@@ -1,0 +1,91 @@
+module.exports = {
+    harvestFromNearestSource(creep) {
+        creep.memory.ticker++;
+        if (creep.memory.ticker > 10) {
+            creep.memory.sourceId = false;
+        }
+        if (!creep.memory.sourceId) {
+            var sources = creep.room.find(FIND_SOURCES, {
+                filter: (structure) => structure.energy > 0
+            });
+
+            var pathLength = 9999;
+
+            for (var i = 0; i < sources.length; i++) {
+                var currentSource = sources[i];
+                var length = creep.pos.findPathTo(currentSource.pos).length;
+                if (pathLength > length) {
+                    creep.memory.sourceId = currentSource.id;
+                    pathLength = length;
+                }
+            }
+
+            if (creep.memory.sourceId) {
+                creep.memory.ticker = 0;
+            }
+        }
+
+        if (creep.memory.sourceId) {
+            var source = Game.getObjectById(creep.memory.sourceId);
+
+            var harvestResult = creep.harvest(source);
+
+            if(harvestResult == ERR_NOT_IN_RANGE) {
+                creep.moveTo(source);
+            } else if (creep.carry.energy == creep.carryCapacity) {
+                creep.memory.sourceId = false;
+            }
+        }
+    },
+
+    withdrawFromContainer(creep) {
+        if (!creep.memory.sourceId) {
+            var sources = creep.room.find(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return structure.structureType == STRUCTURE_CONTAINER &&
+                        structure.store.energy > 0;
+                }
+            });
+
+            sources.sort((a, b) => b.store.energy - a.store.energy);
+
+            if (sources.length > 0) {
+                creep.memory.sourceId = sources[0].id;
+            }
+        }
+
+        if (creep.memory.sourceId) {
+            var source = Game.getObjectById(creep.memory.sourceId);
+
+            var withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
+
+            if(withdrawalResult == ERR_NOT_IN_RANGE) {
+                creep.moveTo(source);
+            } else if (creep.carry.energy == creep.carryCapacity) {
+                creep.memory.sourceId = false;
+            }
+        }
+    },
+
+    withdrawFromRoomStorage(creep) {
+        var source = Game.spawns.Base.room.storage;
+
+        var withdrawResult = creep.withdraw(source, RESOURCE_ENERGY);
+
+        if(withdrawResult == ERR_NOT_IN_RANGE) {
+            creep.moveTo(source);
+        }
+    },
+
+    harvestFromPredefinedSource(creep) {
+        var sources = Game.spawns.Base.memory.sources;
+        var storedSource = sources[creep.memory.numb % sources.length];
+        var source = Game.getObjectById(storedSource.id);
+
+        var harvestResult = creep.harvest(source);
+
+        if(harvestResult == ERR_NOT_IN_RANGE) {
+            creep.moveTo(source);
+        }
+    }
+};

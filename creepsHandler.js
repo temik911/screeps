@@ -1,9 +1,10 @@
-var harvesterRole = require('role.harvester');
+var harvesterWithOutCarryRole = require('role.harvesterWithOutCarry');
 var upgraderRole = require('role.upgrader');
 var builderRole = require('role.builder');
 var baseEnergySupportRole = require('role.baseEnergySupport');
 var cargoRole = require('role.cargo');
 var soldierRole = require('role.soldier');
+var claimerRole = require('role.claimer');
 var constants = require('Constants');
 
 module.exports = {
@@ -11,8 +12,8 @@ module.exports = {
         for(var name in Game.creeps) {
             var creep = Game.creeps[name];
             if (creep.memory.role == constants.HARVESTER) {
-                harvesterRole.run(creep);
-            } else if (creep.memory.role == "baseEnergySupport") {
+                harvesterWithOutCarryRole.run(creep);
+            } else if (creep.memory.role == constants.BASE_ENERGY_SUPPORT) {
                 baseEnergySupportRole.run(creep);
             } else if (creep.memory.role == constants.UPGRADER) {
                 upgraderRole.run(creep);
@@ -22,6 +23,8 @@ module.exports = {
                 cargoRole.run(creep);
             } else if (creep.memory.role == constants.SOLDIER) {
                 soldierRole.run(creep);
+            } else if (creep.memory.role == constants.CLAIMER) {
+                claimerRole.run(creep);
             }
         }
     }

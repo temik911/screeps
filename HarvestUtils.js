@@ -1,3 +1,5 @@
+require('RoomInfo');
+
 module.exports = {
     harvestFromNearestSource(creep) {
         creep.memory.ticker++;
@@ -87,5 +89,43 @@ module.exports = {
         if(harvestResult == ERR_NOT_IN_RANGE) {
             creep.moveTo(source);
         }
+    },
+
+    harvestFromPredefinedSourceWithOutCarry(creep) {
+        if (!creep.memory.sourceId) {
+            var sourcesList = creep.room.stats().sources;
+            var sourceToHarvest = sourcesList[creep.memory.numb % sourcesList.length];
+            creep.memory.sourceId = sourceToHarvest.id;
+            var container = sourceToHarvest.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
+            });
+            creep.memory.containerPos = container.pos;
+        }
+
+        if (!creep.memory.onPosition) {
+            var pos = creep.memory.containerPos;
+            if (creep.pos.findPathTo(pos.x, pos.y).length == 0) {
+                creep.memory.onPosition = true;
+            } else {
+                creep.moveTo(pos.x, pos.y);
+            }
+        } else {
+            var source = Game.getObjectById(creep.memory.sourceId);
+            creep.harvest(source);
+        }
+    },
+
+    findNearest(pos, array) {
+        var pathLength = 9999;
+        var toReturn;
+        for (var i = 0; i < array.length; i++) {
+            var current = array[i];
+            var length = pos.findPathTo(current.pos).length;
+            if (pathLength > length) {
+                toReturn = current;
+                pathLength = length;
+            }
+        }
+        return toReturn;
     }
 };

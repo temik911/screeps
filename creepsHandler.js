@@ -5,6 +5,7 @@ var baseEnergySupportRole = require('role.baseEnergySupport');
 var cargoRole = require('role.cargo');
 var soldierRole = require('role.soldier');
 var claimerRole = require('role.claimer');
+var repairRole = require('role.repair');
 var constants = require('Constants');
 
 module.exports = {
@@ -25,6 +26,8 @@ module.exports = {
                 soldierRole.run(creep);
             } else if (creep.memory.role == constants.CLAIMER) {
                 claimerRole.run(creep);
+            } else if (creep.memory.role == constants.REPAIR) {
+                repairRole.run(creep);
             }
         }
     }

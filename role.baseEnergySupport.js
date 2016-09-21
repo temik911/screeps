@@ -6,7 +6,11 @@ module.exports = {
         var isSupport = creep.memory.isSupport;
         
         if (!isSupport) {
-            harvestUtils.withdrawFromRoomStorage(creep);
+            if (creep.room.storage) {
+                harvestUtils.withdrawFromRoomStorage(creep);
+            } else {
+                harvestUtils.withdrawFromContainer(creep);
+            }
             
             if (creep.carry.energy == creep.carryCapacity) {
                 creep.memory.isSupport = true;
@@ -43,9 +47,6 @@ module.exports = {
                 if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(targets[0]);
                 }
-            } else {
-                var flag = Game.flags[constants.PARKING];
-                creep.moveTo(flag);
             }
 
             if (creep.carry.energy == 0) {

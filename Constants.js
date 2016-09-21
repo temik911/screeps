@@ -5,6 +5,7 @@ module.exports.BASE_ENERGY_SUPPORT = 'baseEnergySupport';
 module.exports.CARGO = 'cargo';
 module.exports.SOLDIER = 'soldier';
 module.exports.CLAIMER = 'claimer';
+module.exports.REPAIR = 'repair';
 
 module.exports.UPGRADERS_FLAG = 'UpgradersFlag';
 module.exports.PARKING = 'Parking';

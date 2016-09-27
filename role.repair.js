@@ -19,13 +19,14 @@ module.exports = {
         else {
             var targets = creep.room.find(FIND_STRUCTURES, {
                 filter: structure => structure.structureType == STRUCTURE_RAMPART &&
-                structure.hits < structure.hitsMax / 100
+                    structure.hits < constants.RAMPART_HP_BARRIER &&
+                    constants.RAMPART_HP_BARRIER - structure.hits > 1000
             });
 
             if (targets.length == 0) {
                 targets = creep.room.find(FIND_STRUCTURES, {
                     filter: structure => structure.structureType == STRUCTURE_WALL &&
-                    structure.hits < structure.hitsMax / 3000
+                        structure.hits < constants.WALL_HP_BARRIER
                 });
             }
 

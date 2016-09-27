@@ -70,7 +70,7 @@ module.exports = {
     },
 
     withdrawFromRoomStorage(creep) {
-        var source = Game.spawns.Base.room.storage;
+        var source = creep.room.storage;
 
         var withdrawResult = creep.withdraw(source, RESOURCE_ENERGY);
 
@@ -80,7 +80,7 @@ module.exports = {
     },
 
     harvestFromPredefinedSource(creep) {
-        var sources = Game.spawns.Base.memory.sources;
+        var sources = creep.room.stats().sources;
         var storedSource = sources[creep.memory.numb % sources.length];
         var source = Game.getObjectById(storedSource.id);
 
@@ -112,6 +112,21 @@ module.exports = {
         } else {
             var source = Game.getObjectById(creep.memory.sourceId);
             creep.harvest(source);
+        }
+    },
+
+    harvestFromPredefineExtractor(creep) {
+        var extractors = creep.room.stats().extractors;
+        var predefineExtractor = extractors[creep.memory.numb % extractors.length];
+        var extractor = Game.getObjectById(predefineExtractor.id);
+        var mineralSource = creep.room.find(FIND_MINERALS, {
+            filter: (mineralSource) => mineralSource.pos = extractor.pos
+        });
+
+        var harvestResult = creep.harvest(mineralSource[0]);
+
+        if(harvestResult == ERR_NOT_IN_RANGE) {
+            creep.moveTo(mineralSource[0]);
         }
     },
 

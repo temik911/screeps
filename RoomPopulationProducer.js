@@ -12,6 +12,12 @@ module.exports = {
         if (spawn.memory.repairNumb == undefined) {
             spawn.memory.repairNumb = 0;
         }
+        if (spawn.memory.upgraderNumb == undefined) {
+            spawn.memory.upgraderNumb = 0;
+        }
+        if (spawn.memory.mineralHarvesterNumb == undefined) {
+            spawn.memory.mineralHarvesterNumb = 0;
+        }
 
         if (spawn.spawning != null) {
             return;
@@ -21,6 +27,7 @@ module.exports = {
         var roomStats = room.stats();
         var roomCreeps = roomStats.creeps;
         var roomSources = roomStats.sources;
+        var roomExtractors = roomStats.extractors;
         var roomName = room.name;
 
         var harvesterCount = 0;
@@ -31,6 +38,7 @@ module.exports = {
         var soldierCount = 0;
         var claimerCount = 0;
         var repairCount = 0;
+        var mineralHarvesterCount = 0;
 
         for (var creepName in roomCreeps) {
             var creep = roomCreeps[creepName];
@@ -50,6 +58,8 @@ module.exports = {
                 claimerCount++;
             } else if (creep.memory.role == constants.REPAIR) {
                 repairCount++;
+            } else if (creep.memory.role == constants.MINERAL_HARVESTER) {
+                mineralHarvesterCount++;
             }
         }
 
@@ -57,10 +67,18 @@ module.exports = {
         var name;
 
         var maxUpgraderCount;
-        if (roomName == 'E39S53') {
-            maxUpgraderCount = 6;
+        if (creep.room.storage) {
+            if (creep.room.storage.store[RESOURCE_ENERGY] < 10000) {
+                maxUpgraderCount = 1;
+            } else if (creep.room.storage.store[RESOURCE_ENERGY] < 25000) {
+                maxUpgraderCount = 2;
+            } else if (creep.room.storage.store[RESOURCE_ENERGY] < 45000) {
+                maxUpgraderCount = 4;
+            } else if (creep.room.storage.store[RESOURCE_ENERGY] < 70000) {
+                maxUpgraderCount = 8;
+            }
         } else {
-            maxUpgraderCount = 2;
+            maxUpgraderCount = 4;
         }
 
         if (baseEnergySupportCount < 2) {
@@ -81,18 +99,36 @@ module.exports = {
                 });
                 spawn.memory.harvesterNumb++;
             }
-        } else if (room.storage && cargoCount < 2) {
+        } else if (room.storage && cargoCount < 3) {
             bodies = [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
             spawn.createCreep(bodies, null, {
                 role: constants.CARGO,
                 isCargo: false
             });
+        } else if (mineralHarvesterCount < roomExtractors.length) {
+            var mineralHarvesterNumb = spawn.memory.mineralHarvesterNumb;
+            bodies = [WORK, WORK, MOVE, MOVE, CARRY, CARRY];
+            name = roomName + "-mineral-" + mineralHarvesterNumb;
+            if (spawn.canCreateCreep(bodies, name) == OK) {
+                spawn.createCreep(bodies, name, {
+                    role: constants.MINERAL_HARVESTER,
+                    numb: mineralHarvesterNumb,
+                    isHarvest: true
+                });
+                spawn.memory.mineralHarvesterNumb++;
+            }
         } else if (upgraderCount < maxUpgraderCount) {
+            var upgraderNumb = spawn.memory.upgraderNumb;
             bodies = createUpgraderBodies(room);
-            spawn.createCreep(bodies, null, {
-                role: constants.UPGRADER,
-                isUpgrade: false
-            });
+            name = roomName + "-upg-" + upgraderNumb;
+            if (spawn.canCreateCreep(bodies, name) == OK) {
+                spawn.createCreep(bodies, name, {
+                    role: constants.UPGRADER,
+                    numb: upgraderNumb,
+                    isUpgrade: false
+                });
+                spawn.memory.upgraderNumb++;
+            }
         } else if (claimerCount < 0) {
             var claimerNumb = spawn.memory.claimerNumb;
             bodies = [WORK, WORK, WORK, WORK, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
@@ -122,8 +158,11 @@ module.exports = {
                 });
                 spawn.memory.repairNumb++;
             }
-        } else if (soldierCount < 0) {
-            bodies = [ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE];
+        } else if (soldierCount < 2 && room.find(FIND_HOSTILE_CREEPS).length > 0) {
+            bodies = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
+                      TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
+                      MOVE, MOVE, MOVE, MOVE, MOVE, 
+                      ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK];
             spawn.createCreep(bodies, null, {
                 role: constants.SOLDIER
             });
@@ -134,11 +173,13 @@ module.exports = {
 var createUpgraderBodies = function(room) {
     var bodies = [MOVE, MOVE];
     var currentCost = 100;
+    var currentBodiesPart = 2;
     var maxCost = room.energyCapacityAvailable;
-    while (currentCost + 150 < maxCost) {
+    while ((currentCost + 150 < maxCost) && (currentBodiesPart + 2 < 24)) {
         bodies.push(CARRY);
         bodies.push(WORK);
         currentCost += 150;
+        currentBodiesPart += 2;
     }
     return bodies;
 };

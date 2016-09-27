@@ -1,3 +1,5 @@
+var constants = require('Constants');
+
 module.exports = {
     run(spawn) {
         var towers = spawn.room.find(FIND_MY_STRUCTURES, {
@@ -22,6 +24,14 @@ module.exports = {
                             filter: structure => structure.structureType == STRUCTURE_CONTAINER &&
                             structure.hits < structure.hitsMax / 2
                         });
+                        
+                        if (targets.length == 0) {
+                            targets = tower.room.find(FIND_STRUCTURES, {
+                                filter: structure => structure.structureType == STRUCTURE_RAMPART &&
+                                    structure.hits < constants.RAMPART_HP_BARRIER &&
+                                    (constants.RAMPART_HP_BARRIER - structure.hits < 1000 || structure.hits < 1000)
+                            });
+                        }
                     }
     
                     targets.sort((a, b) => a.hits - b.hits);

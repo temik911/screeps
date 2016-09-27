@@ -35,8 +35,6 @@ module.exports = {
                 if(creep.transfer(nearestContainer, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(nearestContainer);
                 }
-            } else {
-                creep.moveTo(Game.spawns.Base);
             }
 
             if (creep.carry.energy == 0) {

@@ -6,6 +6,8 @@ var cargoRole = require('role.cargo');
 var soldierRole = require('role.soldier');
 var claimerRole = require('role.claimer');
 var repairRole = require('role.repair');
+var mineralHarvesterRole = require('role.mineralHarvester');
+var invaderRole = require('role.invader');
 var constants = require('Constants');
 
 module.exports = {
@@ -28,6 +30,10 @@ module.exports = {
                 claimerRole.run(creep);
             } else if (creep.memory.role == constants.REPAIR) {
                 repairRole.run(creep);
+            } else if (creep.memory.role == constants.MINERAL_HARVESTER) {
+                mineralHarvesterRole.run(creep);
+            } else if (creep.memory.role == constants.INVADER) {
+                invaderRole.run(creep);
             }
         }
     }

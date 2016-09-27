@@ -1,5 +1,6 @@
 var creepsHandler = require('creepsHandler');
-var populationProducer = require('PopulationProducer');
+var roomPopulationProducer = require('RoomPopulationProducer');
+var globalPopulationProducer = require('GlobalPopulationProducer');
 var towersHandler = require('TowersHandler');
 
 module.exports.loop = function () {
@@ -9,9 +10,11 @@ module.exports.loop = function () {
         }
     }
 
+    globalPopulationProducer.run(Game.spawns.Base);
+
     for (var spawnName in Game.spawns) {
         var spawn = Game.spawns[spawnName];
-        populationProducer.run(spawn);
+        roomPopulationProducer.run(spawn);
         towersHandler.run(spawn);
     }
     creepsHandler.run();

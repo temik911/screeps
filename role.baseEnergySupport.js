@@ -16,7 +16,16 @@ module.exports = {
                 creep.memory.isSupport = true;
             }
         } else {
-            var targets = creep.room.find(FIND_STRUCTURES, {
+            var targets = creep.room.find(FIND_MY_STRUCTURES, {
+                filter: (structure) => {
+                    return structure.structureType == STRUCTURE_TOWER &&
+                            structure.energy < 150;
+                }
+            });
+                    
+            
+            if (targets.length == 0) {
+                targets = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return structure.structureType == STRUCTURE_EXTENSION &&
                         structure.energy < structure.energyCapacity;
@@ -41,6 +50,7 @@ module.exports = {
 
                     targets.sort((a, b) => a.energy - b.energy);
                 }
+            }
             }
 
             if(targets.length > 0) {

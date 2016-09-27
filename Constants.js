@@ -9,6 +9,7 @@ module.exports.CLAIMER = 'claimer';
 module.exports.REPAIR = 'repair';
 module.exports.MINERAL_HARVESTER = 'mineralHarvester';
 module.exports.INVADER = 'invader';
+module.exports.RESERVER = 'reserver';
 
 // flags
 module.exports.UPGRADERS_FLAG = 'UpgradersFlag';

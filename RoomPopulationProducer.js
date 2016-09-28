@@ -256,7 +256,7 @@ module.exports = {
         } else if (remoteHarvestCount < maxRemoteHarvestCount) {
             var remoteHarvestNumb = spawn.memory.remoteHarvestNumb;
             name = roomName + "-RmtHrv-" + remoteHarvestNumb;
-            bodies = [WORK, WORK, WORK, MOVE, MOVE, MOVE];
+            bodies = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE];
             if (spawn.canCreateCreep(bodies, name) == OK) {
                 spawn.createCreep(bodies, name, {
                     role: constants.REMOTE_HARVEST,

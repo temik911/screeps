@@ -9,6 +9,10 @@ var repairRole = require('role.repair');
 var mineralHarvesterRole = require('role.mineralHarvester');
 var invaderRole = require('role.invader');
 var reserverRole = require('role.reserver');
+var reserverForHarvestRole = require('role.reserverForHarvest');
+var remoteHarvestRole = require('role.remoteHarvest');
+var remoteCargoRole = require('role.remoteCargo');
+var remoteBuilderRole = require('role.remoteBuilder');
 var constants = require('Constants');
 
 module.exports = {
@@ -37,6 +41,14 @@ module.exports = {
                 invaderRole.run(creep);
             } else if (creep.memory.role == constants.RESERVER) {
                 reserverRole.run(creep);
+            } else if (creep.memory.role == constants.RESERVER_FOR_HARVEST) {
+                reserverForHarvestRole.run(creep);
+            } else if (creep.memory.role == constants.REMOTE_HARVEST) {
+                remoteHarvestRole.run(creep);
+            } else if (creep.memory.role == constants.REMOTE_CARGO) {
+                remoteCargoRole.run(creep);
+            } else if (creep.memory.role == constants.REMOTE_BUILDER) {
+                remoteBuilderRole.run(creep);
             }
         }
     }

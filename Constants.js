@@ -10,6 +10,10 @@ module.exports.REPAIR = 'repair';
 module.exports.MINERAL_HARVESTER = 'mineralHarvester';
 module.exports.INVADER = 'invader';
 module.exports.RESERVER = 'reserver';
+module.exports.RESERVER_FOR_HARVEST = 'reserverForHarvest';
+module.exports.REMOTE_HARVEST = 'remoteHarvest';
+module.exports.REMOTE_CARGO = 'remoteCargo';
+module.exports.REMOTE_BUILDER = 'remoteBuilder';
 
 // flags
 module.exports.UPGRADERS_FLAG = 'UpgradersFlag';

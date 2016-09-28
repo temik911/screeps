@@ -4,9 +4,18 @@ var harvestUtils = require('HarvestUtils');
 module.exports = {
     run(creep) {
         if (!creep.memory.inClaimedRoom) {
-            var flag = Game.flags[constants.CLAIMED_ROOM_FLAG];
-            creep.moveTo(flag);
-            if (creep.pos.findPathTo(flag.pos).length == 0) {
+            if (creep.memory.currentStep == undefined) {
+                creep.memory.currentStep = 0;
+            }
+            var currentStep = creep.memory.currentStep;
+            var flag = Game.flags['Step' + currentStep];
+            if (flag != undefined) {
+                if (creep.pos.findPathTo(flag.pos).length == 0) {
+                    creep.memory.currentStep++;
+                } else {
+                    creep.moveTo(flag);
+                }
+            } else {
                 creep.memory.inClaimedRoom = true;
             }
         } else {

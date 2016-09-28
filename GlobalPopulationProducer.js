@@ -46,7 +46,7 @@ module.exports = {
                 });
                 spawn.memory.invaderNumb++;
             }
-        } else if (claimerCount < 0) {
+        } else if (claimerCount < 2) {
             var claimerNumb = spawn.memory.claimerNumb;
             bodies = [WORK, WORK, WORK, WORK, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
             name = "claimer-" + claimerNumb;

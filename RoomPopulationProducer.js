@@ -146,7 +146,7 @@ module.exports = {
                 spawn.memory.claimerNumb++;
             }
         } else if (room.find(FIND_CONSTRUCTION_SITES).length > 0 && builderCount < 2) {
-            bodies = [WORK, WORK, WORK, WORK, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
+            bodies = createBuilderBodies(room);
             spawn.createCreep(bodies, null, {
                 role: constants.BUILDER,
                 isBuild: false
@@ -181,6 +181,20 @@ var createUpgraderBodies = function(room) {
     var currentBodiesPart = 2;
     var maxCost = room.energyCapacityAvailable;
     while ((currentCost + 150 < maxCost) && (currentBodiesPart + 2 < 24)) {
+        bodies.push(CARRY);
+        bodies.push(WORK);
+        currentCost += 150;
+        currentBodiesPart += 2;
+    }
+    return bodies;
+};
+
+var createBuilderBodies = function(room) {
+    var bodies = [MOVE, MOVE];
+    var currentCost = 100;
+    var currentBodiesPart = 2;
+    var maxCost = room.energyCapacityAvailable;
+    while ((currentCost + 150 < maxCost) && (currentBodiesPart + 2 < 14)) {
         bodies.push(CARRY);
         bodies.push(WORK);
         currentCost += 150;

@@ -25,7 +25,9 @@ module.exports = {
             if (creep.memory.role == constants.INVADER) {
                 invaderCount++;
             } else if (creep.memory.role == constants.CLAIMER) {
-                claimerCount++;
+                if (creep.ticksToLive > 300) {
+                    claimerCount++;
+                }
             } else if (creep.memory.role == constants.RESERVER) {
                 reserverCount++;
             }
@@ -57,7 +59,7 @@ module.exports = {
                 });
                 spawn.memory.claimerNumb++;
             }
-        } else if (reserverCount < 1) {
+        } else if (reserverCount < 0) {
             var reserverNumb = spawn.memory.reserverNumb;
             bodies = [CLAIM, CLAIM, MOVE, MOVE];
             name = "reserver-" + reserverNumb;

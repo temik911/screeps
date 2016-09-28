@@ -89,7 +89,7 @@ module.exports = {
             });
         } else if (harvesterCount < roomSources.length) {
             var harvesterNumb = spawn.memory.harvesterNumb;
-            bodies = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE];
+            bodies = createHarvesterBodies(room);
             name = roomName + "-harv-" + harvesterNumb;
             if (spawn.canCreateCreep(bodies, name) == OK) {
                 spawn.createCreep(bodies, name, {
@@ -180,6 +180,19 @@ var createUpgraderBodies = function(room) {
         bodies.push(WORK);
         currentCost += 150;
         currentBodiesPart += 2;
+    }
+    return bodies;
+};
+
+var createHarvesterBodies = function(room) {
+    var bodies = [MOVE];
+    var currentCost = 50;
+    var currentBodiesPart = 1;
+    var maxCost = room.energyCapacityAvailable;
+    while ((currentCost + 100 < maxCost) && (currentBodiesPart + 1 < 8)) {
+        bodies.push(WORK);
+        currentCost += 100;
+        currentBodiesPart += 1;
     }
     return bodies;
 };

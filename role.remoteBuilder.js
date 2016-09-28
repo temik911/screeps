@@ -3,6 +3,10 @@ require('RoomInfo');
 
 module.exports = {
     run(creep) {
+        if (creep.memory.targetId == undefined) {
+            creep.memory.targetId = false;
+        }
+
         var numb = creep.memory.numb;
         var flagPrefix = creep.memory.flagPrefix;
         var flags = [];

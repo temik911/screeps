@@ -18,6 +18,9 @@ module.exports = {
         if (spawn.memory.mineralHarvesterNumb == undefined) {
             spawn.memory.mineralHarvesterNumb = 0;
         }
+        if (spawn.memory.builderNumb == undefined) {
+            spawn.memory.builderNumb = 0;
+        }
 
         if (spawn.spawning != null) {
             return;
@@ -134,23 +137,17 @@ module.exports = {
                 });
                 spawn.memory.upgraderNumb++;
             }
-        } else if (claimerCount < 0) {
-            var claimerNumb = spawn.memory.claimerNumb;
-            bodies = [WORK, WORK, WORK, WORK, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
-            name = roomName + "-claimer-" + claimerNumb;
-            if (spawn.canCreateCreep(bodies, name) == OK) {
-                spawn.createCreep(bodies, name, {
-                    role: constants.CLAIMER,
-                    numb: claimerNumb
-                });
-                spawn.memory.claimerNumb++;
-            }
         } else if (room.find(FIND_CONSTRUCTION_SITES).length > 0 && builderCount < 2) {
+            var builderNumb = spawn.memory.builderNumb;
             bodies = createBuilderBodies(room);
-            spawn.createCreep(bodies, null, {
-                role: constants.BUILDER,
-                isBuild: false
-            });
+            name = roomName + "-builder-" +builderNumb;
+            if (spawn.canCreateCreep(bodies, name) == OK) {
+                spawn.createCreep(bodies, null, {
+                    role: constants.BUILDER,
+                    isBuild: false
+                });
+                spawn.memory.builderNumb++;
+            }
         } else if (repairCount < 1) {
             var repairNumb = spawn.memory.repairNumb;
             name = roomName + "-repair-" + repairNumb;

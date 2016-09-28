@@ -137,8 +137,8 @@ module.exports = {
         if (sites.length > 0 && maxBuilderCount < 1) {
             maxBuilderCount = 1;
         }
-        if (maxBuilderCount > 6) {
-            maxBuilderCount = 6;
+        if (maxBuilderCount > 4) {
+            maxBuilderCount = 4;
         }
 
         var flagPrefix = roomName + "-reserver";
@@ -161,7 +161,7 @@ module.exports = {
             }
         }
 
-        if (baseEnergySupportCount < maxBaseEnergySupportCount) {
+        if (baseEnergySupportCount < 2) {
             bodies = [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
             spawn.createCreep(bodies, null, {
                 role: constants.BASE_ENERGY_SUPPORT,

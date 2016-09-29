@@ -22,6 +22,7 @@ module.exports = {
 
         if (!creep.memory.onPosition) {
             container = Game.getObjectById(creep.memory.containerId);
+
             if (creep.pos.findPathTo(container.pos).length == 0) {
                 creep.memory.onPosition = true;
             } else {

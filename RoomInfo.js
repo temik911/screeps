@@ -4,7 +4,10 @@ Room.prototype.stats = function() {
         enemies: this.find(FIND_HOSTILE_CREEPS),
         sources: this.find(FIND_SOURCES),
         extractors: this.find(FIND_MY_STRUCTURES, {
-                        filter: (structure) => structure.structureType == STRUCTURE_EXTRACTOR
-                    })
+            filter: (structure) => structure.structureType == STRUCTURE_EXTRACTOR
+        }),
+        containers: this.find(FIND_STRUCTURES, {
+            filter: (structure) => structure.type == STRUCTURE_CONTAINER
+        })
     };
 };

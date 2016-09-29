@@ -156,7 +156,7 @@ module.exports = {
             if (flagName.startsWith(flagPrefix)) {
                 var room2 = Game.flags[flagName].room;
                 if (room2 != undefined) {
-                    room2.stats().sources.forEach(source => maxRemoteHarvestCount++);
+                    room2.stats().containers.forEach(container => maxRemoteHarvestCount++);
                 }
             }
         }

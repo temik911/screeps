@@ -12,15 +12,17 @@ module.exports = {
                     Game.flags[flagName].room.stats().sources.forEach(source => sources.push(source));
                 }
             }
-            var sourceToHarvest = sources[numb % sources.length];
-            creep.memory.sourceId = sourceToHarvest.id;
-            container = sourceToHarvest.pos.findClosestByRange(FIND_STRUCTURES, {
-                filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
-            });
-            creep.memory.containerId = container.id;
+            if (sources.length > 0) {
+                var sourceToHarvest = sources[numb % sources.length];
+                creep.memory.sourceId = sourceToHarvest.id;
+                container = sourceToHarvest.pos.findClosestByRange(FIND_STRUCTURES, {
+                    filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
+                });
+                creep.memory.containerId = container.id;
+            }
         }
 
-        if (!creep.memory.onPosition) {
+        if (!creep.memory.onPosition && creep.memory.containerId != undefined) {
             container = Game.getObjectById(creep.memory.containerId);
 
             if (creep.pos.findPathTo(container.pos).length == 0) {

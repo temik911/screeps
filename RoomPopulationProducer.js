@@ -283,7 +283,7 @@ module.exports = {
         } else if (remoteBuilderCount < maxReserverForHarvestCount * 2) {
             var remoteBuilderNumb = spawn.memory.remoteBuilderNumb;
             name = roomName + "-RmtBld-" + remoteBuilderNumb;
-            bodies = [WORK, WORK,
+            bodies = [WORK, WORK, WORK, WORK,
                       MOVE, MOVE, MOVE, MOVE,
                       CARRY, CARRY, CARRY, CARRY];
             if (spawn.canCreateCreep(bodies, name) == OK) {

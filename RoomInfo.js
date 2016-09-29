@@ -7,7 +7,7 @@ Room.prototype.stats = function() {
             filter: (structure) => structure.structureType == STRUCTURE_EXTRACTOR
         }),
         containers: this.find(FIND_STRUCTURES, {
-            filter: (structure) => structure.type == STRUCTURE_CONTAINER
+            filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
         })
     };
 };

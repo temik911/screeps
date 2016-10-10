@@ -33,6 +33,12 @@ module.exports = {
         if (spawn.memory.remoteBuilderNumb == undefined) {
             spawn.memory.remoteBuilderNumb = 0;
         }
+        if (spawn.memory.remoteContainerBuilderNumb == undefined) {
+            spawn.memory.remoteContainerBuilderNumb = 0;
+        }
+        if (spawn.memory.guardNumb == undefined) {
+            spawn.memory.guardNumb = 0;
+        }
 
         if (spawn.spawning != null) {
             return;
@@ -57,6 +63,8 @@ module.exports = {
         var remoteHarvestCount = 0;
         var remoteCargoCount = 0;
         var remoteBuilderCount = 0;
+        var remoteContainerBuilderCount = 0;
+        var guardCount = 0;
 
         var creepName;
         var creep;
@@ -86,14 +94,20 @@ module.exports = {
         // remote creeps from this room
         for (creepName in Game.creeps) {
             creep = Game.creeps[creepName];
-            if (creep.memory.role == constants.RESERVER_FOR_HARVEST) {
-                reserverForHarvestCount++;
-            } else if (creep.memory.role == constants.REMOTE_HARVEST) {
-                remoteHarvestCount++;
-            } else if (creep.memory.role == constants.REMOTE_CARGO) {
-                remoteCargoCount++;
-            } else if (creep.memory.role == constants.REMOTE_BUILDER) {
-                remoteBuilderCount++;
+            if (creep.memory.from == roomName) {
+                if (creep.memory.role == constants.RESERVER_FOR_HARVEST) {
+                    reserverForHarvestCount++;
+                } else if (creep.memory.role == constants.REMOTE_HARVEST) {
+                    remoteHarvestCount++;
+                } else if (creep.memory.role == constants.REMOTE_CARGO) {
+                    remoteCargoCount++;
+                } else if (creep.memory.role == constants.REMOTE_BUILDER) {
+                    remoteBuilderCount++;
+                } else if (creep.memory.role == constants.REMOTE_CONTAINER_BUILDER) {
+                    remoteContainerBuilderCount++;
+                } else if (creep.memory.role == constants.GUARD) {
+                    guardCount++;
+                }
             }
         }
 
@@ -141,12 +155,39 @@ module.exports = {
             maxBuilderCount = 4;
         }
 
+        var builderFlagPrefix = roomName + "-build";
         var flagPrefix = roomName + "-reserver";
+        // -------------------------------------------------------------
+        var maxRemoteContainerBuilderCount = 0;
+        for (var flagName in Game.flags) {
+            if (flagName.startsWith(builderFlagPrefix)) {
+                var flagInfo = flagName.split('-');
+                var sourcesCount = 0;
+                for (var q in flagInfo) {
+                    var info = flagInfo[q];
+                    if (info.startsWith('sources')) {
+                        sourcesCount = info.split(':')[1]
+                    }
+                }
+                for (var i = 0; i < sourcesCount; i++) {
+                    maxRemoteContainerBuilderCount++;
+                }
+            }
+        }
+
         // -------------------------------------------------------------
         var maxReserverForHarvestCount = 0;
         for (var flagName in Game.flags) {
             if (flagName.startsWith(flagPrefix)) {
                 maxReserverForHarvestCount++;
+            }
+        }
+
+        // -------------------------------------------------------------
+        var maxGuardCount = 0;
+        for (var flagName in Game.flags) {
+            if (flagName.startsWith(flagPrefix)) {
+                maxGuardCount++;
             }
         }
 
@@ -161,7 +202,7 @@ module.exports = {
             }
         }
 
-        if (baseEnergySupportCount < 2) {
+        if (baseEnergySupportCount < 3) {
             bodies = [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
             spawn.createCreep(bodies, null, {
                 role: constants.BASE_ENERGY_SUPPORT,
@@ -256,7 +297,7 @@ module.exports = {
         } else if (remoteHarvestCount < maxRemoteHarvestCount) {
             var remoteHarvestNumb = spawn.memory.remoteHarvestNumb;
             name = roomName + "-RmtHrv-" + remoteHarvestNumb;
-            bodies = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE];
+            bodies = [WORK, WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY];
             if (spawn.canCreateCreep(bodies, name) == OK) {
                 spawn.createCreep(bodies, name, {
                     role: constants.REMOTE_HARVEST,
@@ -280,7 +321,7 @@ module.exports = {
                 });
                 spawn.memory.remoteCargoNumb++;
             }
-        } else if (remoteBuilderCount < maxReserverForHarvestCount * 2) {
+        } else if (remoteBuilderCount < maxReserverForHarvestCount) {
             var remoteBuilderNumb = spawn.memory.remoteBuilderNumb;
             name = roomName + "-RmtBld-" + remoteBuilderNumb;
             bodies = [WORK, WORK, WORK, WORK,
@@ -294,6 +335,36 @@ module.exports = {
                     from: roomName
                 });
                 spawn.memory.remoteBuilderNumb++;
+            }
+        } else if (remoteContainerBuilderCount < maxRemoteContainerBuilderCount) {
+            var remoteContainerBuilderNumb = spawn.memory.remoteContainerBuilderNumb;
+            name = roomName + "-RmtCntBld-" + remoteContainerBuilderNumb;
+            bodies = [WORK, WORK, WORK, WORK,
+                      MOVE, MOVE, MOVE, MOVE,
+                      CARRY, CARRY, CARRY, CARRY];
+            if (spawn.canCreateCreep(bodies, name) == OK) {
+                spawn.createCreep(bodies, name, {
+                    role: constants.REMOTE_CONTAINER_BUILDER,
+                    numb: remoteContainerBuilderNumb,
+                    flagPrefix : roomName + "-build",
+                    from: roomName
+                });
+                spawn.memory.remoteContainerBuilderNumb++;
+            }
+        } else if (guardCount < maxGuardCount) {
+            var guardNumb = spawn.memory.guardNumb;
+            name = roomName + "-RmtGuard-" + guardNumb;
+            bodies = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
+                MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+                ATTACK, ATTACK, ATTACK, ATTACK, ATTACK];
+            if (spawn.canCreateCreep(bodies, name) == OK) {
+                spawn.createCreep(bodies, name, {
+                    role: constants.GUARD,
+                    numb: guardNumb,
+                    flagPrefix : roomName + "-reserver",
+                    from: roomName
+                });
+                spawn.memory.guardNumb++;
             }
         }
     }

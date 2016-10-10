@@ -14,6 +14,8 @@ module.exports.RESERVER_FOR_HARVEST = 'reserverForHarvest';
 module.exports.REMOTE_HARVEST = 'remoteHarvest';
 module.exports.REMOTE_CARGO = 'remoteCargo';
 module.exports.REMOTE_BUILDER = 'remoteBuilder';
+module.exports.REMOTE_CONTAINER_BUILDER = 'remoteContainerBuilder';
+module.exports.GUARD = 'guard';
 
 // flags
 module.exports.UPGRADERS_FLAG = 'UpgradersFlag';

@@ -10,7 +10,7 @@ module.exports.loop = function () {
         }
     }
 
-    globalPopulationProducer.run(Game.spawns.Base);
+    globalPopulationProducer.run(Game.spawns.Base2);
 
     for (var spawnName in Game.spawns) {
         var spawn = Game.spawns[spawnName];

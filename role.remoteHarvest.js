@@ -12,6 +12,7 @@ module.exports = {
                     Game.flags[flagName].room.stats().sources.forEach(source => sources.push(source));
                 }
             }
+            
             if (sources.length > 0) {
                 var sourceToHarvest = sources[numb % sources.length];
                 creep.memory.sourceId = sourceToHarvest.id;
@@ -28,11 +29,21 @@ module.exports = {
             if (creep.pos.findPathTo(container.pos).length == 0) {
                 creep.memory.onPosition = true;
             } else {
-                creep.moveTo(container);
+                if (creep.room.name == container.room.name) {
+                    creep.moveTo(container, {maxRooms: 1});
+                } else {
+                    creep.moveTo(container);
+                }
             }
-        } else {
+        } else if (creep.memory.containerId != undefined) {
             var source = Game.getObjectById(creep.memory.sourceId);
-            creep.harvest(source);
+            container = Game.getObjectById(creep.memory.containerId);
+
+            if (container.hits < container.hitsMax / 2 && creep.carry.energy > 0) {
+                creep.repair(container);
+            } else {
+                creep.harvest(source);
+            }
         }
     }
 };

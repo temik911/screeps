@@ -38,8 +38,8 @@ module.exports = {
 
         if (invaderCount < 0) {
             var invaderNumb = spawn.memory.invaderNumb;
-            bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-                      ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK];
+            bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+                      ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK];
             name = "invader-" + invaderNumb;
             if (spawn.canCreateCreep(bodies, name) == OK) {
                 spawn.createCreep(bodies, name, {

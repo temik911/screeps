@@ -7,7 +7,9 @@ module.exports = {
         
         if (!isBuild) {
             if (creep.room.storage) {
-                harvestUtils.withdrawFromRoomStorage(creep);
+                if (creep.room.storage.store[RESOURCE_ENERGY] > 5000) {
+                    harvestUtils.withdrawFromRoomStorage(creep);
+                }
             } else {
                 harvestUtils.withdrawFromContainer(creep);
             }

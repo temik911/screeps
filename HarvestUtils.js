@@ -33,7 +33,7 @@ module.exports = {
             var harvestResult = creep.harvest(source);
 
             if(harvestResult == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source);
+                creep.moveTo(source, {maxRooms: 1});
             } else if (creep.carry.energy == creep.carryCapacity) {
                 creep.memory.sourceId = false;
             }
@@ -62,7 +62,7 @@ module.exports = {
             var withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
 
             if(withdrawalResult == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source);
+                creep.moveTo(source, {maxRooms: 1});
             } else if (creep.carry.energy == creep.carryCapacity) {
                 creep.memory.sourceId = false;
             }

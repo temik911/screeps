@@ -16,14 +16,22 @@ module.exports = {
             container = source.pos.findClosestByRange(FIND_STRUCTURES, {
                 filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
             });
-            creep.memory.containerId = container.id;
+            if (container != undefined) {
+                creep.memory.containerId = container.id;
+            }
         } else {
             var isCargo = creep.memory.isCargo;
             if (!isCargo) {
                 container = Game.getObjectById(creep.memory.containerId);
 
-                if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                if (creep.room != container.room) {
                     creep.moveTo(container);
+                } else if (container.store[RESOURCE_ENERGY] > 0) {
+                    if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(container);
+                    }
+                } else {
+                    creep.moveTo(25, 25);
                 }
 
                 if (creep.carry.energy == creep.carryCapacity) {

@@ -26,7 +26,7 @@ module.exports = {
         if (!creep.memory.onPosition && creep.memory.containerId != undefined) {
             container = Game.getObjectById(creep.memory.containerId);
 
-            if (creep.pos.findPathTo(container.pos).length == 0) {
+            if (creep.pos.isEqualTo(container.pos)) {
                 creep.memory.onPosition = true;
             } else {
                 if (creep.room.name == container.room.name) {

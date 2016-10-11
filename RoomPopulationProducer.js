@@ -132,7 +132,7 @@ module.exports = {
 
 
         // -------------------------------------------------------------
-        var maxBaseEnergySupportCount = 2;
+        var maxBaseEnergySupportCount = 4;
         if (room.controller.level < 3) {
             maxBaseEnergySupportCount = 1;
         }
@@ -202,7 +202,7 @@ module.exports = {
             }
         }
 
-        if (baseEnergySupportCount < 3) {
+        if (baseEnergySupportCount < maxBaseEnergySupportCount) {
             bodies = [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
             spawn.createCreep(bodies, null, {
                 role: constants.BASE_ENERGY_SUPPORT,

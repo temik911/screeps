@@ -61,7 +61,7 @@ module.exports = {
             }
         } else if (reserverCount < 0) {
             var reserverNumb = spawn.memory.reserverNumb;
-            bodies = [CLAIM, CLAIM, MOVE, MOVE];
+            bodies = [CLAIM, MOVE];
             name = "reserver-" + reserverNumb;
             if (spawn.canCreateCreep(bodies, name) == OK) {
                 spawn.createCreep(bodies, name, {

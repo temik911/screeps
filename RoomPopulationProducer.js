@@ -132,9 +132,11 @@ module.exports = {
 
 
         // -------------------------------------------------------------
-        var maxBaseEnergySupportCount = 4;
-        if (room.controller.level < 3) {
+        var maxBaseEnergySupportCount = 3;
+        if (room.controller.level < 2) {
             maxBaseEnergySupportCount = 1;
+        } else if (room.controller.level < 3) {
+            maxBaseEnergySupportCount = 2;
         }
 
         // -------------------------------------------------------------
@@ -311,6 +313,7 @@ module.exports = {
             var remoteCargoNumb = spawn.memory.remoteCargoNumb;
             name = roomName + "-RmtCrg-" + remoteCargoNumb;
             bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+                      CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
                       CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
             if (spawn.canCreateCreep(bodies, name) == OK) {
                 spawn.createCreep(bodies, name, {
@@ -370,16 +373,34 @@ module.exports = {
     }
 };
 
+var createBaseEnergySupportBodies = function(room) {
+    var bodies = [MOVE, CARRY, CARRY, MOVE, CARRY, CARRY];
+    if (room.controller > 4) {
+        var currentCost = 300;
+        var currentBodiesPart = 6;
+        var maxCost = room.energyCapacityAvailable / 2;
+        while ((currentCost + 150 < maxCost) && (currentBodiesPart + 3 < 17)) {
+            bodies.push(MOVE);
+            bodies.push(CARRY);
+            bodies.push(CARRY);
+            currentCost += 150;
+            currentBodiesPart += 3;
+        }
+    }
+    return bodies;
+};
+
 var createUpgraderBodies = function(room) {
-    var bodies = [MOVE, MOVE];
-    var currentCost = 100;
-    var currentBodiesPart = 2;
+    var bodies = [];
+    var currentCost = 0;
+    var currentBodiesPart = 0;
     var maxCost = room.energyCapacityAvailable;
-    while ((currentCost + 150 < maxCost) && (currentBodiesPart + 2 < 24)) {
+    while ((currentCost + 200 < maxCost) && (currentBodiesPart + 3 < 31)) {
+        bodies.push(MOVE);
         bodies.push(CARRY);
         bodies.push(WORK);
-        currentCost += 150;
-        currentBodiesPart += 2;
+        currentCost += 200;
+        currentBodiesPart += 3;
     }
     return bodies;
 };

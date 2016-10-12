@@ -26,31 +26,31 @@ module.exports = {
             
             if (targets.length == 0) {
                 targets = creep.room.find(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return structure.structureType == STRUCTURE_EXTENSION &&
-                        structure.energy < structure.energyCapacity;
-                }
-            });
-
-            if(targets.length == 0) {
-                targets = creep.room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        return structure.structureType == STRUCTURE_SPAWN &&
+                        return structure.structureType == STRUCTURE_EXTENSION &&
                             structure.energy < structure.energyCapacity;
                     }
                 });
 
                 if(targets.length == 0) {
-                    targets = creep.room.find(FIND_MY_STRUCTURES, {
+                    targets = creep.room.find(FIND_STRUCTURES, {
                         filter: (structure) => {
-                            return structure.structureType == STRUCTURE_TOWER &&
-                                    structure.energy < structure.energyCapacity;
+                            return structure.structureType == STRUCTURE_SPAWN &&
+                                structure.energy < structure.energyCapacity;
                         }
                     });
 
-                    targets.sort((a, b) => a.energy - b.energy);
+                    if(targets.length == 0) {
+                        targets = creep.room.find(FIND_MY_STRUCTURES, {
+                            filter: (structure) => {
+                                return structure.structureType == STRUCTURE_TOWER &&
+                                        structure.energy < structure.energyCapacity;
+                            }
+                        });
+
+                        targets.sort((a, b) => a.energy - b.energy);
+                    }
                 }
-            }
             }
 
             if(targets.length > 0) {

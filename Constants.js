@@ -1,9 +1,11 @@
 // roles
 module.exports.HARVESTER = 'harvester';
+module.exports.HARVESTER_WITH_LINK = 'harvesterWithLink';
 module.exports.BUILDER = 'builder';
 module.exports.UPGRADER = 'upgrader';
 module.exports.BASE_ENERGY_SUPPORT = 'baseEnergySupport';
 module.exports.CARGO = 'cargo';
+module.exports.LINK_CARGO = 'linkCargo';
 module.exports.SOLDIER = 'soldier';
 module.exports.CLAIMER = 'claimer';
 module.exports.REPAIR = 'repair';
@@ -23,5 +25,5 @@ module.exports.PARKING = 'Parking';
 module.exports.CLAIMED_ROOM_FLAG = 'ClaimedRoom';
 
 // hp barrier
-module.exports.RAMPART_HP_BARRIER = 250000;
-module.exports.WALL_HP_BARRIER = 250000;
+module.exports.RAMPART_HP_BARRIER = 750000;
+module.exports.WALL_HP_BARRIER = 750000;

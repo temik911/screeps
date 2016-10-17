@@ -8,6 +8,10 @@ Room.prototype.stats = function() {
         }),
         containers: this.find(FIND_STRUCTURES, {
             filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
-        })
+        }),
+        links: this.find(FIND_STRUCTURES, {
+            filter: (structure) => structure.structureType == STRUCTURE_LINK
+        }),
+        spawns: this.find(FIND_MY_SPAWNS)
     };
 };

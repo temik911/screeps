@@ -3,7 +3,7 @@ var constants = require('Constants');
 
 module.exports = {
     run(creep) {
-        var isSupport = creep.memory.isSupport;
+        let isSupport = creep.memory.isSupport;
         
         if (!isSupport) {
             if (creep.room.storage) {
@@ -16,51 +16,72 @@ module.exports = {
                 creep.memory.isSupport = true;
             }
         } else {
-            var targets = creep.room.find(FIND_MY_STRUCTURES, {
-                filter: (structure) => {
-                    return structure.structureType == STRUCTURE_TOWER &&
-                            structure.energy < 150;
+            let target = null;
+
+            if (creep.memory.targetId != undefined) {
+                let currentTarget = Game.getObjectById(creep.memory.targetId);
+                if (currentTarget.energy == currentTarget.energyCapacity) {
+                    creep.memory.targetId = undefined;
+                } else {
+                    target = currentTarget;
                 }
-            });
-                    
-            
-            if (targets.length == 0) {
-                targets = creep.room.find(FIND_STRUCTURES, {
+            }
+
+            if (target == null) {
+                target = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
                     filter: (structure) => {
-                        return structure.structureType == STRUCTURE_EXTENSION &&
-                            structure.energy < structure.energyCapacity;
+                        return structure.structureType == STRUCTURE_TOWER &&
+                            structure.energy < 150;
                     }
                 });
 
-                if(targets.length == 0) {
-                    targets = creep.room.find(FIND_STRUCTURES, {
+                if (target == null) {
+                    target = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
                         filter: (structure) => {
-                            return structure.structureType == STRUCTURE_SPAWN &&
+                            return structure.structureType == STRUCTURE_EXTENSION &&
                                 structure.energy < structure.energyCapacity;
                         }
                     });
 
-                    if(targets.length == 0) {
-                        targets = creep.room.find(FIND_MY_STRUCTURES, {
+                    if (target == null) {
+                        target = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
                             filter: (structure) => {
-                                return structure.structureType == STRUCTURE_TOWER &&
-                                        structure.energy < structure.energyCapacity;
+                                return structure.structureType == STRUCTURE_SPAWN &&
+                                    structure.energy < structure.energyCapacity;
                             }
                         });
 
-                        targets.sort((a, b) => a.energy - b.energy);
+                        if (target == null) {
+                            target = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                                filter: (structure) => {
+                                    return structure.structureType == STRUCTURE_TOWER &&
+                                        structure.energy < structure.energyCapacity;
+                                }
+                            });
+                        }
                     }
                 }
-            }
 
-            if(targets.length > 0) {
-                if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0]);
+                if (target != null) {
+                    creep.memory.targetId = target.id;
                 }
             }
 
-            if (creep.carry.energy == 0) {
-                creep.memory.isSupport = false;
+            if (target != null) {
+                if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target);
+                }
+
+                if (creep.carry.energy == 0) {
+                    creep.memory.isSupport = false;
+                }
+            } else {
+                if (creep.room.storage) {
+                    let storage = creep.room.storage;
+                    if (creep.transfer(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(storage);
+                    }
+                }
             }
         }
     }

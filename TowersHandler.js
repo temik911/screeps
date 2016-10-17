@@ -1,8 +1,8 @@
 var constants = require('Constants');
 
 module.exports = {
-    run(spawn) {
-        var towers = spawn.room.find(FIND_MY_STRUCTURES, {
+    run(room) {
+        var towers = room.find(FIND_MY_STRUCTURES, {
             filter: (structure) => structure.structureType == STRUCTURE_TOWER
         });
         

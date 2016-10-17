@@ -115,6 +115,30 @@ module.exports = {
         }
     },
 
+    harvestFromPredefinedSourceWithLink(creep) {
+        if (!creep.memory.sourceId) {
+            var sourcesList = creep.room.stats().sources;
+            var sourceToHarvest = sourcesList[creep.memory.numb % sourcesList.length];
+            creep.memory.sourceId = sourceToHarvest.id;
+            var link = sourceToHarvest.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => structure.structureType == STRUCTURE_LINK
+            });
+            creep.memory.linkId = link.id;
+        }
+
+        if (creep.carry.energy >= 200) {
+            var link = Game.getObjectById(creep.memory.linkId);
+            if (creep.transfer(link, RESOURCE_ENERGY, 200) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(link);
+            }
+        } else {
+            var source = Game.getObjectById(creep.memory.sourceId);
+            if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(source);
+            }
+        }
+    },
+
     harvestFromPredefineExtractor(creep) {
         var extractors = creep.room.stats().extractors;
         var predefineExtractor = extractors[creep.memory.numb % extractors.length];

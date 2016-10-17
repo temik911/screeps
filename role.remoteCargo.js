@@ -24,9 +24,11 @@ module.exports = {
             if (!isCargo) {
                 container = Game.getObjectById(creep.memory.containerId);
 
+                let needToFull = creep.carryCapacity - _.sum(creep.carry) - 100;
+
                 if (creep.room != container.room) {
                     creep.moveTo(container);
-                } else if (container.store[RESOURCE_ENERGY] > 0) {
+                } else if (container.store[RESOURCE_ENERGY] > needToFull) {
                     if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(container);
                     }

@@ -12,6 +12,7 @@ Room.prototype.stats = function() {
         links: this.find(FIND_STRUCTURES, {
             filter: (structure) => structure.structureType == STRUCTURE_LINK
         }),
-        spawns: this.find(FIND_MY_SPAWNS)
+        spawns: this.find(FIND_MY_SPAWNS),
+        mineral: this.find(FIND_MINERALS)[0]
     };
 };

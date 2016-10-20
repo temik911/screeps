@@ -66,7 +66,7 @@ module.exports = {
                     }
                 }
 
-                var target;
+                let target;
                 if (creep.memory.targetId != false) {
                     target = Game.getObjectById(creep.memory.targetId);
                     if (creep.repair(target) == ERR_NOT_IN_RANGE) {
@@ -83,7 +83,31 @@ module.exports = {
                             creep.moveTo(target);
                         }
                     } else {
-                        creep.moveTo(25, 25);
+                        let work = false;
+                        for (let flagName in Game.flags) {
+                            if (flagName.startsWith("dismantle") && !work) {
+                                let flag = Game.flags[flagName];
+                                if (flag.pos.roomName == creep.pos.roomName) {
+                                    let look = creep.room.lookAt(flag.pos.x, flag.pos.y);
+                                    let structureLook = undefined;
+                                    for (let i = 0; i < look.length; i++) {
+                                        if (look[i].type == "structure") {
+                                            structureLook = look[i].structure;
+                                        }
+                                    }
+                                    if (structureLook != undefined) {
+                                        let dismantle = creep.dismantle(structureLook);
+                                        work = true;
+                                        if (dismantle == ERR_NOT_IN_RANGE) {
+                                            creep.moveTo(structureLook);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (!work) {
+                            creep.moveTo(25, 25);
+                        }
                     }
                 }
 

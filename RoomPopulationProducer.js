@@ -40,36 +40,37 @@ module.exports = {
             room.memory.guardNumb = 0;
         }
 
-        var roomStats = room.stats();
-        var roomCreeps = roomStats.creeps;
-        var roomSources = roomStats.sources;
-        var roomExtractors = roomStats.extractors;
-        var spawns = roomStats.spawns;
-        var roomName = room.name;
+        let roomStats = room.stats();
+        let roomCreeps = roomStats.creeps;
+        let roomSources = roomStats.sources;
+        let roomExtractors = roomStats.extractors;
+        let spawns = roomStats.spawns;
+        let mineral = roomStats.mineral;
+        let roomName = room.name;
 
         if (spawns.length == 0) {
             return;
         }
 
-        var harvesterCount = 0;
-        var harvesterWithLinkCount = 0;
-        var upgraderCount = 0;
-        var builderCount = 0;
-        var baseEnergySupportCount = 0;
-        var cargoCount = 0;
-        var linkCargoCount = 0;
-        var soldierCount = 0;
-        var repairCount = 0;
-        var mineralHarvesterCount = 0;
-        var reserverForHarvestCount = 0;
-        var remoteHarvestCount = 0;
-        var remoteCargoCount = 0;
-        var remoteBuilderCount = 0;
-        var remoteContainerBuilderCount = 0;
-        var guardCount = 0;
+        let harvesterCount = 0;
+        let harvesterWithLinkCount = 0;
+        let upgraderCount = 0;
+        let builderCount = 0;
+        let baseEnergySupportCount = 0;
+        let cargoCount = 0;
+        let linkCargoCount = 0;
+        let soldierCount = 0;
+        let repairCount = 0;
+        let mineralHarvesterCount = 0;
+        let reserverForHarvestCount = 0;
+        let remoteHarvestCount = 0;
+        let remoteCargoCount = 0;
+        let remoteBuilderCount = 0;
+        let remoteContainerBuilderCount = 0;
+        let guardCount = 0;
 
-        var creepName;
-        var creep;
+        let creepName;
+        let creep;
 
         let allBusy = true;
         for (let spawnName in spawns) {
@@ -77,7 +78,6 @@ module.exports = {
 
             if (spawn.spawning != null) {
                 let currentSpawnRole = spawn.memory.currentSpawnRole;
-
                 if (currentSpawnRole != undefined) {
                     if (currentSpawnRole == constants.HARVESTER) {
                         harvesterCount++;
@@ -169,11 +169,11 @@ module.exports = {
             }
         }
 
-        var bodies;
-        var name;
+        let bodies;
+        let name;
 
         // -------------------------------------------------------------
-        var maxUpgraderCount;
+        let maxUpgraderCount;
         if (room.storage != undefined) {
             if (room.storage.store[RESOURCE_ENERGY] < 10000) {
                 maxUpgraderCount = 1;
@@ -192,7 +192,7 @@ module.exports = {
 
 
         // -------------------------------------------------------------
-        var maxBaseEnergySupportCount = 3;
+        let maxBaseEnergySupportCount = 3;
         if (room.controller.level < 2) {
             maxBaseEnergySupportCount = 1;
         } else if (room.controller.level < 3) {
@@ -200,16 +200,16 @@ module.exports = {
         }
 
         // -------------------------------------------------------------
-        var sites = room.find(FIND_CONSTRUCTION_SITES);
-        var totalProgress = 0;
+        let sites = room.find(FIND_CONSTRUCTION_SITES);
+        let totalProgress = 0;
         sites.forEach(site => totalProgress += site.progressTotal - site.progress);
-        var carryCount = 0;
+        let carryCount = 0;
         createBuilderBodies(room).forEach(body => {
             if (body == CARRY) {
                 carryCount++;
             }
         });
-        var maxBuilderCount = totalProgress / (carryCount * 50) / 20;
+        let maxBuilderCount = totalProgress / (carryCount * 50) / 20;
         if (sites.length > 0 && maxBuilderCount < 1) {
             maxBuilderCount = 1;
         }
@@ -217,51 +217,57 @@ module.exports = {
             maxBuilderCount = 4;
         }
 
-        var builderFlagPrefix = roomName + "-build";
-        var flagPrefix = roomName + "-reserver";
+        let builderFlagPrefix = roomName + "-build";
+        let flagPrefix = roomName + "-reserver";
         // -------------------------------------------------------------
-        var maxRemoteContainerBuilderCount = 0;
-        for (var flagName in Game.flags) {
+        let maxRemoteContainerBuilderCount = 0;
+        for (let flagName in Game.flags) {
             if (flagName.startsWith(builderFlagPrefix)) {
-                var flagInfo = flagName.split('-');
-                var sourcesCount = 0;
-                for (var q in flagInfo) {
-                    var info = flagInfo[q];
+                let flagInfo = flagName.split('-');
+                let sourcesCount = 0;
+                for (let q in flagInfo) {
+                    let info = flagInfo[q];
                     if (info.startsWith('sources')) {
                         sourcesCount = info.split(':')[1]
                     }
                 }
-                for (var i = 0; i < sourcesCount; i++) {
+                for (let i = 0; i < sourcesCount; i++) {
                     maxRemoteContainerBuilderCount++;
                 }
             }
         }
 
         // -------------------------------------------------------------
-        var maxReserverForHarvestCount = 0;
-        for (var flagName in Game.flags) {
+        let maxReserverForHarvestCount = 0;
+        for (let flagName in Game.flags) {
             if (flagName.startsWith(flagPrefix)) {
                 maxReserverForHarvestCount++;
             }
         }
 
         // -------------------------------------------------------------
-        var maxGuardCount = 0;
-        for (var flagName in Game.flags) {
+        let maxGuardCount = 0;
+        for (let flagName in Game.flags) {
             if (flagName.startsWith(flagPrefix)) {
                 maxGuardCount++;
             }
         }
 
         // -------------------------------------------------------------
-        var maxRemoteHarvestCount = 0;
-        for (var flagName in Game.flags) {
+        let maxRemoteHarvestCount = 0;
+        for (let flagName in Game.flags) {
             if (flagName.startsWith(flagPrefix)) {
-                var room2 = Game.flags[flagName].room;
+                let room2 = Game.flags[flagName].room;
                 if (room2 != undefined) {
                     room2.stats().containers.forEach(container => maxRemoteHarvestCount++);
                 }
             }
+        }
+
+        // --------------------------------------------------------------
+        let maxMineralHarvesterCount = 0;
+        if (roomExtractors.length != 0 && mineral.mineralAmount > 0) {
+            maxMineralHarvesterCount = 1
         }
 
         for (let spawnName in spawns) {
@@ -274,7 +280,7 @@ module.exports = {
             let role = undefined;
 
             if (baseEnergySupportCount < maxBaseEnergySupportCount) {
-                bodies = [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
+                bodies = createBaseEnergySupportBodies(room);
                 role = constants.BASE_ENERGY_SUPPORT;
                 spawn.createCreep(bodies, null, {
                     role: role,
@@ -324,9 +330,11 @@ module.exports = {
                     role: role,
                 });
                 linkCargoCount++;
-            } else if (mineralHarvesterCount < roomExtractors.length) {
+            } else if (mineralHarvesterCount < maxMineralHarvesterCount) {
                 let mineralHarvesterNumb = room.memory.mineralHarvesterNumb;
-                bodies = [WORK, WORK, MOVE, MOVE, CARRY, CARRY];
+                bodies = [WORK, WORK, WORK, WORK, WORK,
+                    MOVE, MOVE, MOVE, MOVE, MOVE,
+                    CARRY, CARRY, CARRY, CARRY, CARRY];
                 name = roomName + "-mineral-" + mineralHarvesterNumb;
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.MINERAL_HARVESTER;
@@ -473,8 +481,8 @@ module.exports = {
             } else if (guardCount < maxGuardCount) {
                 let guardNumb = room.memory.guardNumb;
                 name = roomName + "-RmtGuard-" + guardNumb;
-                bodies = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
-                    MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+                bodies = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
+                    MOVE, MOVE, MOVE, MOVE, MOVE,
                     ATTACK, ATTACK, ATTACK, ATTACK, ATTACK];
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.GUARD;
@@ -494,12 +502,12 @@ module.exports = {
     }
 };
 
-var createBaseEnergySupportBodies = function(room) {
-    var bodies = [MOVE, CARRY, CARRY, MOVE, CARRY, CARRY];
-    if (room.controller > 4) {
-        var currentCost = 300;
-        var currentBodiesPart = 6;
-        var maxCost = room.energyCapacityAvailable / 2;
+let createBaseEnergySupportBodies = function(room) {
+    let bodies = [MOVE, CARRY, CARRY, MOVE, CARRY, CARRY];
+    if (room.storage != undefined) {
+        let currentCost = 300;
+        let currentBodiesPart = 6;
+        let maxCost = room.energyCapacityAvailable / 2;
         while ((currentCost + 150 < maxCost) && (currentBodiesPart + 3 < 17)) {
             bodies.push(MOVE);
             bodies.push(CARRY);
@@ -511,11 +519,11 @@ var createBaseEnergySupportBodies = function(room) {
     return bodies;
 };
 
-var createUpgraderBodies = function(room) {
-    var bodies = [];
-    var currentCost = 0;
-    var currentBodiesPart = 0;
-    var maxCost = room.energyCapacityAvailable;
+let createUpgraderBodies = function(room) {
+    let bodies = [];
+    let currentCost = 0;
+    let currentBodiesPart = 0;
+    let maxCost = room.energyCapacityAvailable;
     while ((currentCost + 200 < maxCost) && (currentBodiesPart + 3 < 31)) {
         bodies.push(MOVE);
         bodies.push(CARRY);
@@ -526,11 +534,11 @@ var createUpgraderBodies = function(room) {
     return bodies;
 };
 
-var createBuilderBodies = function(room) {
-    var bodies = [MOVE, MOVE];
-    var currentCost = 100;
-    var currentBodiesPart = 2;
-    var maxCost = room.energyCapacityAvailable;
+let createBuilderBodies = function(room) {
+    let bodies = [MOVE, MOVE];
+    let currentCost = 100;
+    let currentBodiesPart = 2;
+    let maxCost = room.energyCapacityAvailable;
     while ((currentCost + 150 < maxCost) && (currentBodiesPart + 2 < 14)) {
         bodies.push(CARRY);
         bodies.push(WORK);
@@ -540,11 +548,11 @@ var createBuilderBodies = function(room) {
     return bodies;
 };
 
-var createHarvesterBodies = function(room) {
-    var bodies = [MOVE];
-    var currentCost = 50;
-    var currentBodiesPart = 1;
-    var maxCost = room.energyCapacityAvailable;
+let createHarvesterBodies = function(room) {
+    let bodies = [MOVE];
+    let currentCost = 50;
+    let currentBodiesPart = 1;
+    let maxCost = room.energyCapacityAvailable;
     while ((currentCost + 100 < maxCost) && (currentBodiesPart + 1 < 8)) {
         bodies.push(WORK);
         currentCost += 100;

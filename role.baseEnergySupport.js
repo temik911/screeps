@@ -1,5 +1,4 @@
-var harvestUtils = require('HarvestUtils');
-var constants = require('Constants');
+let harvestUtils = require('HarvestUtils');
 
 module.exports = {
     run(creep) {
@@ -55,7 +54,7 @@ module.exports = {
                             target = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
                                 filter: (structure) => {
                                     return structure.structureType == STRUCTURE_TOWER &&
-                                        structure.energy < structure.energyCapacity;
+                                        structure.energy < 500;
                                 }
                             });
                         }

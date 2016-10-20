@@ -1,19 +1,20 @@
-var harvestUtils = require('HarvestUtils');
+let harvestUtils = require('HarvestUtils');
+require('RoomInfo');
 
 module.exports = {
     run(creep) {
-        var isHarvest = creep.memory.isHarvest;
+        let isHarvest = creep.memory.isHarvest;
 
         if (isHarvest) {
             harvestUtils.harvestFromPredefineExtractor(creep);
 
-            if (_.sum(creep.carry) == creep.carryCapacity) {
+            if (_.sum(creep.carry) == creep.carryCapacity || creep.room.stats().mineral.mineralAmount == 0) {
                 creep.memory.isHarvest = false;
             }
         }
         else {
-            var target = creep.room.storage;
-            for(var resourceType in creep.carry) {
+            let target = creep.room.terminal != undefined ? creep.room.terminal : creep.room.storage;
+            for(let resourceType in creep.carry) {
                 if(creep.transfer(target, resourceType) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target);
                 }

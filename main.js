@@ -1,8 +1,8 @@
-var creepsHandler = require('creepsHandler');
-var roomPopulationProducer = require('RoomPopulationProducer');
-var globalPopulationProducer = require('GlobalPopulationProducer');
-var linksHandler = require('LinksHandler');
-var towersHandler = require('TowersHandler');
+let creepsHandler = require('creepsHandler');
+let roomPopulationProducer = require('RoomPopulationProducer');
+let globalPopulationProducer = require('GlobalPopulationProducer');
+let linksHandler = require('LinksHandler');
+let towersHandler = require('TowersHandler');
 
 module.exports.loop = function () {
     for (let name in Memory.creeps) {
@@ -11,7 +11,7 @@ module.exports.loop = function () {
         }
     }
 
-    // globalPopulationProducer.run(Game.spawns.Base2);
+    globalPopulationProducer.run(Game.spawns.Base2);
 
     let rooms = Game.rooms;
     for (let roomName in rooms) {

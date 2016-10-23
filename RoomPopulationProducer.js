@@ -15,6 +15,9 @@ module.exports = {
         if (room.memory.upgraderNumb == undefined) {
             room.memory.upgraderNumb = 0;
         }
+        if (room.memory.linkUpgraderNumb == undefined) {
+            room.memory.linkUpgraderNumb = 0;
+        }
         if (room.memory.mineralHarvesterNumb == undefined) {
             room.memory.mineralHarvesterNumb = 0;
         }
@@ -55,6 +58,7 @@ module.exports = {
         let harvesterCount = 0;
         let harvesterWithLinkCount = 0;
         let upgraderCount = 0;
+        let linkUpgraderCount = 0;
         let builderCount = 0;
         let baseEnergySupportCount = 0;
         let cargoCount = 0;
@@ -111,6 +115,8 @@ module.exports = {
                         remoteContainerBuilderCount++;
                     } else if (currentSpawnRole == constants.GUARD) {
                         guardCount++;
+                    } else if (currentSpawnRole == constants.LINK_UPGRADER) {
+                        linkUpgraderCount++;
                     }
                 }
             } else {
@@ -146,6 +152,8 @@ module.exports = {
                 repairCount++;
             } else if (creepRole == constants.MINERAL_HARVESTER) {
                 mineralHarvesterCount++;
+            } else if (creepRole == constants.LINK_UPGRADER) {
+                linkUpgraderCount++;
             }
         }
 
@@ -173,21 +181,30 @@ module.exports = {
         let name;
 
         // -------------------------------------------------------------
-        let maxUpgraderCount;
-        if (room.storage != undefined) {
-            if (room.storage.store[RESOURCE_ENERGY] < 10000) {
-                maxUpgraderCount = 1;
-            } else if (room.storage.store[RESOURCE_ENERGY] < 25000) {
-                maxUpgraderCount = 2;
-            } else if (room.storage.store[RESOURCE_ENERGY] < 45000) {
-                maxUpgraderCount = 4;
-            } else if (room.storage.store[RESOURCE_ENERGY] < 70000) {
-                maxUpgraderCount = 8;
+        let maxUpgraderCount = 0;
+        let maxLinkUpgraderCount = 0;
+        if (room.stats().links.length >=4) {
+            // link upgraders
+            if (room.storage.store.energy < 10000) {
+                maxLinkUpgraderCount = 1;
             } else {
-                maxUpgraderCount = 1;
+                maxLinkUpgraderCount = 2;
             }
         } else {
-            maxUpgraderCount = 4;
+            // default upgraders
+            if (room.storage != undefined) {
+                if (room.storage.store.energy < 10000) {
+                    maxUpgraderCount = 1;
+                } else if (room.storage.store.energy < 25000) {
+                    maxUpgraderCount = 2;
+                } else if (room.storage.store.energy < 45000) {
+                    maxUpgraderCount = 4;
+                } else {
+                    maxUpgraderCount = 8;
+                }
+            } else {
+                maxUpgraderCount = 4;
+            }
         }
 
 
@@ -359,6 +376,21 @@ module.exports = {
                     });
                     room.memory.upgraderNumb++;
                     upgraderCount++;
+                }
+            } else if (linkUpgraderCount < maxLinkUpgraderCount) {
+                let linkUpgraderNumb = room.memory.linkUpgraderNumb;
+                bodies = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
+                    MOVE, MOVE, MOVE, MOVE, MOVE,
+                    CARRY, CARRY, CARRY, CARRY];
+                name = roomName + "-linkUpg-" + linkUpgraderNumb;
+                if (spawn.canCreateCreep(bodies, name) == OK) {
+                    role = constants.LINK_UPGRADER;
+                    spawn.createCreep(bodies, name, {
+                        role: role,
+                        numb: linkUpgraderNumb
+                    });
+                    room.memory.linkUpgraderNumb++;
+                    linkUpgraderNumb++;
                 }
             } else if (builderCount < maxBuilderCount) {
                 let builderNumb = room.memory.builderNumb;

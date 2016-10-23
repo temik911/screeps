@@ -7,15 +7,15 @@ module.exports = {
             creep.memory.sourceId = false;
         }
         if (!creep.memory.sourceId) {
-            var sources = creep.room.find(FIND_SOURCES, {
+            let sources = creep.pos.findClosestByPath(FIND_SOURCES, {
                 filter: (structure) => structure.energy > 0
             });
 
-            var pathLength = 9999;
+            let pathLength = 9999;
 
-            for (var i = 0; i < sources.length; i++) {
-                var currentSource = sources[i];
-                var length = creep.pos.findPathTo(currentSource.pos).length;
+            for (let i = 0; i < sources.length; i++) {
+                let currentSource = sources[i];
+                let length = creep.pos.findPathTo(currentSource.pos).length;
                 if (pathLength > length) {
                     creep.memory.sourceId = currentSource.id;
                     pathLength = length;
@@ -28,9 +28,9 @@ module.exports = {
         }
 
         if (creep.memory.sourceId) {
-            var source = Game.getObjectById(creep.memory.sourceId);
+            let source = Game.getObjectById(creep.memory.sourceId);
 
-            var harvestResult = creep.harvest(source);
+            let harvestResult = creep.harvest(source);
 
             if(harvestResult == ERR_NOT_IN_RANGE) {
                 creep.moveTo(source, {maxRooms: 1});
@@ -42,7 +42,7 @@ module.exports = {
 
     withdrawFromContainer(creep) {
         if (!creep.memory.sourceId) {
-            var sources = creep.room.find(FIND_STRUCTURES, {
+            let sources = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return structure.structureType == STRUCTURE_CONTAINER &&
                         structure.store.energy > 0;
@@ -57,9 +57,9 @@ module.exports = {
         }
 
         if (creep.memory.sourceId) {
-            var source = Game.getObjectById(creep.memory.sourceId);
+            let source = Game.getObjectById(creep.memory.sourceId);
 
-            var withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
+            let withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
 
             if(withdrawalResult == ERR_NOT_IN_RANGE) {
                 creep.moveTo(source, {maxRooms: 1});
@@ -70,9 +70,9 @@ module.exports = {
     },
 
     withdrawFromRoomStorage(creep) {
-        var source = creep.room.storage;
+        let source = creep.room.storage;
 
-        var withdrawResult = creep.withdraw(source, RESOURCE_ENERGY);
+        let withdrawResult = creep.withdraw(source, RESOURCE_ENERGY);
 
         if(withdrawResult == ERR_NOT_IN_RANGE) {
             creep.moveTo(source);
@@ -80,11 +80,11 @@ module.exports = {
     },
 
     harvestFromPredefinedSource(creep) {
-        var sources = creep.room.stats().sources;
-        var storedSource = sources[creep.memory.numb % sources.length];
-        var source = Game.getObjectById(storedSource.id);
+        let sources = creep.room.stats().sources;
+        let storedSource = sources[creep.memory.numb % sources.length];
+        let source = Game.getObjectById(storedSource.id);
 
-        var harvestResult = creep.harvest(source);
+        let harvestResult = creep.harvest(source);
 
         if(harvestResult == ERR_NOT_IN_RANGE) {
             creep.moveTo(source);
@@ -93,46 +93,46 @@ module.exports = {
 
     harvestFromPredefinedSourceWithOutCarry(creep) {
         if (!creep.memory.sourceId) {
-            var sourcesList = creep.room.stats().sources;
-            var sourceToHarvest = sourcesList[creep.memory.numb % sourcesList.length];
+            let sourcesList = creep.room.stats().sources;
+            let sourceToHarvest = sourcesList[creep.memory.numb % sourcesList.length];
             creep.memory.sourceId = sourceToHarvest.id;
-            var container = sourceToHarvest.pos.findClosestByRange(FIND_STRUCTURES, {
+            let container = sourceToHarvest.pos.findClosestByRange(FIND_STRUCTURES, {
                 filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
             });
             creep.memory.containerPos = container.pos;
         }
 
         if (!creep.memory.onPosition) {
-            var pos = creep.memory.containerPos;
+            let pos = creep.memory.containerPos;
             if (creep.pos.findPathTo(pos.x, pos.y).length == 0) {
                 creep.memory.onPosition = true;
             } else {
                 creep.moveTo(pos.x, pos.y);
             }
         } else {
-            var source = Game.getObjectById(creep.memory.sourceId);
+            let source = Game.getObjectById(creep.memory.sourceId);
             creep.harvest(source);
         }
     },
 
     harvestFromPredefinedSourceWithLink(creep) {
         if (!creep.memory.sourceId) {
-            var sourcesList = creep.room.stats().sources;
-            var sourceToHarvest = sourcesList[creep.memory.numb % sourcesList.length];
+            let sourcesList = creep.room.stats().sources;
+            let sourceToHarvest = sourcesList[creep.memory.numb % sourcesList.length];
             creep.memory.sourceId = sourceToHarvest.id;
-            var link = sourceToHarvest.pos.findClosestByRange(FIND_STRUCTURES, {
+            let link = sourceToHarvest.pos.findClosestByRange(FIND_STRUCTURES, {
                 filter: (structure) => structure.structureType == STRUCTURE_LINK
             });
             creep.memory.linkId = link.id;
         }
 
         if (creep.carry.energy >= 200) {
-            var link = Game.getObjectById(creep.memory.linkId);
+            let link = Game.getObjectById(creep.memory.linkId);
             if (creep.transfer(link, RESOURCE_ENERGY, 200) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(link);
             }
         } else {
-            var source = Game.getObjectById(creep.memory.sourceId);
+            let source = Game.getObjectById(creep.memory.sourceId);
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(source);
             }
@@ -140,14 +140,14 @@ module.exports = {
     },
 
     harvestFromPredefineExtractor(creep) {
-        var extractors = creep.room.stats().extractors;
-        var predefineExtractor = extractors[creep.memory.numb % extractors.length];
-        var extractor = Game.getObjectById(predefineExtractor.id);
-        var mineralSource = creep.room.find(FIND_MINERALS, {
+        let extractors = creep.room.stats().extractors;
+        let predefineExtractor = extractors[creep.memory.numb % extractors.length];
+        let extractor = Game.getObjectById(predefineExtractor.id);
+        let mineralSource = creep.room.find(FIND_MINERALS, {
             filter: (mineralSource) => mineralSource.pos = extractor.pos
         });
 
-        var harvestResult = creep.harvest(mineralSource[0]);
+        let harvestResult = creep.harvest(mineralSource[0]);
 
         if(harvestResult == ERR_NOT_IN_RANGE) {
             creep.moveTo(mineralSource[0]);
@@ -155,11 +155,11 @@ module.exports = {
     },
 
     findNearest(pos, array) {
-        var pathLength = 9999;
-        var toReturn;
-        for (var i = 0; i < array.length; i++) {
-            var current = array[i];
-            var length = pos.findPathTo(current.pos).length;
+        let pathLength = 9999;
+        let toReturn;
+        for (let i = 0; i < array.length; i++) {
+            let current = array[i];
+            let length = pos.findPathTo(current.pos).length;
             if (pathLength > length) {
                 toReturn = current;
                 pathLength = length;

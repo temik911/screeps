@@ -1,4 +1,4 @@
-var constants = require('Constants');
+let constants = require('Constants');
 
 module.exports = {
     run(spawn) {
@@ -16,12 +16,12 @@ module.exports = {
             return;
         }
 
-        var invaderCount = 0;
-        var claimerCount = 0;
-        var reserverCount = 0;
+        let invaderCount = 0;
+        let claimerCount = 0;
+        let reserverCount = 0;
 
-        for (var creepName in Game.creeps) {
-            var creep = Game.creeps[creepName];
+        for (let creepName in Game.creeps) {
+            let creep = Game.creeps[creepName];
             if (creep.memory.role == constants.INVADER) {
                 invaderCount++;
             } else if (creep.memory.role == constants.CLAIMER) {
@@ -33,11 +33,11 @@ module.exports = {
             }
         }
 
-        var bodies;
-        var name;
+        let bodies;
+        let name;
 
         if (invaderCount < 0) {
-            var invaderNumb = spawn.memory.invaderNumb;
+            let invaderNumb = spawn.memory.invaderNumb;
             bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
                       ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK];
             name = "invader-" + invaderNumb;
@@ -48,8 +48,8 @@ module.exports = {
                 });
                 spawn.memory.invaderNumb++;
             }
-        } else if (claimerCount < 0) {
-            var claimerNumb = spawn.memory.claimerNumb;
+        } else if (claimerCount < 4) {
+            let claimerNumb = spawn.memory.claimerNumb;
             bodies = [WORK, WORK, WORK, WORK, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
             name = "claimer-" + claimerNumb;
             if (spawn.canCreateCreep(bodies, name) == OK) {
@@ -60,7 +60,7 @@ module.exports = {
                 spawn.memory.claimerNumb++;
             }
         } else if (reserverCount < 0) {
-            var reserverNumb = spawn.memory.reserverNumb;
+            let reserverNumb = spawn.memory.reserverNumb;
             bodies = [CLAIM, MOVE];
             name = "reserver-" + reserverNumb;
             if (spawn.canCreateCreep(bodies, name) == OK) {

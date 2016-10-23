@@ -1,28 +1,29 @@
-var harvesterWithOutCarryRole = require('role.harvesterWithOutCarry');
-var harvesterWithLinkRole = require('role.harvesterWithLink');
-var upgraderRole = require('role.upgrader');
-var builderRole = require('role.builder');
-var baseEnergySupportRole = require('role.baseEnergySupport');
-var cargoRole = require('role.cargo');
-var linkCargoRole = require('role.linkCargo');
-var soldierRole = require('role.soldier');
-var claimerRole = require('role.claimer');
-var repairRole = require('role.repair');
-var mineralHarvesterRole = require('role.mineralHarvester');
-var invaderRole = require('role.invader');
-var reserverRole = require('role.reserver');
-var reserverForHarvestRole = require('role.reserverForHarvest');
-var remoteHarvestRole = require('role.remoteHarvest');
-var remoteCargoRole = require('role.remoteCargo');
-var remoteBuilderRole = require('role.remoteBuilder');
-var remoteContainerBuilderRole = require('role.remoteContainerBuilder');
-var guardRole = require('role.guard');
-var constants = require('Constants');
+let harvesterWithOutCarryRole = require('role.harvesterWithOutCarry');
+let harvesterWithLinkRole = require('role.harvesterWithLink');
+let upgraderRole = require('role.upgrader');
+let linkUpgraderRole = require('role.linkUpgrader');
+let builderRole = require('role.builder');
+let baseEnergySupportRole = require('role.baseEnergySupport');
+let cargoRole = require('role.cargo');
+let linkCargoRole = require('role.linkCargo');
+let soldierRole = require('role.soldier');
+let claimerRole = require('role.claimer');
+let repairRole = require('role.repair');
+let mineralHarvesterRole = require('role.mineralHarvester');
+let invaderRole = require('role.invader');
+let reserverRole = require('role.reserver');
+let reserverForHarvestRole = require('role.reserverForHarvest');
+let remoteHarvestRole = require('role.remoteHarvest');
+let remoteCargoRole = require('role.remoteCargo');
+let remoteBuilderRole = require('role.remoteBuilder');
+let remoteContainerBuilderRole = require('role.remoteContainerBuilder');
+let guardRole = require('role.guard');
+let constants = require('Constants');
 
 module.exports = {
     run() {
-        for(var name in Game.creeps) {
-            var creep = Game.creeps[name];
+        for(let name in Game.creeps) {
+            let creep = Game.creeps[name];
             try {
                 if (creep.memory.role == constants.HARVESTER) {
                     harvesterWithOutCarryRole.run(creep);
@@ -62,6 +63,8 @@ module.exports = {
                     remoteContainerBuilderRole.run(creep);
                 } else if (creep.memory.role == constants.GUARD) {
                     guardRole.run(creep);
+                } else if (creep.memory.role == constants.LINK_UPGRADER) {
+                    linkUpgraderRole.run(creep);
                 }
             } catch (e) {
                 console.log(creep.name + ": " + e.stack);

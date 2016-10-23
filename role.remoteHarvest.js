@@ -39,7 +39,7 @@ module.exports = {
             var source = Game.getObjectById(creep.memory.sourceId);
             container = Game.getObjectById(creep.memory.containerId);
 
-            if (container.hits < container.hitsMax / 2 && creep.carry.energy > 0) {
+            if (container.hits < container.hitsMax * 0.8 && creep.carry.energy > 0) {
                 creep.repair(container);
             } else {
                 creep.harvest(source);

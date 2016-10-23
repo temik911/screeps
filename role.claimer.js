@@ -1,5 +1,5 @@
-var constants = require('Constants');
-var harvestUtils = require('HarvestUtils');
+let harvestUtils = require('HarvestUtils');
+require('RoomInfo');
 
 module.exports = {
     run(creep) {
@@ -7,8 +7,8 @@ module.exports = {
             if (creep.memory.currentStep == undefined) {
                 creep.memory.currentStep = 0;
             }
-            var currentStep = creep.memory.currentStep;
-            var flag = Game.flags['Step' + currentStep];
+            let currentStep = creep.memory.currentStep;
+            let flag = Game.flags['Step' + currentStep];
             if (flag != undefined) {
                 if (creep.pos.findPathTo(flag.pos).length == 0) {
                     creep.memory.currentStep++;
@@ -19,7 +19,7 @@ module.exports = {
                 creep.memory.inClaimedRoom = true;
             }
         } else {
-            var targets = creep.room.find(FIND_STRUCTURES, {
+            let targets = creep.room.find(FIND_STRUCTURES, {
                 filter: structure => structure.structureType == STRUCTURE_ROAD &&
                 structure.hits < structure.hitsMax / 10
             });
@@ -32,10 +32,24 @@ module.exports = {
             }
 
             if (creep.room.find(FIND_CONSTRUCTION_SITES).length > 0 || targets.length > 0) {
-                var isBuild = creep.memory.isBuild;
+                let isBuild = creep.memory.isBuild;
 
                 if (!isBuild) {
-                    harvestUtils.harvestFromNearestSource(creep);
+                    let containers = creep.room.stats().containers;
+                    if (containers != undefined && containers.length > 0) {
+                        let sum = 0;
+                        containers.forEach(container => {
+                            sum += container.store.energy;
+                        });
+                        if (sum > 0) {
+                            harvestUtils.withdrawFromContainer(creep);
+                        } else {
+                            harvestUtils.harvestFromPredefinedSource(creep);
+                        }
+                    } else {
+                        harvestUtils.harvestFromPredefinedSource(creep);
+                    }
+
 
                     if (creep.carry.energy == creep.carryCapacity) {
                         creep.memory.isBuild = true;
@@ -49,7 +63,7 @@ module.exports = {
                             creep.moveTo(targets[0]);
                         }
                     } else {
-                        var target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+                        let target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
                         if (target) {
                             if (creep.build(target) == ERR_NOT_IN_RANGE) {
                                 creep.moveTo(target);
@@ -61,10 +75,23 @@ module.exports = {
                     }
                 }
             } else {
-                var isUpgrade = creep.memory.isUpgrade;
+                let isUpgrade = creep.memory.isUpgrade;
 
                 if (!isUpgrade) {
-                    harvestUtils.harvestFromNearestSource(creep);
+                    let containers = creep.room.stats().containers;
+                    if (containers != undefined && containers.length > 0) {
+                        let sum = 0;
+                        containers.forEach(container => {
+                            sum += container.store.energy;
+                        });
+                        if (sum > 0) {
+                            harvestUtils.withdrawFromContainer(creep);
+                        } else {
+                            harvestUtils.harvestFromPredefinedSource(creep);
+                        }
+                    } else {
+                        harvestUtils.harvestFromPredefinedSource(creep);
+                    }
 
                     if (creep.carry.energy == creep.carryCapacity) {
                         creep.memory.isUpgrade = true;

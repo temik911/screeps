@@ -1,8 +1,8 @@
-var harvestUtils = require('HarvestUtils');
+let harvestUtils = require('HarvestUtils');
 
 module.exports = {
     run(creep) {
-        var isHarvest = creep.memory.isHarvest;
+        let isHarvest = creep.memory.isHarvest;
 
         if (isHarvest) {
             harvestUtils.harvestFromPredefinedSource(creep);
@@ -12,19 +12,19 @@ module.exports = {
             }
         }
         else {
-            var containers = creep.room.find(FIND_STRUCTURES, {
+            let containers = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return structure.structureType == STRUCTURE_CONTAINER &&
                         structure.store.energy < structure.storeCapacity;
                 }
             });
 
-            var nearestContainer;
-            var pathLength = 9999;
+            let nearestContainer;
+            let pathLength = 9999;
 
-            for (var i = 0; i < containers.length; i++) {
-                var currentContainer = containers[i];
-                var length = creep.pos.findPathTo(currentContainer.pos).length;
+            for (let i = 0; i < containers.length; i++) {
+                let currentContainer = containers[i];
+                let length = creep.pos.findPathTo(currentContainer.pos).length;
                 if (pathLength > length) {
                     nearestContainer = currentContainer;
                     pathLength = length;

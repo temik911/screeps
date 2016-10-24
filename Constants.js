@@ -19,6 +19,7 @@ module.exports.REMOTE_CARGO = 'remoteCargo';
 module.exports.REMOTE_BUILDER = 'remoteBuilder';
 module.exports.REMOTE_CONTAINER_BUILDER = 'remoteContainerBuilder';
 module.exports.GUARD = 'guard';
+module.exports.LABS_SUPPORT = 'labsSupport';
 
 // flags
 module.exports.UPGRADERS_FLAG = 'UpgradersFlag';

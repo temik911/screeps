@@ -42,6 +42,9 @@ module.exports = {
         if (room.memory.guardNumb == undefined) {
             room.memory.guardNumb = 0;
         }
+        if (room.memory.labsSupportNumb == undefined) {
+            room.memory.labsSupportNumb = 0;
+        }
 
         let roomStats = room.stats();
         let roomCreeps = roomStats.creeps;
@@ -49,6 +52,7 @@ module.exports = {
         let roomExtractors = roomStats.extractors;
         let spawns = roomStats.spawns;
         let mineral = roomStats.mineral;
+        let labs = roomStats.labs;
         let roomName = room.name;
 
         if (spawns.length == 0) {
@@ -72,6 +76,7 @@ module.exports = {
         let remoteBuilderCount = 0;
         let remoteContainerBuilderCount = 0;
         let guardCount = 0;
+        let labsSupportCount = 0;
 
         let creepName;
         let creep;
@@ -117,6 +122,8 @@ module.exports = {
                         guardCount++;
                     } else if (currentSpawnRole == constants.LINK_UPGRADER) {
                         linkUpgraderCount++;
+                    } else if (currentSpawnRole == constants.LABS_SUPPORT) {
+                        labsSupportCount++;
                     }
                 }
             } else {
@@ -154,6 +161,8 @@ module.exports = {
                 mineralHarvesterCount++;
             } else if (creepRole == constants.LINK_UPGRADER) {
                 linkUpgraderCount++;
+            } else if (creepRole == constants.LABS_SUPPORT) {
+                labsSupportCount++;
             }
         }
 
@@ -287,6 +296,12 @@ module.exports = {
             maxMineralHarvesterCount = 1
         }
 
+        // --------------------------------------------------------------
+        let maxLabsSupportCount = 0;
+        if (labs.length >= 6) {
+            maxLabsSupportCount = 1
+        }
+
         for (let spawnName in spawns) {
             let spawn = spawns[spawnName];
 
@@ -404,6 +419,19 @@ module.exports = {
                     });
                     room.memory.builderNumb++;
                     builderCount++;
+                }
+            } else if (labsSupportCount < maxLabsSupportCount) {
+                let labsSupportNumb = room.memory.labsSupportNumb;
+                bodies = [MOVE, CARRY, MOVE, CARRY];
+                name = roomName + "-labsSupport-" + labsSupportNumb;
+                if (spawn.canCreateCreep(bodies, name) == OK) {
+                    role = constants.LABS_SUPPORT;
+                    spawn.createCreep(bodies, name, {
+                        role: role,
+                        isBuild: false
+                    });
+                    room.memory.labsSupportNumb++;
+                    labsSupportCount++;
                 }
             } else if (repairCount < 1) {
                 let repairNumb = room.memory.repairNumb;

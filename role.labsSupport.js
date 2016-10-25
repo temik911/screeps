@@ -43,10 +43,10 @@ module.exports = {
             let amount1 = lab1.mineralAmount;
             let amount2 = lab2.mineralAmount;
 
-            if (amount1 == undefined) {
+            if (amount1 == undefined || amount1 == 0) {
                 amount1 = 0;
             }
-            if (amount2 == undefined) {
+            if (amount2 == undefined || amount2 == 0) {
                 amount2 = 0;
             }
 

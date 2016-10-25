@@ -2,7 +2,7 @@ let fff = require('Utils');
 
 module.exports = {
     run() {
-        if (Game.time % 10 != 0) {
+        if (Game.time % 100 != 0) {
             return;
         }
 

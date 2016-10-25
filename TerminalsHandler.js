@@ -20,6 +20,7 @@ module.exports = {
             if (terminal != undefined) {
                 let lab1Resource = Memory.rooms[roomName].lab1_resource;
                 let lab2Resource = Memory.rooms[roomName].lab2_resource;
+
                 if (lab1Resource != undefined) {
                     let resourceType = fff.getMineralTypeByChar(lab1Resource);
                     if (mineralsNeeded.has(resourceType)) {
@@ -79,10 +80,8 @@ module.exports = {
         }
 
         let terminalsSends = [];
-
         for (let index in neededMassive) {
             let needed = neededMassive[index];
-
             for (let index2 in moreMassive) {
                 let more = moreMassive[index2];
                 if (more[1] == needed[1]) {

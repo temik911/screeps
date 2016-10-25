@@ -20,6 +20,7 @@ module.exports.REMOTE_BUILDER = 'remoteBuilder';
 module.exports.REMOTE_CONTAINER_BUILDER = 'remoteContainerBuilder';
 module.exports.GUARD = 'guard';
 module.exports.LABS_SUPPORT = 'labsSupport';
+module.exports.HEALER = 'healer';
 
 // flags
 module.exports.UPGRADERS_FLAG = 'UpgradersFlag';

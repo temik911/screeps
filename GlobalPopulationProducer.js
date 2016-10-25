@@ -11,6 +11,9 @@ module.exports = {
         if (spawn.memory.reserverNumb == undefined) {
             spawn.memory.reserverNumb = 0;
         }
+        if (spawn.memory.healerNumb == undefined) {
+            spawn.memory.healerNumb = 0;
+        }
 
         if (spawn.spawning != null) {
             return;
@@ -19,6 +22,7 @@ module.exports = {
         let invaderCount = 0;
         let claimerCount = 0;
         let reserverCount = 0;
+        let healerCount = 0;
 
         for (let creepName in Game.creeps) {
             let creep = Game.creeps[creepName];
@@ -30,6 +34,8 @@ module.exports = {
                 }
             } else if (creep.memory.role == constants.RESERVER) {
                 reserverCount++;
+            } else if (creep.memory.role == constants.HEALER) {
+                healerCount++;
             }
         }
 
@@ -38,17 +44,18 @@ module.exports = {
 
         if (invaderCount < 0) {
             let invaderNumb = spawn.memory.invaderNumb;
-            bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-                      ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK];
+            bodies = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
+                MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+                ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK];
             name = "invader-" + invaderNumb;
-            if (spawn.canCreateCreep(bodies, name) == OK) {
-                spawn.createCreep(bodies, name, {
+            if (spawn.canCreateCreep(bodies, null) == OK) {
+                spawn.createCreep(bodies, null, {
                     role: constants.INVADER,
                     currentStep: 0
                 });
                 spawn.memory.invaderNumb++;
             }
-        } else if (claimerCount < 4) {
+        } else if (claimerCount < 0) {
             let claimerNumb = spawn.memory.claimerNumb;
             bodies = [WORK, WORK, WORK, WORK, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
             name = "claimer-" + claimerNumb;
@@ -58,6 +65,17 @@ module.exports = {
                     numb: claimerNumb
                 });
                 spawn.memory.claimerNumb++;
+            }
+        } else if (healerCount < 0) {
+            let healerNumb = spawn.memory.healerNumb;
+            bodies = [TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, HEAL, HEAL, HEAL, HEAL];
+            name = "healer-" + healerNumb;
+            if (spawn.canCreateCreep(bodies, null) == OK) {
+                spawn.createCreep(bodies, null, {
+                    role: constants.HEALER,
+                    numb: healerNumb
+                });
+                spawn.memory.healerNumb++;
             }
         } else if (reserverCount < 0) {
             let reserverNumb = spawn.memory.reserverNumb;

@@ -19,6 +19,7 @@ let remoteBuilderRole = require('role.remoteBuilder');
 let remoteContainerBuilderRole = require('role.remoteContainerBuilder');
 let guardRole = require('role.guard');
 let labsSupportRole = require('role.labsSupport');
+let healerRole = require('role.healer');
 let constants = require('Constants');
 
 module.exports = {
@@ -68,6 +69,8 @@ module.exports = {
                     linkUpgraderRole.run(creep);
                 } else if (creep.memory.role == constants.LABS_SUPPORT) {
                     labsSupportRole.run(creep);
+                } else if (creep.memory.role == constants.HEALER) {
+                    healerRole.run(creep);
                 }
             } catch (e) {
                 console.log(creep.name + ": " + e.stack);

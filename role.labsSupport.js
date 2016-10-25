@@ -1,9 +1,7 @@
+let utils = require('Utils');
+
 module.exports = {
     run(creep) {
-        if (creep.memory.iter == undefined) {
-            creep.memory.iter = 0;
-        }
-
         let labs = creep.room.stats().labs;
         let lab1 = Game.getObjectById(creep.room.memory.lab1);
         let lab2 = Game.getObjectById(creep.room.memory.lab2);
@@ -41,10 +39,27 @@ module.exports = {
             }
         } else {
             let withResource = creep.memory.withResource;
-            let currentLabNumb = creep.memory.iter % 2 + 1;
-            let currentLab = Game.getObjectById(creep.room.memory['lab' + currentLabNumb]);
 
-            let currentMineral = getMineralTypeByChar(creep.room.memory['lab' + currentLabNumb + '_resource']);
+            let amount1 = lab1.mineralAmount;
+            let amount2 = lab2.mineralAmount;
+
+            if (amount1 == undefined) {
+                amount1 = 0;
+            }
+            if (amount2 == undefined) {
+                amount2 = 0;
+            }
+
+            let currentLab;
+            let currentMineral;
+            if (amount1 <= amount2) {
+                currentLab = lab1;
+                currentMineral = utils.getMineralTypeByChar(creep.room.memory['lab1_resource']);
+            } else {
+                currentLab = lab2;
+                currentMineral = utils.getMineralTypeByChar(creep.room.memory['lab2_resource']);
+            }
+
             if (!withResource) {
                 if (creep.carry[currentMineral] == undefined || creep.carry[currentMineral] < 100) {
                     if (creep.withdraw(terminal, currentMineral) != 0) {
@@ -64,19 +79,5 @@ module.exports = {
                 }
             }
         }
-    }
-};
-
-let getMineralTypeByChar = function(char) {
-    if (char == 'K') {
-        return RESOURCE_KEANIUM;
-    } else if (char == 'Z') {
-        return RESOURCE_ZYNTHIUM;
-    } else if (char == 'U') {
-        return RESOURCE_UTRIUM;
-    } else if (char == 'L') {
-        return RESOURCE_LEMERGIUM;
-    } else {
-        return undefined;
     }
 };

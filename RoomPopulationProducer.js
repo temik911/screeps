@@ -1,4 +1,4 @@
-var constants = require('Constants');
+let constants = require('Constants');
 require('RoomInfo');
 
 module.exports = {
@@ -433,10 +433,10 @@ module.exports = {
                     room.memory.labsSupportNumb++;
                     labsSupportCount++;
                 }
-            } else if (repairCount < 1) {
+            } else if (room.controller.level >= 4 && repairCount < 1) {
                 let repairNumb = room.memory.repairNumb;
                 name = roomName + "-repair-" + repairNumb;
-                bodies = [WORK, WORK, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
+                bodies = [WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.REPAIR;
                     spawn.createCreep(bodies, name, {

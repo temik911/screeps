@@ -12,13 +12,13 @@ module.exports = {
                 creep.moveTo(flag);
             }
         } else {
-            let target = creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS);
+            let target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
             if (target) {
                 if(creep.attack(target) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target);
                 }
             } else {
-                target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
+                target = creep.pos.findClosestByPath(FIND_HOSTILE_SPAWNS);
                 if (target) {
                     if (creep.attack(target) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(target);
@@ -41,7 +41,12 @@ module.exports = {
                                 creep.moveTo(target);
                             }
                         } else {
-                            creep.moveTo(25, 25);
+                            let parking = Game.flags['Parking'];
+                            // if (parking != undefined) {
+                            //     creep.moveTo(parking);
+                            // } else {
+                                creep.moveTo(25, 25);
+                            // }
                         }
                     }
                 }

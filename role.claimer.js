@@ -19,6 +19,33 @@ module.exports = {
                 creep.memory.inClaimedRoom = true;
             }
         } else {
+            if (creep.room.storage) {
+                if (creep.room.storage.store[RESOURCE_ENERGY] < 1000) {
+                    if (creep.carry[RESOURCE_ENERGY] < 200) {
+                        let containers = creep.room.stats().containers;
+                        if (containers != undefined && containers.length > 0) {
+                            let sum = 0;
+                            containers.forEach(container => {
+                                sum += container.store.energy;
+                            });
+                            if (sum > 0) {
+                                harvestUtils.withdrawFromContainer(creep);
+                            } else {
+                                harvestUtils.harvestFromPredefinedSource(creep);
+                            }
+                        } else {
+                            harvestUtils.harvestFromPredefinedSource(creep);
+                        }
+                    } else {
+                        if(creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(creep.room.storage);
+                        }
+                    }
+                    return;
+                }
+            }
+            
+            
             let targets = creep.room.find(FIND_STRUCTURES, {
                 filter: structure => structure.structureType == STRUCTURE_ROAD &&
                 structure.hits < structure.hitsMax / 10

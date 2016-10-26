@@ -7,22 +7,12 @@ module.exports = {
             creep.memory.sourceId = false;
         }
         if (!creep.memory.sourceId) {
-            let sources = creep.pos.findClosestByPath(FIND_SOURCES, {
+            let source = creep.pos.findClosestByPath(FIND_SOURCES, {
                 filter: (structure) => structure.energy > 0
             });
 
-            let pathLength = 9999;
-
-            for (let i = 0; i < sources.length; i++) {
-                let currentSource = sources[i];
-                let length = creep.pos.findPathTo(currentSource.pos).length;
-                if (pathLength > length) {
-                    creep.memory.sourceId = currentSource.id;
-                    pathLength = length;
-                }
-            }
-
-            if (creep.memory.sourceId) {
+            if (source != undefined) {
+                creep.memory.sourceId = source.id;
                 creep.memory.ticker = 0;
             }
         }

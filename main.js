@@ -23,8 +23,8 @@ module.exports.loop = function () {
     for (let roomName in rooms) {
         let room = rooms[roomName];
         // if (roomName == 'E39S53') {
-        //     room.memory.lab1_resource = 'K';
-        //     room.memory.lab2_resource = 'Z';
+        //     room.memory.lab1_resource = 'GH';
+        //     room.memory.lab2_resource = 'OH';
         // }
         labsHandler.run(room);
         roomPopulationProducer.run(room);

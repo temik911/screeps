@@ -2,7 +2,43 @@ let utils = require('Utils');
 
 module.exports = {
     run(creep) {
+        if (creep.ticksToLive < 25 && _.sum(creep.carry) == 0) {
+            creep.suicide();
+            return;
+        }
+
         let labs = creep.room.stats().labs;
+        let terminal = creep.room.terminal;
+
+        if (creep.room.memory.clearLabs) {
+            let fromLab = undefined;
+            for (let labName in labs) {
+                let lab = labs[labName];
+                if (lab.mineralAmount != 0) {
+                    fromLab = lab;
+                }
+            }
+
+            if (fromLab == undefined && _.sum(creep.carry) == 0) {
+                creep.room.memory.clearLabs = false;
+            } else {
+                if (_.sum(creep.carry) != 0) {
+                    for (let resourceType in creep.carry) {
+                        let transfer = creep.transfer(terminal, resourceType);
+                        if (transfer == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(terminal);
+                        }
+                    }
+                } else {
+                    if (creep.withdraw(fromLab, fromLab.mineralType) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(fromLab);
+                    }
+                }
+            }
+
+            return;
+        }
+
         let lab1 = Game.getObjectById(creep.room.memory.lab1);
         let lab2 = Game.getObjectById(creep.room.memory.lab2);
 
@@ -19,7 +55,6 @@ module.exports = {
             }
         }
 
-        let terminal = creep.room.terminal;
         if (creep.memory.needWithdraw) {
             if (_.sum(creep.carry) != 0) {
                 for (let resourceType in creep.carry) {
@@ -43,10 +78,10 @@ module.exports = {
             let amount1 = lab1.mineralAmount;
             let amount2 = lab2.mineralAmount;
 
-            if (amount1 == undefined || amount1 == 0) {
+            if (amount1 == undefined || isNaN(amount1)) {
                 amount1 = 0;
             }
-            if (amount2 == undefined || amount2 == 0) {
+            if (amount2 == undefined || isNaN(amount2)) {
                 amount2 = 0;
             }
 
@@ -75,7 +110,6 @@ module.exports = {
 
                 if (creep.carry[currentMineral] == undefined || creep.carry[currentMineral] == 0) {
                     creep.memory.withResource = false;
-                    creep.memory.iter++;
                 }
             }
         }

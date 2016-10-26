@@ -1,8 +1,8 @@
-let fff = require('Utils');
+let utils = require('Utils');
 
 module.exports = {
     run() {
-        if (Game.time % 100 != 0) {
+        if (Game.time % 50 != 0) {
             return;
         }
 
@@ -22,7 +22,7 @@ module.exports = {
                 let lab2Resource = Memory.rooms[roomName].lab2_resource;
 
                 if (lab1Resource != undefined) {
-                    let resourceType = fff.getMineralTypeByChar(lab1Resource);
+                    let resourceType = utils.getMineralTypeByChar(lab1Resource);
                     if (mineralsNeeded.has(resourceType)) {
                         mineralsNeeded.get(resourceType).push(room.name);
                     } else {
@@ -30,7 +30,7 @@ module.exports = {
                     }
                 }
                 if (lab2Resource != undefined) {
-                    let resourceType = fff.getMineralTypeByChar(lab2Resource);
+                    let resourceType = utils.getMineralTypeByChar(lab2Resource);
                     if (mineralsNeeded.has(resourceType)) {
                         mineralsNeeded.get(resourceType).push(room.name);
                     } else {
@@ -55,6 +55,29 @@ module.exports = {
                     }
                 }
                 roomsAmount.set(roomName, roomAmount);
+            }
+        }
+
+        let orders = Game.market.orders;
+        for (let orderName in orders) {
+            let order = orders[orderName];
+            let mineral = order.resourceType;
+            let roomName = order.roomName;
+            let remainingAmount = order.remainingAmount;
+
+            let currentAmount = mineralsAmount.get(mineral);
+            if (isNaN(currentAmount)) {
+                mineralsAmount.set(mineral, remainingAmount);
+            } else {
+                mineralsAmount.set(mineral, currentAmount - remainingAmount)
+            }
+
+            let roomAmount = roomsAmount.get(roomName);
+            let currentRoomAmount = roomAmount.get(mineral);
+            if (isNaN(currentRoomAmount)) {
+                roomAmount.set(mineral, remainingAmount);
+            } else {
+                roomAmount.set(mineral, currentRoomAmount - remainingAmount)
             }
         }
 
@@ -107,6 +130,14 @@ module.exports = {
                 amount = mas[2];
             }
             Game.rooms[mas[0]].terminal.send(mas[1], amount, mas[3]);
+        }
+
+        let room = roomsAmount.get('E39S53');
+        if (Memory.rooms['E39S53'].lab1_resource != RESOURCE_CATALYST && Memory.rooms['E39S53'].lab2_resource != RESOURCE_GHODIUM_ACID) {
+            if (room.get(RESOURCE_CATALYST) >= 5500 && room.get(RESOURCE_GHODIUM_ACID) >= 5500) {
+                Memory.rooms['E39S53'].lab1_resource = RESOURCE_CATALYST;
+                Memory.rooms['E39S53'].lab2_resource = RESOURCE_GHODIUM_ACID;
+            }
         }
     }
 };

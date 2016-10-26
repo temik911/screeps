@@ -1,4 +1,4 @@
-var harvestUtils = require('HarvestUtils');
+let harvestUtils = require('HarvestUtils');
 require('RoomInfo');
 
 module.exports = {
@@ -7,25 +7,25 @@ module.exports = {
             creep.memory.targetId = false;
         }
 
-        var numb = creep.memory.numb;
-        var flagPrefix = creep.memory.flagPrefix;
-        var flags = [];
-        for (var flagName in Game.flags) {
+        let numb = creep.memory.numb;
+        let flagPrefix = creep.memory.flagPrefix;
+        let flags = [];
+        for (let flagName in Game.flags) {
             if (flagName.startsWith(flagPrefix)) {
-                var flagInfo = flagName.split('-');
-                var sourcesCount = 0;
-                for (var q in flagInfo) {
-                    var info = flagInfo[q];
+                let flagInfo = flagName.split('-');
+                let sourcesCount = 0;
+                for (let q in flagInfo) {
+                    let info = flagInfo[q];
                     if (info.startsWith('sources')) {
                         sourcesCount = info.split(':')[1]
                     }
                 }
-                for (var i = 0; i < sourcesCount; i++) {
+                for (let i = 0; i < sourcesCount; i++) {
                     flags.push(Game.flags[flagName])
                 }
             }
         }
-        var flag = flags[numb % flags.length];
+        let flag = flags[numb % flags.length];
 
         if (creep.room == flag.room) {
             if (creep.memory.needEnergy == true) {
@@ -35,7 +35,7 @@ module.exports = {
                     creep.memory.needEnergy = false;
                 }
             } else {
-                var target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+                let target = creep.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
                 if (target) {
                     if (creep.build(target) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(target, {maxRooms: 1});

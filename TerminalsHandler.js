@@ -139,5 +139,12 @@ module.exports = {
                 Memory.rooms['E39S53'].lab2_resource = RESOURCE_GHODIUM_ACID;
             }
         }
+
+        if (Memory.rooms['E39S53'].lab1_resource != RESOURCE_GHODIUM_HYDRIDE && Memory.rooms['E39S53'].lab2_resource != RESOURCE_HYDROXIDE) {
+            if (room.get(RESOURCE_CATALYZED_GHODIUM_ACID) >= 5000) {
+                Memory.rooms['E39S53'].lab1_resource = RESOURCE_GHODIUM_HYDRIDE;
+                Memory.rooms['E39S53'].lab2_resource = RESOURCE_HYDROXIDE;
+            }
+        }
     }
 };

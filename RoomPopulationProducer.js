@@ -428,6 +428,8 @@ module.exports = {
                     role = constants.LABS_SUPPORT;
                     spawn.createCreep(bodies, name, {
                         role: role,
+                        numb: labsSupportNumb,
+                        roomName: roomName,
                         isBuild: false
                     });
                     room.memory.labsSupportNumb++;

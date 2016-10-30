@@ -28,6 +28,10 @@ module.exports = {
             }
         }
 
+        if (room.memory.lab1_resource == undefined || room.memory.lab2_resource == undefined) {
+            return;
+        }
+
         if (room.memory.clearLabs) {
             return;
         }
@@ -35,8 +39,8 @@ module.exports = {
         let lab1 = Game.getObjectById(room.memory.lab1);
         let lab2 = Game.getObjectById(room.memory.lab2);
 
-        let mineral1 = utils.getMineralTypeByChar(room.memory.lab1_resource);
-        let mineral2 = utils.getMineralTypeByChar(room.memory.lab2_resource);
+        let mineral1 = room.memory.lab1_resource;
+        let mineral2 = room.memory.lab2_resource;
 
         if (mineral1 != lab1.mineralType || mineral2 != lab2.mineralType) {
             for (let labName in labs) {

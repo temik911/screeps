@@ -33,5 +33,70 @@ module.exports = {
         } else {
             return undefined;
         }
+    },
+
+    getComponentsToProduceMineral(mineralToProduce) {
+        switch (mineralToProduce) {
+            case 'OH' :
+                return ['O', 'H'];
+            case 'UH' :
+                return ['U', 'H'];
+            case 'LO' :
+                return ['L', 'O'];
+            case 'ZK' :
+                return ['Z', 'K'];
+            case 'UL' :
+                return ['U', 'L'];
+            case 'G' :
+                return ['ZK', 'UL'];
+            case 'GH' :
+                return ['G', 'H'];
+            case 'UH2O' :
+                return ['UH', 'OH'];
+            case 'GH2O' :
+                return ['GH', 'OH'];
+            case 'LHO2' :
+                return ['LO', 'OH'];
+            case 'XUH2O' :
+                return ['UH2O', 'X'];
+            case 'XLHO2' :
+                return ['LHO2', 'X'];
+            case 'XGH2O' :
+                return ['GH2O', 'X'];
+            default :
+                return undefined;
+        }
+    },
+
+    getProducedMineral(mineralsFromProduce) {
+        let mineral1 = mineralsFromProduce[0];
+        let mineral2 = mineralsFromProduce[1];
+
+        switch (mineral1) {
+            case 'O' :
+                switch (mineral2) {
+                    case 'H' :
+                        return 'OH';
+                    default :
+                        return undefined;
+                }
+            default :
+                return undefined;
+        }
+    },
+
+    isBaseMineral(mineral) {
+        switch (mineral) {
+            case 'O' :
+            case 'H' :
+            case 'Z' :
+            case 'K' :
+            case 'U' :
+            case 'L' :
+            case 'X' :
+                return true;
+            default :
+                return false;
+        }
     }
 };

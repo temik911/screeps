@@ -7,6 +7,10 @@ module.exports = {
             return;
         }
 
+        if (creep.room.memory.lab1 == undefined || creep.room.memory.lab2 == undefined) {
+            return;
+        }
+
         let labs = creep.room.stats().labs;
         let terminal = creep.room.terminal;
 
@@ -68,8 +72,12 @@ module.exports = {
                 }
             } else {
                 let fromLab = Game.getObjectById(creep.memory.fromLabId);
-                if (creep.withdraw(fromLab, fromLab.mineralType) == ERR_NOT_IN_RANGE) {
+                let withdraw = creep.withdraw(fromLab, fromLab.mineralType);
+                if (withdraw == ERR_NOT_IN_RANGE) {
                     creep.moveTo(fromLab);
+                } else if (withdraw == ERR_INVALID_ARGS) {
+                    creep.memory.needWithdraw = false;
+                    creep.memory.fromLabId = undefined;
                 }
             }
         } else {
@@ -85,20 +93,27 @@ module.exports = {
                 amount2 = 0;
             }
 
+            if (amount1 > 1500 && amount2 > 1500) {
+                return;
+            }
+
             let currentLab;
             let currentMineral;
             if (amount1 <= amount2) {
                 currentLab = lab1;
-                currentMineral = utils.getMineralTypeByChar(creep.room.memory['lab1_resource']);
+                currentMineral = creep.room.memory['lab1_resource'];
             } else {
                 currentLab = lab2;
-                currentMineral = utils.getMineralTypeByChar(creep.room.memory['lab2_resource']);
+                currentMineral = creep.room.memory['lab2_resource'];
             }
 
             if (!withResource) {
                 if (creep.carry[currentMineral] == undefined || creep.carry[currentMineral] < 100) {
-                    if (creep.withdraw(terminal, currentMineral) != 0) {
+                    let withdraw = creep.withdraw(terminal, currentMineral);
+                    if (withdraw == ERR_NOT_IN_RANGE) {
                         creep.moveTo(terminal);
+                    } else if (withdraw == ERR_NOT_ENOUGH_RESOURCES) {
+                        creep.memory.withResource = true;
                     }
                 } else {
                     creep.memory.withResource = true;

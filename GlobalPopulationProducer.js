@@ -42,7 +42,19 @@ module.exports = {
         let bodies;
         let name;
 
-        if (invaderCount < 0) {
+        if (reserverCount < 1) {
+            let reserverNumb = spawn.memory.reserverNumb;
+            bodies = [CLAIM, MOVE];
+            name = "reserver-" + reserverNumb;
+            if (spawn.canCreateCreep(bodies, name) == OK) {
+                spawn.createCreep(bodies, name, {
+                    role: constants.RESERVER,
+                    numb: reserverNumb,
+                    currentStep: 0
+                });
+                spawn.memory.reserverNumb++;
+            }
+        } else if (invaderCount < 0) {
             let invaderNumb = spawn.memory.invaderNumb;
             bodies = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
                 MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
@@ -55,9 +67,11 @@ module.exports = {
                 });
                 spawn.memory.invaderNumb++;
             }
-        } else if (claimerCount < 0) {
+        } else if (claimerCount < 6) {
             let claimerNumb = spawn.memory.claimerNumb;
-            bodies = [WORK, WORK, WORK, WORK, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
+            bodies = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
+                      MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+                      CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
             name = "claimer-" + claimerNumb;
             if (spawn.canCreateCreep(bodies, name) == OK) {
                 spawn.createCreep(bodies, name, {
@@ -76,18 +90,6 @@ module.exports = {
                     numb: healerNumb
                 });
                 spawn.memory.healerNumb++;
-            }
-        } else if (reserverCount < 0) {
-            let reserverNumb = spawn.memory.reserverNumb;
-            bodies = [CLAIM, MOVE];
-            name = "reserver-" + reserverNumb;
-            if (spawn.canCreateCreep(bodies, name) == OK) {
-                spawn.createCreep(bodies, name, {
-                    role: constants.RESERVER,
-                    numb: reserverNumb,
-                    currentStep: 0
-                });
-                spawn.memory.reserverNumb++;
             }
         }
     }

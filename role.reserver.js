@@ -12,9 +12,16 @@ module.exports = {
                 creep.moveTo(flag);
             }
         } else {
-            if(creep.room.controller) {
-                if(creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+            if (creep.room.controller) {
+                let claimController = creep.claimController(creep.room.controller);
+                if(claimController == ERR_NOT_IN_RANGE) {
                     creep.moveTo(creep.room.controller);
+                } else if (claimController == ERR_GCL_NOT_ENOUGH) {
+                    if (creep.reserveController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(creep.room.controller);
+                    }
+                } else {
+                    creep.moveTo(25, 25);
                 }
             }
         }

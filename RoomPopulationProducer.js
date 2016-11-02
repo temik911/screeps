@@ -405,7 +405,7 @@ module.exports = {
                         numb: linkUpgraderNumb
                     });
                     room.memory.linkUpgraderNumb++;
-                    linkUpgraderNumb++;
+                    linkUpgraderCount++;
                 }
             } else if (builderCount < maxBuilderCount) {
                 let builderNumb = room.memory.builderNumb;
@@ -422,7 +422,11 @@ module.exports = {
                 }
             } else if (labsSupportCount < maxLabsSupportCount) {
                 let labsSupportNumb = room.memory.labsSupportNumb;
-                bodies = [MOVE, CARRY, MOVE, CARRY];
+                if (labs.length == 10) {
+                    bodies = [MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY];
+                } else {
+                    bodies = [MOVE, CARRY, MOVE, CARRY];
+                }
                 name = roomName + "-labsSupport-" + labsSupportNumb;
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.LABS_SUPPORT;

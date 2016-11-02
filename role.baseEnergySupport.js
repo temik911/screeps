@@ -59,8 +59,10 @@ module.exports = {
                             });
                             
                             if (target == null) {
-                                if (creep.room.terminal != undefined && creep.room.terminal.store.energy < 30000) {
-                                    target = creep.room.terminal;
+                                if (creep.room.storage.store.energy > 5000) {
+                                    if (creep.room.terminal != undefined && creep.room.terminal.store.energy < 30000) {
+                                        target = creep.room.terminal;
+                                    }
                                 }
                             }
                         }

@@ -95,6 +95,9 @@ module.exports = {
             let mineral = order.resourceType;
             let roomName = order.roomName;
             let remainingAmount = order.remainingAmount;
+            if (order.type == ORDER_BUY) {
+                continue;
+            }
 
             let currentAmount = allAmount.get(mineral);
             if (isNaN(currentAmount)) {

@@ -21,7 +21,7 @@ module.exports = {
         } else {
             if (creep.room.storage) {
                 if (creep.room.storage.store[RESOURCE_ENERGY] < 1000) {
-                    if (creep.carry[RESOURCE_ENERGY] < 200) {
+                    if (creep.carry[RESOURCE_ENERGY] < creep.carryCapacity) {
                         let containers = creep.room.stats().containers;
                         if (containers != undefined && containers.length > 0) {
                             let sum = 0;

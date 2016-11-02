@@ -13,9 +13,13 @@ module.exports.loop = function () {
         }
     }
 
+    let progress = Game.gcl.progress;
+    let progressTotal = Game.gcl.progressTotal;
+    console.log("Current progress is " + progress + " from " + progressTotal + ". Remaining: " + (progressTotal - progress));
+
     terminalsHandler.run();
 
-    // globalPopulationProducer.run(Game.spawns['E37S53-Spawn-1']);
+    globalPopulationProducer.run(Game.spawns['Base']);
     // globalPopulationProducer.run(Game.spawns['E36S51-Spawn-2']);
     // globalPopulationProducer.run(Game.spawns['Base2']);
 

@@ -28,5 +28,5 @@ module.exports.PARKING = 'Parking';
 module.exports.CLAIMED_ROOM_FLAG = 'ClaimedRoom';
 
 // hp barrier
-module.exports.RAMPART_HP_BARRIER = 750000;
-module.exports.WALL_HP_BARRIER = 750000;
+module.exports.RAMPART_HP_BARRIER = 1000000;
+module.exports.WALL_HP_BARRIER = 1000000;

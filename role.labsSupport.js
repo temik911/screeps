@@ -50,7 +50,7 @@ module.exports = {
             for (let labName in labs) {
                 let lab = labs[labName];
                 if (lab.id != lab1.id && lab.id != lab2.id) {
-                    if (lab.mineralAmount > 100) {
+                    if (lab.mineralAmount > creep.carryCapacity) {
                         creep.memory.needWithdraw = true;
                         creep.memory.fromLabId = lab.id;
                         break;

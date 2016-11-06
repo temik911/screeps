@@ -21,6 +21,11 @@ module.exports.REMOTE_CONTAINER_BUILDER = 'remoteContainerBuilder';
 module.exports.GUARD = 'guard';
 module.exports.LABS_SUPPORT = 'labsSupport';
 module.exports.HEALER = 'healer';
+module.exports.SQUAD_HEALER = 'squadHealer';
+module.exports.SQUAD_ATTACK = 'squadAttack';
+
+// squad
+module.exports.SQUAD_ROLE_MAIN = 'squadRoleMain';
 
 // flags
 module.exports.UPGRADERS_FLAG = 'UpgradersFlag';

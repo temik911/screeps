@@ -1,4 +1,4 @@
-var harvestUtils = require('HarvestUtils');
+let harvestUtils = require('HarvestUtils');
 require('RoomInfo');
 
 module.exports = {
@@ -7,20 +7,20 @@ module.exports = {
             creep.memory.targetId = false;
         }
 
-        var numb = creep.memory.numb;
-        var flagPrefix = creep.memory.flagPrefix;
-        var flags = [];
-        for (var flagName in Game.flags) {
+        let numb = creep.memory.numb;
+        let flagPrefix = creep.memory.flagPrefix;
+        let flags = [];
+        for (let flagName in Game.flags) {
             if (flagName.startsWith(flagPrefix)) {
                 flags.push(Game.flags[flagName])
             }
         }
-        var flag = flags[numb % flags.length];
+        let flag = flags[numb % flags.length];
 
         if (creep.room == flag.room) {
             if (creep.memory.needEnergy == true) {
                 if (!creep.memory.sourceId) {
-                    var sources = creep.room.find(FIND_STRUCTURES, {
+                    let sources = creep.room.find(FIND_STRUCTURES, {
                         filter: (structure) => {
                             return structure.structureType == STRUCTURE_CONTAINER &&
                                 structure.store.energy > 0;
@@ -35,10 +35,10 @@ module.exports = {
                 }
 
                 if (creep.memory.sourceId) {
-                    var source = Game.getObjectById(creep.memory.sourceId);
+                    let source = Game.getObjectById(creep.memory.sourceId);
 
                     if (source.store[RESOURCE_ENERGY] > 0) {
-                        var withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
+                        let withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
 
                         if (withdrawalResult == ERR_NOT_IN_RANGE) {
                             creep.moveTo(source, {maxRooms: 1});
@@ -54,7 +54,7 @@ module.exports = {
                 }
             } else {
                 if (creep.memory.targetId == false) {
-                    var targets = creep.room.find(FIND_STRUCTURES, {
+                    let targets = creep.room.find(FIND_STRUCTURES, {
                         filter: structure => structure.structureType == STRUCTURE_ROAD &&
                         structure.hits < structure.hitsMax / 2
                     });

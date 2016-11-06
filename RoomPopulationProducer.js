@@ -298,7 +298,7 @@ module.exports = {
 
         // --------------------------------------------------------------
         let maxLabsSupportCount = 0;
-        if (labs.length >= 6) {
+        if (labs.length >= 3) {
             maxLabsSupportCount = 1
         }
 
@@ -348,7 +348,8 @@ module.exports = {
                     }
                 }
             } else if (room.storage && cargoCount < 3 && room.stats().links.length < 3) {
-                bodies = [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
+                bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+                          CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
                 role = constants.CARGO;
                 spawn.createCreep(bodies, null, {
                     role: role,
@@ -465,7 +466,7 @@ module.exports = {
                 soldierCount++;
             } else if (reserverForHarvestCount < maxReserverForHarvestCount) {
                 let reserverForHarvestNumb = room.memory.reserverForHarvestNumb;
-                name = roomName + "-RrsvrFHrv-" + reserverForHarvestNumb;
+                name = roomName + "-RsrvFHrv-" + reserverForHarvestNumb;
                 bodies = [CLAIM, CLAIM, MOVE, MOVE];
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.RESERVER_FOR_HARVEST;
@@ -542,7 +543,7 @@ module.exports = {
                         from: roomName
                     });
                     room.memory.remoteContainerBuilderNumb++;
-                    remoteBuilderCount++;
+                    remoteContainerBuilderCount++;
                 }
             } else if (guardCount < maxGuardCount) {
                 let guardNumb = room.memory.guardNumb;

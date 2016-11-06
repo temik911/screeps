@@ -31,23 +31,17 @@ module.exports = {
     },
 
     withdrawFromContainer(creep) {
-        if (!creep.memory.sourceId) {
-            let sources = creep.room.find(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return structure.structureType == STRUCTURE_CONTAINER &&
-                        structure.store.energy > 0;
-                }
-            });
-
-            sources.sort((a, b) => b.store.energy - a.store.energy);
-
-            if (sources.length > 0) {
-                creep.memory.sourceId = sources[0].id;
+        let sources = creep.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return structure.structureType == STRUCTURE_CONTAINER &&
+                    structure.store.energy > 0;
             }
-        }
+        });
 
-        if (creep.memory.sourceId) {
-            let source = Game.getObjectById(creep.memory.sourceId);
+        sources.sort((a, b) => b.store.energy - a.store.energy);
+
+        if (sources.length > 0) {
+            let source = sources[0];
 
             let withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
 

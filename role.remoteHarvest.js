@@ -2,19 +2,19 @@ require('RoomInfo');
 
 module.exports = {
     run(creep) {
-        var container;
-        if (!creep.memory.sourceId) {
-            var numb = creep.memory.numb;
-            var flagPrefix = creep.memory.flagPrefix;
-            var sources = [];
-            for (var flagName in Game.flags) {
+        let container;
+        if (!creep.memory.sourceId || !creep.memory.containerId) {
+            let numb = creep.memory.numb;
+            let flagPrefix = creep.memory.flagPrefix;
+            let sources = [];
+            for (let flagName in Game.flags) {
                 if (flagName.startsWith(flagPrefix)) {
                     Game.flags[flagName].room.stats().sources.forEach(source => sources.push(source));
                 }
             }
             
             if (sources.length > 0) {
-                var sourceToHarvest = sources[numb % sources.length];
+                let sourceToHarvest = sources[numb % sources.length];
                 creep.memory.sourceId = sourceToHarvest.id;
                 container = sourceToHarvest.pos.findClosestByRange(FIND_STRUCTURES, {
                     filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
@@ -36,7 +36,7 @@ module.exports = {
                 }
             }
         } else if (creep.memory.containerId != undefined) {
-            var source = Game.getObjectById(creep.memory.sourceId);
+            let source = Game.getObjectById(creep.memory.sourceId);
             container = Game.getObjectById(creep.memory.containerId);
 
             if (container.hits < container.hitsMax * 0.8 && creep.carry.energy > 0) {

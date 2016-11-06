@@ -6,8 +6,12 @@ module.exports = {
         if (Game.time % 10 != 0) {
             return;
         }
+        if (Game.cpu.bucket < 250) {
+            return;
+        }
 
-        let allAmount = new Map();
+        let roomsRequiredAmount = new Map();
+        let roomsFreeAmount = new Map();
         let terminalsAmount = new Map();
         let labsAmount = new Map();
         let terminalsIsBusy = new Map();
@@ -20,7 +24,11 @@ module.exports = {
             if (room.memory.target_mineral_amount == undefined) {
                 room.memory.target_mineral_amount = 1000;
             } else if (room.memory.target_mineral == 'XGH2O' || room.memory.target_mineral == 'OH') {
-                room.memory.target_mineral_amount = 10000;
+                if (room.stats().labs.length < 6) {
+                    room.memory.target_mineral_amount = 1000;
+                } else {
+                    room.memory.target_mineral_amount = 10000;
+                }
             }
 
             let terminal = room.terminal;
@@ -28,14 +36,7 @@ module.exports = {
                 let terminalAmount = new Map();
                 for (let resourceType in terminal.store) {
                     if (resourceType != RESOURCE_ENERGY) {
-                        let currentAmount = allAmount.get(resourceType);
-                        let store = terminal.store[resourceType];
-                        if (isNaN(currentAmount)) {
-                            allAmount.set(resourceType, store)
-                        } else {
-                            allAmount.set(resourceType, currentAmount + store)
-                        }
-                        terminalAmount.set(resourceType, store);
+                        terminalAmount.set(resourceType, terminal.store[resourceType]);
                     }
                 }
 
@@ -44,15 +45,13 @@ module.exports = {
                 for (let index in labs) {
                     let lab = labs[index];
                     let mineralType = lab.mineralType;
-                    if (mineralType != undefined) {
-                        let mineralAmount = lab.mineralAmount;
-                        if (mineralAmount != 0) {
-                            let currentAmount = labAmount.get(mineralType);
-                            if (isNaN(currentAmount)) {
-                                labAmount.set(mineralType, mineralAmount);
-                            } else {
-                                labAmount.set(mineralType, currentAmount + mineralAmount);
-                            }
+                    let mineralAmount = lab.mineralAmount;
+                    if (mineralType != undefined && mineralAmount != 0) {
+                        let currentAmount = labAmount.get(mineralType);
+                        if (isNaN(currentAmount)) {
+                            labAmount.set(mineralType, mineralAmount);
+                        } else {
+                            labAmount.set(mineralType, currentAmount + mineralAmount);
                         }
                     }
                 }
@@ -61,22 +60,13 @@ module.exports = {
                 for (let index in roomCreeps) {
                     let creep = roomCreeps[index];
                     if (creep.memory.role == constants.LABS_SUPPORT) {
-                        let creepRoomName = undefined;
-                        if (creep.memory.roomName == undefined) {
-                            creepRoomName = creep.name.split('-')[0];
-                        } else {
-                            creepRoomName = creep.memory.roomName;
-                        }
-
-                        if (creepRoomName = roomName) {
-                            if (_.sum(creep.carry) != 0) {
-                                for (let type in creep.carry) {
-                                    let currentAmount = labAmount.get(type);
-                                    if (isNaN(currentAmount)) {
-                                        labAmount.set(type, creep.carry[type]);
-                                    } else {
-                                        labAmount.set(type, currentAmount + creep.carry[type]);
-                                    }
+                        if (_.sum(creep.carry) != 0) {
+                            for (let type in creep.carry) {
+                                let currentAmount = labAmount.get(type);
+                                if (isNaN(currentAmount)) {
+                                    labAmount.set(type, creep.carry[type]);
+                                } else {
+                                    labAmount.set(type, currentAmount + creep.carry[type]);
                                 }
                             }
                         }
@@ -99,20 +89,40 @@ module.exports = {
                 continue;
             }
 
-            let currentAmount = allAmount.get(mineral);
-            if (isNaN(currentAmount)) {
-                allAmount.set(mineral, remainingAmount);
-            } else {
-                allAmount.set(mineral, currentAmount - remainingAmount)
-            }
-
             let roomAmount = terminalsAmount.get(roomName);
             let currentRoomAmount = roomAmount.get(mineral);
             if (isNaN(currentRoomAmount)) {
-                roomAmount.set(mineral, remainingAmount);
+                roomAmount.set(mineral, 0);
             } else {
                 roomAmount.set(mineral, currentRoomAmount - remainingAmount)
             }
+        }
+
+        for (let roomName in rooms) {
+            let room = rooms[roomName];
+            if (room.terminal == undefined) {
+                continue;
+            }
+
+            let roomFreeAmount = new Map();
+            let requiredAmount = new Map();
+            if (room.memory.target_mineral != undefined && room.memory.target_mineral_amount != undefined) {
+                console.log("!!!!!!!!!!!!!!!!!!!!!!!!!" + roomName + "!!!!!!!!!!!!!!!!!!!!!!!!!");
+                let terminalAmount = terminalsAmount.get(roomName);
+                let labAmount = labsAmount.get(roomName);
+                for (let a of terminalAmount) {
+                    roomFreeAmount.set(a[0], a[1]);
+                }
+                for (let a of labAmount) {
+                    roomFreeAmount.set(a[0], a[1] + get(roomFreeAmount, a[0], 0))
+                }
+
+                calcRequiredMineralsMap(room.memory.target_mineral, room.memory.target_mineral_amount, roomFreeAmount,
+                    requiredAmount, true);
+            }
+
+            roomsFreeAmount.set(roomName, roomFreeAmount);
+            roomsRequiredAmount.set(roomName, requiredAmount);
         }
 
         for (let roomName in rooms) {
@@ -127,7 +137,7 @@ module.exports = {
 
                     let neededAmount = targetMineralAmount - get(terminalAmount, targetMineral, 0) - get(labAmount, targetMineral, 0);
 
-                    func(room, allAmount, terminalsAmount, labAmount, targetMineral, neededAmount, terminalsIsBusy, terminalsSend);
+                    func(room, roomsFreeAmount, terminalsAmount, labsAmount, targetMineral, neededAmount, terminalsIsBusy, terminalsSend);
                 }
             }
         }
@@ -144,7 +154,23 @@ module.exports = {
             }
         }
 
+        for (let entry of roomsRequiredAmount) {
+            console.log("Room " + entry[0] + " needed minerals:");
+            for (let a of entry[1]) {
+                console.log("    " + a[0] + " " + a[1]);
+            }
+        }
+
         console.log("\n");
+
+        // for (let entry of roomsFreeAmount) {
+        //     console.log("Room " + entry[0] + " free minerals:");
+        //     for (let a of entry[1]) {
+        //         console.log("    " + a[0] + " " + a[1]);
+        //     }
+        // }
+        //
+        // console.log("\n");
     }
 };
 
@@ -173,88 +199,60 @@ let get = function (map, key, defaultValue) {
     return value;
 };
 
-let func = function (room, allAmount, terminalsAmount, labAmount, targetMineral, targetMineralAmount, terminalsIsBusy, terminalsSend) {
+let func = function (room, roomsFreeAmount, terminalsAmount, labsAmount, targetMineral, targetMineralAmount, terminalsIsBusy, terminalsSend) {
     if (utils.isBaseMineral(targetMineral)) {
         return true;
     }
-
-    console.log("Func from " + room.name + " " + targetMineral + " " + targetMineralAmount);
+    // console.log("Func from " + room.name + " " + targetMineral + " " + targetMineralAmount);
 
     let terminalAmount = terminalsAmount.get(room.name);
+    let labAmount = labsAmount.get(room.name);
     if (targetMineralAmount > 0) {
-        if (targetMineralAmount < 100) {
-            targetMineralAmount = 100;
-        }
-        let targetMineralAmountInRoom = get(terminalAmount, targetMineral, 0) + get(labAmount, targetMineral, 0);
         let requiredMineral = getRequiredMineral(targetMineral, targetMineralAmount, terminalAmount, labAmount);
         if (requiredMineral == undefined) {
             let components = utils.getComponentsToProduceMineral(targetMineral);
-            console.log("Room " + room.name + " now produce " + targetMineral + " from " + components[0] + " and " + components[1]);
+            // console.log("Room " + room.name + " now produce " + targetMineral + " from " + components[0] + " and " + components[1]);
             room.memory.lab1_resource = components[0];
             room.memory.lab2_resource = components[1];
             return true;
         } else {
             let neededMineral = requiredMineral[0];
             let neededMineralAmount = requiredMineral[1];
-            if (neededMineralAmount < 100) {
-                neededMineralAmount = 100;
-            }
-            console.log("Func from " + room.name + " " + targetMineral + " " + targetMineralAmount + " is needed for " + neededMineral + " " + neededMineralAmount);
-            if (get(allAmount, neededMineral, 0) > neededMineralAmount) {
-                console.log(neededMineral + " in all rooms amount is " + get(allAmount, neededMineral, 0));
-                for (let roomName in Game.rooms) {
-                    if (neededMineralAmount >= 100) {
-                        let anotherRoom = Game.rooms[roomName];
-                        if (anotherRoom.name != room.name) {
-                            if (anotherRoom.terminal != undefined) {
-                                let anotherRoomAmount = terminalsAmount.get(anotherRoom.name);
-                                if (anotherRoomAmount != undefined) {
-                                    let anotherRoomMineralAmount = get(anotherRoomAmount, neededMineral, 0);
-                                    console.log(anotherRoom.name + " contain " + neededMineral + " in amount " + anotherRoomMineralAmount);
-                                    if (anotherRoomMineralAmount > 0) {
-                                        let anotherRoomTarget = anotherRoom.memory.target_mineral;
-                                        let freeMineralAmount = 0;
-                                        console.log(neededMineral + " " + anotherRoomTarget);
-                                        if (anotherRoomTarget != undefined && roomIsNeededMineral(neededMineral, anotherRoomTarget, true)) {
-                                            freeMineralAmount = anotherRoomMineralAmount - anotherRoom.memory.target_mineral_amount;
-                                        } else {
-                                            console.log("Free mineral amount " + anotherRoomMineralAmount);
-                                            freeMineralAmount = anotherRoomMineralAmount;
-                                        }
-                                        if (freeMineralAmount >= 100) {
-                                            if (terminalsIsBusy.get(anotherRoom.name) == false) {
-                                                if (freeMineralAmount > neededMineralAmount) {
-                                                    console.log("Mineral " + neededMineral + " from " + anotherRoom.name + " to room " + room.name + " " + neededMineralAmount);
-                                                    terminalsSend.push([anotherRoom.name, neededMineral, neededMineralAmount, room.name]);
-                                                    terminalsIsBusy.set(anotherRoom, true);
-                                                    anotherRoomAmount.set(neededMineral, anotherRoomMineralAmount - neededMineralAmount);
-                                                    neededMineralAmount = 0;
-                                                    return true;
-                                                } else {
-                                                    console.log("Mineral " + neededMineral + " from " + anotherRoom.name + " to room " + room.name + " " + freeMineralAmount);
-                                                    terminalsSend.push([anotherRoom.name, neededMineral, freeMineralAmount, room.name]);
-                                                    terminalsIsBusy.set(anotherRoom, true);
-                                                    anotherRoomAmount.set(neededMineral, 0);
-                                                    neededMineralAmount = neededMineralAmount - freeMineralAmount;
-                                                    if (neededMineralAmount == 0) {
-                                                        return true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+            // console.log("Func from " + room.name + " " + targetMineral + " " + targetMineralAmount + " is needed for " + neededMineral + " " + neededMineralAmount);
+            for (let roomName in Game.rooms) {
+                let anotherRoom = Game.rooms[roomName];
+                if (anotherRoom.name != room.name && !terminalsIsBusy.get(anotherRoom.name)) {
+                    let amountToAsk = neededMineralAmount >= 100 ? neededMineralAmount : 100;
+                    if (anotherRoom.terminal != undefined) {
+                        let anotherRoomFreeAmount = roomsFreeAmount.get(anotherRoom.name);
+                        let anotherRoomTerminalAmount = terminalsAmount.get(anotherRoom.name);
+                        if (anotherRoomFreeAmount != undefined && anotherRoomTerminalAmount != undefined) {
+                            let freeAmount = get(anotherRoomFreeAmount, neededMineral, 0);
+                            let freeAmountInTerminal = get(anotherRoomTerminalAmount, neededMineral, 0);
+                            if (freeAmount >= 100 && freeAmountInTerminal >= 100) {
+                                if (freeAmount >= amountToAsk && freeAmountInTerminal >= amountToAsk) {
+                                    // console.log("Mineral " + neededMineral + " from " + anotherRoom.name + " to room " + room.name + " " + amountToAsk);
+                                    terminalsSend.push([anotherRoom.name, neededMineral, amountToAsk, room.name]);
+                                    terminalsIsBusy.set(anotherRoom, true);
+                                    anotherRoomTerminalAmount.set(neededMineral, freeAmountInTerminal - amountToAsk);
+                                    anotherRoomFreeAmount.set(neededMineral, freeAmount - amountToAsk);
+                                    return true;
+                                } else {
+                                    terminalsSend.push([anotherRoom.name, neededMineral, freeAmountInTerminal, room.name]);
+                                    terminalsIsBusy.set(anotherRoom, true);
+                                    anotherRoomTerminalAmount.set(neededMineral, 0);
+                                    anotherRoomFreeAmount.set(neededMineral, freeAmount - freeAmountInTerminal);
+                                    neededMineralAmount = neededMineralAmount - freeAmountInTerminal;
                                 }
                             }
                         }
                     }
                 }
-                if (neededMineralAmount > 0) {
-                    return func(room, allAmount, terminalsAmount, labAmount, neededMineral, neededMineralAmount, terminalsIsBusy, terminalsSend);
-                }
-                return true;
-            } else {
-                return func(room, allAmount, terminalsAmount, labAmount, neededMineral, neededMineralAmount, terminalsIsBusy, terminalsSend);
             }
+            if (neededMineralAmount > 0) {
+                return func(room, roomsFreeAmount, terminalsAmount, labsAmount, neededMineral, neededMineralAmount, terminalsIsBusy, terminalsSend);
+            }
+            return true;
         }
     } else {
         return true;
@@ -268,7 +266,6 @@ let roomIsNeededMineral = function (mineral, target, first) {
         if (utils.isBaseMineral(target)) {
             return false;
         }
-        console.log("Components for " + target);
         let components = utils.getComponentsToProduceMineral(target);
         let left = roomIsNeededMineral(mineral, components[0], false);
         if (left) {
@@ -281,4 +278,32 @@ let roomIsNeededMineral = function (mineral, target, first) {
         }
     }
     return false;
+};
+
+let calcRequiredMineralsMap = function (targetMineral, targetAmount, freeAmount, requiredAmount, isRoomTarget) {
+    if (targetAmount <= 0) {
+        return;
+    }
+    let currentRoomAmount = get(freeAmount, targetMineral, 0);
+    let neededAmount = targetAmount - currentRoomAmount;
+    if (neededAmount >= 0) {
+        if (isRoomTarget) {
+            let components = utils.getComponentsToProduceMineral(targetMineral);
+            calcRequiredMineralsMap(components[0], neededAmount, freeAmount, requiredAmount, false);
+            calcRequiredMineralsMap(components[1], neededAmount, freeAmount, requiredAmount, false);
+        } else {
+            // console.log(targetMineral + " " + neededAmount);
+            requiredAmount.set(targetMineral, neededAmount + get(requiredAmount, targetMineral, 0));
+            let offset = currentRoomAmount - targetAmount;
+            if (offset < 0) {
+                offset = 0;
+            }
+            freeAmount.set(targetMineral, offset);
+            if (!utils.isBaseMineral(targetMineral)) {
+                let components = utils.getComponentsToProduceMineral(targetMineral);
+                calcRequiredMineralsMap(components[0], neededAmount, freeAmount, requiredAmount, false);
+                calcRequiredMineralsMap(components[1], neededAmount, freeAmount, requiredAmount, false);
+            }
+        }
+    }
 };

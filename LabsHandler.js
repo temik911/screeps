@@ -3,7 +3,7 @@ let utils = require('Utils');
 module.exports = {
     run(room) {
         let labs = room.stats().labs;
-        if (labs.length < 6) {
+        if (labs.length < 3) {
             return;
         }
 

@@ -4,6 +4,10 @@ module.exports = {
     run(creep) {
         let isSupport = creep.memory.isSupport;
         
+        if (Game.time % 20 == 0) {
+            creep.memory.targetId = undefined;
+        }
+        
         if (!isSupport) {
             if (creep.room.storage) {
                 harvestUtils.withdrawFromRoomStorage(creep);
@@ -59,9 +63,18 @@ module.exports = {
                             });
                             
                             if (target == null) {
-                                if (creep.room.storage.store.energy > 5000) {
+                                if (creep.room.storage && creep.room.storage.store.energy > 5000) {
                                     if (creep.room.terminal != undefined && creep.room.terminal.store.energy < 30000) {
                                         target = creep.room.terminal;
+                                    }
+
+                                    if (target == null) {
+                                        let nuker = creep.room.stats().nuker;
+                                        if (nuker.length != 0) {
+                                            if (nuker[0].energy < nuker[0].energyCapacity) {
+                                                target = nuker[0];
+                                            }
+                                        }
                                     }
                                 }
                             }

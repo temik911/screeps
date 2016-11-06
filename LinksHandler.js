@@ -1,5 +1,8 @@
 module.exports = {
     run(room) {
+        if (room.controller == undefined || room.controller.owner == undefined) {
+            return;
+        }
         let links = room.stats().links;
         if (links.length == 3) {
             let storageLink = room.storage.pos.findClosestByRange(FIND_STRUCTURES, {

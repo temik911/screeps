@@ -6,6 +6,7 @@ let builderRole = require('role.builder');
 let baseEnergySupportRole = require('role.baseEnergySupport');
 let cargoRole = require('role.cargo');
 let linkCargoRole = require('role.linkCargo');
+let terminalCargoRole = require('role.terminalCargo');
 let soldierRole = require('role.soldier');
 let claimerRole = require('role.claimer');
 let repairRole = require('role.repair');
@@ -42,6 +43,8 @@ module.exports = {
                     cargoRole.run(creep);
                 } else if (creep.memory.role == constants.LINK_CARGO) {
                     linkCargoRole.run(creep);
+                } else if (creep.memory.role == constants.TERMINAL_CARGO) {
+                    terminalCargoRole.run(creep);
                 } else if (creep.memory.role == constants.SOLDIER) {
                     soldierRole.run(creep);
                 } else if (creep.memory.role == constants.CLAIMER) {

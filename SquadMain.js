@@ -1,5 +1,6 @@
 let constants = require('Constants');
 let x2 = require('SquadX2');
+let x3 = require('SquadX3');
 
 module.exports = {
     run(creep) {
@@ -15,6 +16,8 @@ module.exports = {
 
         if (squadAlg == 'x2') {
             x2.run(squad);
+        } else if (squadAlg == 'x3') {
+            x3.run(squad);
         }
     }
 };

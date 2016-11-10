@@ -24,11 +24,7 @@ module.exports = {
             if (room.memory.target_mineral_amount == undefined) {
                 room.memory.target_mineral_amount = 1000;
             } else if (room.memory.target_mineral == 'XGH2O' || room.memory.target_mineral == 'OH') {
-                if (room.stats().labs.length < 6) {
-                    room.memory.target_mineral_amount = 1000;
-                } else {
-                    room.memory.target_mineral_amount = 10000;
-                }
+                room.memory.target_mineral_amount = 450;
             }
 
             let terminal = room.terminal;
@@ -107,7 +103,6 @@ module.exports = {
             let roomFreeAmount = new Map();
             let requiredAmount = new Map();
             if (room.memory.target_mineral != undefined && room.memory.target_mineral_amount != undefined) {
-                console.log("!!!!!!!!!!!!!!!!!!!!!!!!!" + roomName + "!!!!!!!!!!!!!!!!!!!!!!!!!");
                 let terminalAmount = terminalsAmount.get(roomName);
                 let labAmount = labsAmount.get(roomName);
                 for (let a of terminalAmount) {
@@ -117,6 +112,8 @@ module.exports = {
                     roomFreeAmount.set(a[0], a[1] + get(roomFreeAmount, a[0], 0))
                 }
 
+                // console.log(roomName);
+
                 calcRequiredMineralsMap(room.memory.target_mineral, room.memory.target_mineral_amount, roomFreeAmount,
                     requiredAmount, true);
             }
@@ -125,19 +122,50 @@ module.exports = {
             roomsRequiredAmount.set(roomName, requiredAmount);
         }
 
+        let roomsWithMaxController = [];
+        let roomsWithoutMaxController = [];
         for (let roomName in rooms) {
             let room = rooms[roomName];
             if (room.terminal != undefined) {
+                if (room.controller.level == 8) {
+                    roomsWithMaxController.push(room);
+                } else {
+                    roomsWithoutMaxController.push(room);
+                }
                 let targetMineral = room.memory.target_mineral;
                 let targetMineralAmount = room.memory.target_mineral_amount;
                 if (targetMineral != undefined && targetMineralAmount != undefined) {
-                    console.log("!!! " + room.name + " " + targetMineral + " " + targetMineralAmount + " !!!");
                     let labAmount = labsAmount.get(roomName);
                     let terminalAmount = terminalsAmount.get(roomName);
+                    let currentAmount = get(terminalAmount, targetMineral, 0) + get(labAmount, targetMineral, 0);
 
-                    let neededAmount = targetMineralAmount - get(terminalAmount, targetMineral, 0) - get(labAmount, targetMineral, 0);
+                    let neededAmount = targetMineralAmount - currentAmount % targetMineralAmount;
 
                     func(room, roomsFreeAmount, terminalsAmount, labsAmount, targetMineral, neededAmount, terminalsIsBusy, terminalsSend);
+                }
+            }
+        }
+
+        for (let index in roomsWithMaxController) {
+            let room = roomsWithMaxController[index];
+            if (!get(terminalsIsBusy, room.name, false)) {
+                if (room.terminal.store[RESOURCE_ENERGY] > 55000) {
+                    let roomWithMinEnergy = undefined;
+                    let minEnergy = 999999999;
+                    for (let index1 in roomsWithoutMaxController) {
+                        let roomToSend = roomsWithoutMaxController[index1];
+                        if (_.sum(roomToSend.storage.store) < 250000) {
+                            let energyAmount = roomToSend.terminal.store[RESOURCE_ENERGY] + roomToSend.storage.store[RESOURCE_ENERGY];
+                            if (energyAmount < minEnergy) {
+                                roomWithMinEnergy = roomToSend;
+                                minEnergy = energyAmount;
+                            }
+                        }
+                    }
+                    if (roomWithMinEnergy != undefined) {
+                        let transactionCost = Game.market.calcTransactionCost(25000, room.name, roomWithMinEnergy.name);
+                        terminalsSend.push([room.name, RESOURCE_ENERGY, 25000 - transactionCost, roomWithMinEnergy.name]);
+                    }
                 }
             }
         }
@@ -153,15 +181,15 @@ module.exports = {
                 aaa.set(send[3], true);
             }
         }
-
-        for (let entry of roomsRequiredAmount) {
-            console.log("Room " + entry[0] + " needed minerals:");
-            for (let a of entry[1]) {
-                console.log("    " + a[0] + " " + a[1]);
-            }
-        }
-
-        console.log("\n");
+        //
+        // for (let entry of roomsRequiredAmount) {
+        //     console.log("Room " + entry[0] + " needed minerals:");
+        //     for (let a of entry[1]) {
+        //         console.log("    " + a[0] + " " + a[1]);
+        //     }
+        // }
+        //
+        // console.log("\n");
 
         // for (let entry of roomsFreeAmount) {
         //     console.log("Room " + entry[0] + " free minerals:");
@@ -228,22 +256,23 @@ let func = function (room, roomsFreeAmount, terminalsAmount, labsAmount, targetM
                         let anotherRoomTerminalAmount = terminalsAmount.get(anotherRoom.name);
                         if (anotherRoomFreeAmount != undefined && anotherRoomTerminalAmount != undefined) {
                             let freeAmount = get(anotherRoomFreeAmount, neededMineral, 0);
-                            let freeAmountInTerminal = get(anotherRoomTerminalAmount, neededMineral, 0);
-                            if (freeAmount >= 100 && freeAmountInTerminal >= 100) {
-                                if (freeAmount >= amountToAsk && freeAmountInTerminal >= amountToAsk) {
-                                    // console.log("Mineral " + neededMineral + " from " + anotherRoom.name + " to room " + room.name + " " + amountToAsk);
+                            let amountInTerminal = get(anotherRoomTerminalAmount, neededMineral, 0);
+                            if (freeAmount >= 100 && amountInTerminal >= 100) {
+                                if (freeAmount >= amountToAsk && amountInTerminal >= amountToAsk) {
+                                    console.log("Mineral " + neededMineral + " from " + anotherRoom.name + " to room " + room.name + " " + amountToAsk);
                                     terminalsSend.push([anotherRoom.name, neededMineral, amountToAsk, room.name]);
                                     terminalsIsBusy.set(anotherRoom, true);
-                                    anotherRoomTerminalAmount.set(neededMineral, freeAmountInTerminal - amountToAsk);
+                                    anotherRoomTerminalAmount.set(neededMineral, amountInTerminal - amountToAsk);
                                     anotherRoomFreeAmount.set(neededMineral, freeAmount - amountToAsk);
                                     return true;
-                                } else {
-                                    terminalsSend.push([anotherRoom.name, neededMineral, freeAmountInTerminal, room.name]);
-                                    terminalsIsBusy.set(anotherRoom, true);
-                                    anotherRoomTerminalAmount.set(neededMineral, 0);
-                                    anotherRoomFreeAmount.set(neededMineral, freeAmount - freeAmountInTerminal);
-                                    neededMineralAmount = neededMineralAmount - freeAmountInTerminal;
                                 }
+                                // } else if (freeAmount < amountToAsk && amountInTerminal >= amountToAsk) {
+                                //     terminalsSend.push([anotherRoom.name, neededMineral, freeAmount, room.name]);
+                                //     terminalsIsBusy.set(anotherRoom, true);
+                                //     anotherRoomTerminalAmount.set(neededMineral, amountInTerminal - freeAmount);
+                                //     anotherRoomFreeAmount.set(neededMineral, 0);
+                                //     neededMineralAmount = neededMineralAmount - amountInTerminal;
+                                // }
                             }
                         }
                     }
@@ -285,13 +314,14 @@ let calcRequiredMineralsMap = function (targetMineral, targetAmount, freeAmount,
         return;
     }
     let currentRoomAmount = get(freeAmount, targetMineral, 0);
-    let neededAmount = targetAmount - currentRoomAmount;
-    if (neededAmount >= 0) {
-        if (isRoomTarget) {
-            let components = utils.getComponentsToProduceMineral(targetMineral);
-            calcRequiredMineralsMap(components[0], neededAmount, freeAmount, requiredAmount, false);
-            calcRequiredMineralsMap(components[1], neededAmount, freeAmount, requiredAmount, false);
-        } else {
+    if (isRoomTarget) {
+        let neededAmount = targetAmount - currentRoomAmount % targetAmount;
+        let components = utils.getComponentsToProduceMineral(targetMineral);
+        calcRequiredMineralsMap(components[0], neededAmount, freeAmount, requiredAmount, false);
+        calcRequiredMineralsMap(components[1], neededAmount, freeAmount, requiredAmount, false);
+    } else {
+        let neededAmount = targetAmount - currentRoomAmount;
+        if (neededAmount >= 0) {
             // console.log(targetMineral + " " + neededAmount);
             requiredAmount.set(targetMineral, neededAmount + get(requiredAmount, targetMineral, 0));
             let offset = currentRoomAmount - targetAmount;

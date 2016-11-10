@@ -6,6 +6,7 @@ module.exports.UPGRADER = 'upgrader';
 module.exports.LINK_UPGRADER = 'linkUpg';
 module.exports.BASE_ENERGY_SUPPORT = 'baseEnergySupport';
 module.exports.CARGO = 'cargo';
+module.exports.TERMINAL_CARGO = 'terminalCargo';
 module.exports.LINK_CARGO = 'linkCargo';
 module.exports.SOLDIER = 'soldier';
 module.exports.CLAIMER = 'claimer';
@@ -22,6 +23,7 @@ module.exports.GUARD = 'guard';
 module.exports.LABS_SUPPORT = 'labsSupport';
 module.exports.HEALER = 'healer';
 module.exports.SQUAD_HEALER = 'squadHealer';
+module.exports.SQUAD_HEALER_SECOND = 'squadHealerSecond';
 module.exports.SQUAD_ATTACK = 'squadAttack';
 
 // squad
@@ -33,5 +35,5 @@ module.exports.PARKING = 'Parking';
 module.exports.CLAIMED_ROOM_FLAG = 'ClaimedRoom';
 
 // hp barrier
-module.exports.RAMPART_HP_BARRIER = 1000000;
-module.exports.WALL_HP_BARRIER = 1000000;
+module.exports.RAMPART_HP_BARRIER = 2000000;
+module.exports.WALL_HP_BARRIER = 2000000;

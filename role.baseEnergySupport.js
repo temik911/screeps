@@ -1,4 +1,5 @@
 let harvestUtils = require('HarvestUtils');
+require('RoomInfo');
 
 module.exports = {
     run(creep) {
@@ -64,8 +65,22 @@ module.exports = {
                             
                             if (target == null) {
                                 if (creep.room.storage && creep.room.storage.store.energy > 5000) {
-                                    if (creep.room.terminal != undefined && creep.room.terminal.store.energy < 30000) {
-                                        target = creep.room.terminal;
+                                    let labs = creep.room.stats().labs;
+                                    for (let index in labs) {
+                                        if (target == null) {
+                                            let lab = labs[index];
+                                            if (lab.energy < lab.energyCapacity) {
+                                                target = lab;
+                                            }
+                                        }
+                                    }
+
+                                    if (target == null) {
+                                        let terminalMaxCapacity = creep.room.controller.level == 8
+                                        && creep.room.storage.store.energy > 50000 ? 60000 : 30000;
+                                        if (creep.room.terminal != undefined && creep.room.terminal.store.energy <= terminalMaxCapacity) {
+                                            target = creep.room.terminal;
+                                        }
                                     }
 
                                     if (target == null) {

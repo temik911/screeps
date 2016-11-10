@@ -45,6 +45,9 @@ module.exports = {
         if (room.memory.labsSupportNumb == undefined) {
             room.memory.labsSupportNumb = 0;
         }
+        if (room.memory.terminalCargoNumb == undefined) {
+            room.memory.terminalCargoNumb = 0;
+        }
 
         let roomStats = room.stats();
         let roomCreeps = roomStats.creeps;
@@ -66,6 +69,7 @@ module.exports = {
         let builderCount = 0;
         let baseEnergySupportCount = 0;
         let cargoCount = 0;
+        let terminalCargoCount = 0;
         let linkCargoCount = 0;
         let soldierCount = 0;
         let repairCount = 0;
@@ -102,6 +106,8 @@ module.exports = {
                         cargoCount++;
                     } else if (currentSpawnRole == constants.LINK_CARGO) {
                         linkCargoCount++;
+                    } else if (currentSpawnRole == constants.TERMINAL_CARGO) {
+                        terminalCargoCount++;
                     } else if (currentSpawnRole == constants.SOLDIER) {
                         soldierCount++;
                     } else if (currentSpawnRole == constants.REPAIR) {
@@ -153,6 +159,8 @@ module.exports = {
                 cargoCount++;
             } else if (creepRole == constants.LINK_CARGO) {
                 linkCargoCount++;
+            } else if (creepRole == constants.TERMINAL_CARGO) {
+                terminalCargoCount++;
             } else if (creepRole == constants.SOLDIER) {
                 soldierCount++;
             } else if (creepRole == constants.REPAIR) {
@@ -194,10 +202,16 @@ module.exports = {
         let maxLinkUpgraderCount = 0;
         if (room.stats().links.length >=4) {
             // link upgraders
-            if (room.storage.store.energy < 10000) {
+            if (room.controller.level == 8) {
                 maxLinkUpgraderCount = 1;
             } else {
-                maxLinkUpgraderCount = 2;
+                if (room.storage.store.energy < 10000) {
+                    maxLinkUpgraderCount = 1;
+                } else if (room.storage.store.energy < 75000) {
+                    maxLinkUpgraderCount = 2;
+                } else {
+                    maxLinkUpgraderCount = 4;
+                }
             }
         } else {
             // default upgraders
@@ -302,6 +316,16 @@ module.exports = {
             maxLabsSupportCount = 1
         }
 
+        // --------------------------------------------------------------
+        let maxTerminalCargoCount = 0;
+        if (room.terminal != undefined) {
+            if (room.controller.level != 8) {
+                if (room.terminal.store[RESOURCE_ENERGY] > 30000 + 1000) {
+                    maxTerminalCargoCount = 1;
+                }
+            }
+        }
+
         for (let spawnName in spawns) {
             let spawn = spawns[spawnName];
 
@@ -363,6 +387,21 @@ module.exports = {
                     role: role,
                 });
                 linkCargoCount++;
+            } else if (terminalCargoCount < maxTerminalCargoCount) {
+                let terminalCargoNumb = room.memory.terminalCargoNumb;
+                bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+                    CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+                    CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
+                name = roomName + "-terminalCrg-" + terminalCargoNumb;
+                if (spawn.canCreateCreep(bodies, name) == OK) {
+                    role = constants.TERMINAL_CARGO;
+                    spawn.createCreep(bodies, name, {
+                        role: role,
+                        numb: terminalCargoNumb
+                    });
+                    room.memory.terminalCargoNumb++;
+                    terminalCargoCount++;
+                }
             } else if (mineralHarvesterCount < maxMineralHarvesterCount) {
                 let mineralHarvesterNumb = room.memory.mineralHarvesterNumb;
                 bodies = [WORK, WORK, WORK, WORK, WORK,
@@ -399,11 +438,13 @@ module.exports = {
                     MOVE, MOVE, MOVE, MOVE, MOVE,
                     CARRY, CARRY, CARRY, CARRY];
                 name = roomName + "-linkUpg-" + linkUpgraderNumb;
+                let isReadyToUpgrade = room.terminal.store[RESOURCE_CATALYZED_GHODIUM_ACID] < 10000 * maxLinkUpgraderCount;
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.LINK_UPGRADER;
                     spawn.createCreep(bodies, name, {
                         role: role,
-                        numb: linkUpgraderNumb
+                        numb: linkUpgraderNumb,
+                        isReadyToUpgrade: isReadyToUpgrade
                     });
                     room.memory.linkUpgraderNumb++;
                     linkUpgraderCount++;

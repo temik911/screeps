@@ -60,7 +60,7 @@ module.exports = {
         if (lab1.mineralAmount > 0 && lab2.mineralAmount > 0) {
             for (let labName in labs) {
                 let lab = labs[labName];
-                if (lab.id != lab1.id && lab.id != lab2.id) {
+                if (lab.id != lab1.id && lab.id != lab2.id && lab.id != room.memory.cgaBoostLabId) {
                     if (lab.cooldown == 0) {
                         lab.runReaction(lab1, lab2);
                     }

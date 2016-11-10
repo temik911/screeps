@@ -18,7 +18,7 @@ module.exports = {
             let fromLab = undefined;
             for (let labName in labs) {
                 let lab = labs[labName];
-                if (lab.mineralAmount != 0) {
+                if (lab.id != creep.room.memory.cgaBoostLabId && lab.mineralAmount != 0) {
                     fromLab = lab;
                 }
             }
@@ -49,7 +49,7 @@ module.exports = {
         if (!creep.memory.needWithdraw) {
             for (let labName in labs) {
                 let lab = labs[labName];
-                if (lab.id != lab1.id && lab.id != lab2.id) {
+                if (lab.id != lab1.id && lab.id != lab2.id && lab.id != creep.room.memory.cgaBoostLabId) {
                     if (lab.mineralAmount > creep.carryCapacity) {
                         creep.memory.needWithdraw = true;
                         creep.memory.fromLabId = lab.id;

@@ -53,6 +53,20 @@ module.exports = {
         }
     },
 
+    withdrawFromTerminal(creep) {
+        let terminal = creep.room.terminal;
+        if (terminal != undefined) {
+            let amount = terminal.store[RESOURCE_ENERGY] - 30000;
+
+            if (amount > 0) {
+                let amountToWithdraw = amount >= creep.carryCapacity ? creep.carryCapacity : amount;
+                if (creep.withdraw(terminal, RESOURCE_ENERGY, amountToWithdraw) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(terminal);
+                }
+            }
+        }
+    },
+
     withdrawFromRoomStorage(creep) {
         let source = creep.room.storage;
 

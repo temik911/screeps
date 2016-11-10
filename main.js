@@ -14,10 +14,6 @@ module.exports.loop = function () {
         }
     }
 
-    let progress = Game.gcl.progress;
-    let progressTotal = Game.gcl.progressTotal;
-    console.log("Current progress is " + progress + " from " + progressTotal + ". Remaining: " + (progressTotal - progress));
-
     let beforeTerminalsHandler = Game.cpu.getUsed();
     terminalsHandler.run();
     let afterTerminalsHandler = Game.cpu.getUsed();
@@ -29,10 +25,9 @@ module.exports.loop = function () {
     let rooms = Game.rooms;
     for (let roomName in rooms) {
         let room = rooms[roomName];
-        // if (roomName == 'E39S53') {
-        //     room.memory.lab1_resource = 'GH';
-        //     room.memory.lab2_resource = 'OH';
-        // }
+        if (room.memory.remoteContainers == undefined) {
+            room.memory.remoteContainers = new Map();
+        }
         labsHandler.run(room);
         roomPopulationProducer.run(room);
         linksHandler.run(room);
@@ -43,7 +38,11 @@ module.exports.loop = function () {
     creepsHandler.run();
     let afterCreepsHandler = Game.cpu.getUsed();
 
+    let progress = Game.gcl.progress;
+    let progressTotal = Game.gcl.progressTotal;
+    console.log("Current progress is " + progress + " from " + progressTotal + ". Remaining: " + (progressTotal - progress));
     console.log("Used: " + Game.cpu.getUsed() + "; bucket: " + Game.cpu.bucket);
     console.log("TerminalsHandler used: " + (afterTerminalsHandler - beforeTerminalsHandler));
     console.log("CreepsHandler used: " + (afterCreepsHandler - beforeCreepsHandler));
+    console.log();
 };

@@ -5,15 +5,14 @@ module.exports = {
         let isCargo = creep.memory.isCargo;
 
         if (!isCargo) {
-            harvestUtils.withdrawFromContainer(creep);
+            harvestUtils.withdrawFromTerminal(creep);
 
-            if (creep.carry.energy == creep.carryCapacity) {
+            if (creep.carry.energy > 0) {
                 creep.memory.isCargo = true;
             }
-        }
-        else {
+        } else {
             let target = creep.room.storage;
-            if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
             }
 

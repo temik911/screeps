@@ -1,9 +1,9 @@
-var harvestUtils = require('HarvestUtils');
-var constants = require('Constants');
+let harvestUtils = require('HarvestUtils');
+let constants = require('Constants');
 
 module.exports = {
     run(creep) {
-        var isRepair = creep.memory.isRepair;
+        let isRepair = creep.memory.isRepair;
 
         if (!isRepair) {
             if (creep.room.storage) {
@@ -15,29 +15,42 @@ module.exports = {
             if (creep.carry.energy == creep.carryCapacity) {
                 creep.memory.isRepair = true;
             }
-        }
-        else {
-            var targets = creep.room.find(FIND_STRUCTURES, {
-                filter: structure => structure.structureType == STRUCTURE_RAMPART &&
-                    structure.hits < constants.RAMPART_HP_BARRIER &&
-                    constants.RAMPART_HP_BARRIER - structure.hits > 1000
-            });
-
-            if (targets.length == 0) {
-                targets = creep.room.find(FIND_STRUCTURES, {
-                    filter: structure => structure.structureType == STRUCTURE_WALL &&
-                        structure.hits < constants.WALL_HP_BARRIER
+        } else {
+            let repairId = creep.memory.repairId;
+            if (repairId == undefined) {
+                let targets = creep.room.find(FIND_STRUCTURES, {
+                    filter: structure => structure.structureType == STRUCTURE_RAMPART || structure.structureType == STRUCTURE_WALL
                 });
-            }
 
-            if(targets.length > 0) {
-                if(creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0]);
+                if (targets.length != 0) {
+                    let toRepair = undefined;
+                    let min = 999999999;
+                    for (let i in targets) {
+                        let target = targets[i];
+                        if (min > target.hits && target.hits < target.hitsMax) {
+                            min = target.hits;
+                            toRepair = target;
+                        }
+                    }
+                    if (toRepair != undefined) {
+                        creep.memory.repairId = toRepair.id;
+                        creep.memory.stopRepair = toRepair.hits + 50000 < toRepair.hitsMax ? toRepair.hits + 50000 : toRepair.hitsMax;
+                    }
                 }
-            }
+            } else {
+                let toRepair = Game.getObjectById(repairId);
+                if (toRepair.hits < creep.memory.stopRepair) {
+                    if (creep.repair(toRepair) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(toRepair);
+                    }
+                } else {
+                    creep.memory.repairId = undefined;
+                    creep.memory.stopRepair = undefined;
+                }
 
-            if (creep.carry.energy == 0) {
-                creep.memory.isRepair = false;
+                if (creep.carry.energy == 0) {
+                    creep.memory.isRepair = false;
+                }
             }
         }
     }

@@ -1,13 +1,11 @@
 let creepsHandler = require('creepsHandler');
-let roomPopulationProducer = require('RoomPopulationProducer');
 let globalPopulationProducer = require('GlobalPopulationProducer');
-let linksHandler = require('LinksHandler');
-let towersHandler = require('TowersHandler');
-let labsHandler = require('LabsHandler');
 let terminalsHandler = require('TerminalsHandler');
-let squadsHandler = require('SquadsHandler');
+let roomStrategyHandler = require('RoomStrategyHandler');
+let remoteRoomsWatcher = require('RemoteRoomsWatcher');
 
 module.exports.loop = function () {
+    console.log("************************* " + Game.time + " *************************")
     for (let name in Memory.creeps) {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];
@@ -15,34 +13,52 @@ module.exports.loop = function () {
     }
 
     let beforeTerminalsHandler = Game.cpu.getUsed();
-    terminalsHandler.run();
+    try {
+        terminalsHandler.run();
+    } catch (e) {
+        console.log("TerminalHandler: " + e.stack);
+    }
     let afterTerminalsHandler = Game.cpu.getUsed();
 
-    // globalPopulationProducer.run(Game.spawns['Base']);
-    // globalPopulationProducer.run(Game.spawns['E36S51-Spawn-2']);
-    // globalPopulationProducer.run(Game.spawns['Base2']);
-
-    let rooms = Game.rooms;
-    for (let roomName in rooms) {
-        let room = rooms[roomName];
-        if (room.memory.remoteContainers == undefined) {
-            room.memory.remoteContainers = new Map();
-        }
-        labsHandler.run(room);
-        roomPopulationProducer.run(room);
-        linksHandler.run(room);
-        towersHandler.run(room);
+    try {
+        // globalPopulationProducer.run(Game.spawns['Base']);
+        // globalPopulationProducer.run(Game.spawns['E36S51-Spawn-2']);
+        // globalPopulationProducer.run(Game.spawns['Base2']);
+    } catch (e) {
+        console.log("GlobalPopulationProducer: " + e.stack);
     }
+
+    let beforeRoomsHandler = Game.cpu.getUsed();
+    roomStrategyHandler.run();
+    let afterRoomsHandler = Game.cpu.getUsed();
 
     let beforeCreepsHandler = Game.cpu.getUsed();
     creepsHandler.run();
     let afterCreepsHandler = Game.cpu.getUsed();
 
+    let beforeRemoteRoomsWatcher = Game.cpu.getUsed();
+    remoteRoomsWatcher.run();
+    let afterRemoteRoomsWatcher = Game.cpu.getUsed();
+
     let progress = Game.gcl.progress;
     let progressTotal = Game.gcl.progressTotal;
+
     console.log("Current progress is " + progress + " from " + progressTotal + ". Remaining: " + (progressTotal - progress));
-    console.log("Used: " + Game.cpu.getUsed() + "; bucket: " + Game.cpu.bucket);
+    let total = Game.cpu.getUsed();
+    Memory.total += total;
+    Memory.ticks += 1;
+    console.log("Used: " + total + "; bucket: " + Game.cpu.bucket);
+    console.log("Average: " + (Memory.total / Memory.ticks) + " for " + Memory.ticks + " ticks");
     console.log("TerminalsHandler used: " + (afterTerminalsHandler - beforeTerminalsHandler));
+    console.log("RoomsHandler used: " + (afterRoomsHandler - beforeRoomsHandler));
     console.log("CreepsHandler used: " + (afterCreepsHandler - beforeCreepsHandler));
+    console.log("RemoteRoomsWatcher used: " + (afterRemoteRoomsWatcher - beforeRemoteRoomsWatcher));
+
+    if (Memory.ticks == 5000) {
+        Game.notify("Average: " + (Memory.total / Memory.ticks) + " for " + Memory.ticks + " ticks");
+        Memory.total = 0;
+        Memory.ticks = 0;
+    }
+
     console.log();
 };

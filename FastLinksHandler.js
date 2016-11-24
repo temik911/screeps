@@ -6,8 +6,8 @@ module.exports = {
             return;
         }
         let links = room.stats().links;
-        if (links.length == 3) {
-            linksUtils.sourceSourceStorage(room);
+        if (links.length == 2) {
+            linksUtils.storageController(room);
         } else if (links.length == 4) {
             linksUtils.sourceSourceStorageController(room);
         }

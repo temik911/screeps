@@ -7,6 +7,11 @@ module.exports = {
         if (creep.memory.boostedCount == undefined) {
             creep.memory.boostedCount = 0;
         }
+        if (creep.memory.controllerLinkId == undefined) {
+            creep.memory.controllerLinkId = creep.room.controller.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => structure.structureType == STRUCTURE_LINK
+            }).id;
+        }
 
 
         if (isReadyToUpgrade) {
@@ -15,9 +20,7 @@ module.exports = {
                     creep.moveTo(creep.room.controller);
                 }
             } else {
-                let controllerLink = creep.room.controller.pos.findClosestByRange(FIND_STRUCTURES, {
-                    filter: (structure) => structure.structureType == STRUCTURE_LINK
-                });
+                let controllerLink = Game.getObjectById(creep.memory.controllerLinkId);
 
                 if (creep.withdraw(controllerLink, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(controllerLink);

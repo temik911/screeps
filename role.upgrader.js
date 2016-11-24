@@ -1,8 +1,8 @@
-var harvestUtils = require('HarvestUtils');
+let harvestUtils = require('HarvestUtils');
 
 module.exports = {
     run(creep) {
-        var isUpgrade = creep.memory.isUpgrade;
+        let isUpgrade = creep.memory.isUpgrade;
 
         if (!isUpgrade) {
             if (creep.room.storage) {

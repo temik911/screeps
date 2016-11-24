@@ -21,7 +21,7 @@ module.exports = {
 
         attack.memory.roomName='E39S52';
 
-        if (attack.memory.prepared == undefined) {
+        if (!attack.memory.prepared) {
             let flag = Game.flags[attack.memory.roomName + "-prepareAttack"];
             if (flag != undefined) {
                 if (!attack.pos.isNearTo(flag.pos)) {

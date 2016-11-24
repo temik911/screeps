@@ -19,9 +19,9 @@ module.exports = {
                     ATTACK, ATTACK, ATTACK, ATTACK, ATTACK,
                     ATTACK, ATTACK, ATTACK, ATTACK, ATTACK,
                     ATTACK, ATTACK, ATTACK, ATTACK, ATTACK,
-                    ATTACK, ATTACK, ATTACK, ATTACK, ATTACK], "Squad-1-attack", {squad_role:'squadRoleMain', roomName: 'E39S52', squad_numb: 1, squad_alg: 'x3', role: 'squadAttack'});
+                    ATTACK, ATTACK, ATTACK, ATTACK, ATTACK], "Squad-3-attack", {squad_role:'squadRoleMain', roomName: 'E39S52', squad_numb: 3, squad_alg: 'x1', role: 'squadAttack'});
 
-                Game.getObjectById('5817049c30f0d0351371cbe6').createCreep([MOVE, MOVE, MOVE, MOVE, MOVE,
+                Game.getObjectById('580541916402874c619e0182').createCreep([MOVE, MOVE, MOVE, MOVE, MOVE,
                     MOVE, MOVE, MOVE, MOVE, MOVE,
                     MOVE, MOVE, MOVE, MOVE, MOVE,
                     MOVE, MOVE, MOVE, MOVE, MOVE,
@@ -32,7 +32,7 @@ module.exports = {
                     HEAL, HEAL, HEAL, HEAL, HEAL,
                     HEAL, HEAL, HEAL, HEAL, HEAL], "Squad-1-healer", {roomName: 'E39S52', squad_numb: 1, squad_alg: 'x3', role: 'squadHealer'});
 
-                Game.getObjectById('57d83c9b3b13abc675e9f277').createCreep([MOVE, MOVE, MOVE, MOVE, MOVE,
+                Game.getObjectById('5817049c30f0d0351371cbe6').createCreep([MOVE, MOVE, MOVE, MOVE, MOVE,
                     MOVE, MOVE, MOVE, MOVE, MOVE,
                     MOVE, MOVE, MOVE, MOVE, MOVE,
                     MOVE, MOVE, MOVE, MOVE, MOVE,
@@ -41,7 +41,7 @@ module.exports = {
                     HEAL, HEAL, HEAL, HEAL, HEAL,
                     HEAL, HEAL, HEAL, HEAL, HEAL,
                     HEAL, HEAL, HEAL, HEAL, HEAL,
-                    HEAL, HEAL, HEAL, HEAL, HEAL], "Squad-1-healer2", {roomName: 'E39S52', squad_numb: 1, squad_alg: 'x3', role: 'squadHealer'});
+                    HEAL, HEAL, HEAL, HEAL, HEAL], "Squad-1-healer2", {roomName: 'E39S52', squad_numb: 1, squad_alg: 'x3', role: 'squadHealerSecond'});
 
 
 

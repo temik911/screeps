@@ -1,9 +1,8 @@
-var harvestUtils = require('HarvestUtils');
-var constants = require('Constants');
+let harvestUtils = require('HarvestUtils');
 
 module.exports = {
     run(creep) {
-        var isBuild = creep.memory.isBuild;
+        let isBuild = creep.memory.isBuild;
         
         if (!isBuild) {
             if (creep.room.storage) {
@@ -19,14 +18,25 @@ module.exports = {
             }
         }
         else {
-            var target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
-            if (target) {
-                if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target);
+            if (creep.memory.targetId == undefined) {
+                let target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+                if (target == null) {
+                    creep.suicide();
+                    return;
                 }
-            }
-            if (creep.carry.energy == 0) {
-                creep.memory.isBuild = false;
+                creep.memory.targetId = target.id;
+            } else {
+                let target = Game.getObjectById(creep.memory.targetId);
+                if (target != null) {
+                    if (creep.build(target) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(target);
+                    }
+                } else {
+                    creep.memory.targetId = undefined;
+                }
+                if (creep.carry.energy == 0) {
+                    creep.memory.isBuild = false;
+                }
             }
         }
     }

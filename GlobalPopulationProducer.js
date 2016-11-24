@@ -42,7 +42,7 @@ module.exports = {
         let bodies;
         let name;
 
-        if (reserverCount < 1) {
+        if (reserverCount < 0) {
             let reserverNumb = spawn.memory.reserverNumb;
             bodies = [CLAIM, MOVE];
             name = "reserver-" + reserverNumb;

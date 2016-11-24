@@ -41,7 +41,22 @@ module.exports = {
                         creep.moveTo(target, {maxRooms: 1});
                     }
                 } else {
-                    creep.suicide();
+                    for (let container of creep.room.stats().containers) {
+                        let containerInfo = new Map();
+                        containerInfo.amount = container.store[RESOURCE_ENERGY];
+                        containerInfo.pos = container.pos;
+                        containerInfo.withdraw = 0;
+                        Memory.rooms[creep.memory.from].remoteContainers[container.id] = containerInfo;
+                    }
+
+                    let controllerInfo = new Map();
+                    let controller = creep.room.controller;
+                    controllerInfo.pos = controller.pos;
+                    controllerInfo.ticksToEnd = controller.reservation.ticksToEnd;
+                    Memory.rooms[creep.memory.from].remoteControllers[controller.id] = controllerInfo;
+
+
+                    // creep.suicide();
                     flag.remove()
                 }
 

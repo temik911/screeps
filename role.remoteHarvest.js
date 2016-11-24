@@ -43,15 +43,6 @@ module.exports = {
                 creep.repair(container);
             } else {
                 creep.harvest(source);
-                let fromRoomMemory = Game.rooms[creep.memory.from].memory;
-                if (fromRoomMemory.remoteContainers[container.id] == undefined) {
-                    let map = new Map();
-                    map.pos = container.pos;
-                    map.amount = container.store[RESOURCE_ENERGY];
-                    fromRoomMemory.remoteContainers[container.id] = map;
-                } else {
-                    fromRoomMemory.remoteContainers[container.id].amount = container.store[RESOURCE_ENERGY];
-                }
             }
         }
     }

@@ -17,7 +17,7 @@ module.exports = {
             }
         } else {
             let repairId = creep.memory.repairId;
-            if (repairId == undefined) {
+            if (!repairId) {
                 let targets = creep.room.find(FIND_STRUCTURES, {
                     filter: structure => structure.structureType == STRUCTURE_RAMPART || structure.structureType == STRUCTURE_WALL
                 });

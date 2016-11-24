@@ -11,20 +11,21 @@ module.exports = {
             let creep = squad[index];
             if (creep.memory.role == constants.SQUAD_HEALER) {
                 healer = creep;
+                console.log("lol")
             } else if (creep.memory.role == constants.SQUAD_ATTACK) {
                 attack = creep;
+                console.log("lol1")
             } else if (creep.memory.role == constants.SQUAD_HEALER_SECOND) {
                 healer2 = creep;
+                console.log("lol2")
             }
         }
-
-        attack.memory.roomName='E39S52';
 
         if (attack == undefined || healer == undefined || healer2 == undefined) {
             return;
         }
 
-        if (attack.memory.prepared == undefined) {
+        if (!attack.memory.prepared) {
             let flag = Game.flags[attack.memory.roomName + "-prepareAttack"];
             if (flag != undefined) {
                 if (!attack.pos.isNearTo(flag.pos)) {
@@ -48,7 +49,6 @@ module.exports = {
                         attack.moveTo(flag.pos);
                         healer.moveTo(flag.pos);
                         healer2.moveTo(flag.pos);
-                        healer.move()
                     }
                 }
             } else {
@@ -73,9 +73,11 @@ module.exports = {
                     }
                     if (flag != undefined) {
                         if (!attack.pos.isNearTo(flag.pos)) {
-                            attack.moveTo(flag.pos);
-                            healer.moveTo(flag.pos);
-                            healer2.moveTo(flag.pos);
+                            if (attack.fatigue == 0 && healer.fatigue == 0 && healer2.fatigue == 0) {
+                                attack.moveTo(flag.pos);
+                                healer.moveTo(flag.pos);
+                                healer2.moveTo(flag.pos);
+                            }
                             healer.heal(toHeal);
                             healer2.heal(toHeal);
                         } else {
@@ -141,9 +143,11 @@ module.exports = {
 
                         if (target != null) {
                             if (attack.attack(target) == ERR_NOT_IN_RANGE) {
-                                attack.moveTo(target);
-                                healer.moveTo(target);
-                                healer2.moveTo(target);
+                                if (attack.fatigue == 0 && healer.fatigue == 0 && healer2.fatigue == 0) {
+                                    attack.moveTo(target);
+                                    healer.moveTo(target);
+                                    healer2.moveTo(target);
+                                }
                                 healer.heal(toHeal);
                                 healer2.heal(toHeal);
                             }

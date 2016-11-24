@@ -3,6 +3,10 @@ require('RoomInfo');
 
 module.exports = {
     run(creep) {
+        if (Game.cpu.bucket < 3000) {
+            return;
+        }
+
         if (!creep.memory.inClaimedRoom) {
             if (creep.memory.currentStep == undefined) {
                 creep.memory.currentStep = 0;
@@ -62,21 +66,28 @@ module.exports = {
                 let isBuild = creep.memory.isBuild;
 
                 if (!isBuild) {
-                    let containers = creep.room.stats().containers;
-                    if (containers != undefined && containers.length > 0) {
-                        let sum = 0;
-                        containers.forEach(container => {
-                            sum += container.store.energy;
-                        });
-                        if (sum > 0) {
-                            harvestUtils.withdrawFromContainer(creep);
+                    if (creep.room.storage) {
+                        if (creep.room.storage.store[RESOURCE_ENERGY] > 5000) {
+                            if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(creep.room.storage);
+                            }
+                        }
+                    } else {
+                        let containers = creep.room.stats().containers;
+                        if (containers != undefined && containers.length > 0) {
+                            let sum = 0;
+                            containers.forEach(container => {
+                                sum += container.store.energy;
+                            });
+                            if (sum > 0) {
+                                harvestUtils.withdrawFromContainer(creep);
+                            } else {
+                                harvestUtils.harvestFromPredefinedSource(creep);
+                            }
                         } else {
                             harvestUtils.harvestFromPredefinedSource(creep);
                         }
-                    } else {
-                        harvestUtils.harvestFromPredefinedSource(creep);
                     }
-
 
                     if (creep.carry.energy == creep.carryCapacity) {
                         creep.memory.isBuild = true;
@@ -105,19 +116,27 @@ module.exports = {
                 let isUpgrade = creep.memory.isUpgrade;
 
                 if (!isUpgrade) {
-                    let containers = creep.room.stats().containers;
-                    if (containers != undefined && containers.length > 0) {
-                        let sum = 0;
-                        containers.forEach(container => {
-                            sum += container.store.energy;
-                        });
-                        if (sum > 0) {
-                            harvestUtils.withdrawFromContainer(creep);
+                    if (creep.room.storage) {
+                        if (creep.room.storage.store[RESOURCE_ENERGY] > 5000) {
+                            if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(creep.room.storage);
+                            }
+                        }
+                    } else {
+                        let containers = creep.room.stats().containers;
+                        if (containers != undefined && containers.length > 0) {
+                            let sum = 0;
+                            containers.forEach(container => {
+                                sum += container.store.energy;
+                            });
+                            if (sum > 0) {
+                                harvestUtils.withdrawFromContainer(creep);
+                            } else {
+                                harvestUtils.harvestFromPredefinedSource(creep);
+                            }
                         } else {
                             harvestUtils.harvestFromPredefinedSource(creep);
                         }
-                    } else {
-                        harvestUtils.harvestFromPredefinedSource(creep);
                     }
 
                     if (creep.carry.energy == creep.carryCapacity) {

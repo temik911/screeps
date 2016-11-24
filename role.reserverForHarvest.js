@@ -2,41 +2,59 @@ require('RoomInfo');
 
 module.exports = {
     run(creep) {
-        var numb = creep.memory.numb;
-        var flagPrefix = creep.memory.flagPrefix;
-        var flags = [];
-        for (var flagName in Game.flags) {
-            if (flagName.startsWith(flagPrefix)) {
-                flags.push(Game.flags[flagName])
+        if (creep.memory.controllerToReserv == undefined) {
+            let remoteControllers = Memory.rooms[creep.memory.from].remoteControllers;
+            let minAmount = 999999;
+            let id = undefined;
+            let pos = undefined;
+            for (let controllerId in remoteControllers) {
+                let controllerInfo = remoteControllers[controllerId];
+                if (controllerInfo.ticksToEnd < minAmount
+                    && !controllerInfo.busy
+                    && !Memory.rooms[creep.memory.from].remoteRooms[controllerInfo.pos.roomName].isDirty) {
+                    minAmount = controllerInfo.ticksToEnd;
+                    id = controllerId;
+                    pos = controllerInfo.pos;
+                }
+            }
+
+            if (id != undefined) {
+                creep.memory.controllerToReserv = id;
+                creep.memory.posToGo = pos;
+                Memory.rooms[creep.memory.from].remoteControllers[creep.memory.controllerToReserv].busy = true;
             }
         }
-        var flag = flags[numb % flags.length];
 
-        if (creep.room == flag.room) {
-            if(creep.room.controller) {
-                if(creep.reserveController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                    var room = creep.room;
-                    var controllerPos = creep.room.controller.pos;
-                    var pos;
-                    var wall = true;
-                    for (var dx = -1; dx <= 1; dx++) {
-                        for (var dy = -1; dy <= 1; dy++) {
-                            pos = new RoomPosition(controllerPos.x + dx, controllerPos.y + dy, room.name);
-                            wall = Game.map.getTerrainAt(pos) == "wall";
+        let controllerPos = creep.memory.posToGo;
+        if (creep.room.name == controllerPos.roomName) {
+            let controller = creep.room.controller;
+            if(controller) {
+                let reserveController = creep.reserveController(controller);
+                if(reserveController == ERR_NOT_IN_RANGE) {
+                    if (creep.memory.pos == undefined) {
+                        let room = creep.room;
+                        let controllerPos = controller.pos;
+                        let pos;
+                        let wall = true;
+                        for (let dx = -1; dx <= 1; dx++) {
+                            for (let dy = -1; dy <= 1; dy++) {
+                                pos = new RoomPosition(controllerPos.x + dx, controllerPos.y + dy, room.name);
+                                wall = Game.map.getTerrainAt(pos) == "wall";
+                                if (!wall) {
+                                    dy = 10;
+                                }
+                            }
                             if (!wall) {
-                                dy = 10;
+                                dx = 10;
                             }
                         }
-                        if (!wall) {
-                            dx = 10;
-                        }
+                        creep.memory.pos = pos;
                     }
-                    
-                    creep.moveTo(pos.x, pos.y, {maxRooms: 1});
+                    creep.moveTo(creep.memory.pos.x, creep.memory.pos.y, {maxRooms: 1});
                 }
             }
         } else {
-            creep.moveTo(flag);
+            creep.moveTo(new RoomPosition(controllerPos.x, controllerPos.y, controllerPos.roomName));
         }
     }
 };

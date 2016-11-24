@@ -21,57 +21,59 @@ module.exports = {
         for (let roomName in rooms) {
             let room = rooms[roomName];
 
-            if (room.memory.target_mineral_amount == undefined) {
-                room.memory.target_mineral_amount = 1000;
-            } else if (room.memory.target_mineral == 'XGH2O' || room.memory.target_mineral == 'OH') {
-                room.memory.target_mineral_amount = 450;
-            }
-
-            let terminal = room.terminal;
-            if (terminal != undefined) {
-                let terminalAmount = new Map();
-                for (let resourceType in terminal.store) {
-                    if (resourceType != RESOURCE_ENERGY) {
-                        terminalAmount.set(resourceType, terminal.store[resourceType]);
-                    }
+            if (room.controller != undefined && room.controller.my) {
+                if (room.memory.target_mineral_amount == undefined) {
+                    room.memory.target_mineral_amount = 1000;
+                } else if (room.memory.target_mineral == 'XGH2O' || room.memory.target_mineral == 'OH') {
+                    room.memory.target_mineral_amount = 450;
                 }
 
-                let labs = room.stats().labs;
-                let labAmount = new Map();
-                for (let index in labs) {
-                    let lab = labs[index];
-                    let mineralType = lab.mineralType;
-                    let mineralAmount = lab.mineralAmount;
-                    if (mineralType != undefined && mineralAmount != 0) {
-                        let currentAmount = labAmount.get(mineralType);
-                        if (isNaN(currentAmount)) {
-                            labAmount.set(mineralType, mineralAmount);
-                        } else {
-                            labAmount.set(mineralType, currentAmount + mineralAmount);
+                let terminal = room.terminal;
+                if (terminal != undefined) {
+                    let terminalAmount = new Map();
+                    for (let resourceType in terminal.store) {
+                        if (resourceType != RESOURCE_ENERGY) {
+                            terminalAmount.set(resourceType, terminal.store[resourceType]);
                         }
                     }
-                }
 
-                let roomCreeps = room.stats().creeps;
-                for (let index in roomCreeps) {
-                    let creep = roomCreeps[index];
-                    if (creep.memory.role == constants.LABS_SUPPORT) {
-                        if (_.sum(creep.carry) != 0) {
-                            for (let type in creep.carry) {
-                                let currentAmount = labAmount.get(type);
-                                if (isNaN(currentAmount)) {
-                                    labAmount.set(type, creep.carry[type]);
-                                } else {
-                                    labAmount.set(type, currentAmount + creep.carry[type]);
+                    let labs = room.stats().labs;
+                    let labAmount = new Map();
+                    for (let index in labs) {
+                        let lab = labs[index];
+                        let mineralType = lab.mineralType;
+                        let mineralAmount = lab.mineralAmount;
+                        if (mineralType != undefined && mineralAmount != 0) {
+                            let currentAmount = labAmount.get(mineralType);
+                            if (isNaN(currentAmount)) {
+                                labAmount.set(mineralType, mineralAmount);
+                            } else {
+                                labAmount.set(mineralType, currentAmount + mineralAmount);
+                            }
+                        }
+                    }
+
+                    let roomCreeps = room.stats().creeps;
+                    for (let index in roomCreeps) {
+                        let creep = roomCreeps[index];
+                        if (creep.memory.role == constants.LABS_SUPPORT) {
+                            if (_.sum(creep.carry) != 0) {
+                                for (let type in creep.carry) {
+                                    let currentAmount = labAmount.get(type);
+                                    if (isNaN(currentAmount)) {
+                                        labAmount.set(type, creep.carry[type]);
+                                    } else {
+                                        labAmount.set(type, currentAmount + creep.carry[type]);
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                labsAmount.set(roomName, labAmount);
-                terminalsAmount.set(roomName, terminalAmount);
-                terminalsIsBusy.set(roomName, false);
+                    labsAmount.set(roomName, labAmount);
+                    terminalsAmount.set(roomName, terminalAmount);
+                    terminalsIsBusy.set(roomName, false);
+                }
             }
         }
 
@@ -112,8 +114,6 @@ module.exports = {
                     roomFreeAmount.set(a[0], a[1] + get(roomFreeAmount, a[0], 0))
                 }
 
-                // console.log(roomName);
-
                 calcRequiredMineralsMap(room.memory.target_mineral, room.memory.target_mineral_amount, roomFreeAmount,
                     requiredAmount, true);
             }
@@ -140,6 +140,10 @@ module.exports = {
                     let currentAmount = get(terminalAmount, targetMineral, 0) + get(labAmount, targetMineral, 0);
 
                     let neededAmount = targetMineralAmount - currentAmount % targetMineralAmount;
+
+                    if (roomName == 'E39S52') {
+                        console.log(targetMineral + " " + neededAmount);
+                    }
 
                     func(room, roomsFreeAmount, terminalsAmount, labsAmount, targetMineral, neededAmount, terminalsIsBusy, terminalsSend);
                 }
@@ -181,24 +185,6 @@ module.exports = {
                 aaa.set(send[3], true);
             }
         }
-        //
-        // for (let entry of roomsRequiredAmount) {
-        //     console.log("Room " + entry[0] + " needed minerals:");
-        //     for (let a of entry[1]) {
-        //         console.log("    " + a[0] + " " + a[1]);
-        //     }
-        // }
-        //
-        // console.log("\n");
-
-        // for (let entry of roomsFreeAmount) {
-        //     console.log("Room " + entry[0] + " free minerals:");
-        //     for (let a of entry[1]) {
-        //         console.log("    " + a[0] + " " + a[1]);
-        //     }
-        // }
-        //
-        // console.log("\n");
     }
 };
 
@@ -231,7 +217,6 @@ let func = function (room, roomsFreeAmount, terminalsAmount, labsAmount, targetM
     if (utils.isBaseMineral(targetMineral)) {
         return true;
     }
-    // console.log("Func from " + room.name + " " + targetMineral + " " + targetMineralAmount);
 
     let terminalAmount = terminalsAmount.get(room.name);
     let labAmount = labsAmount.get(room.name);
@@ -239,14 +224,12 @@ let func = function (room, roomsFreeAmount, terminalsAmount, labsAmount, targetM
         let requiredMineral = getRequiredMineral(targetMineral, targetMineralAmount, terminalAmount, labAmount);
         if (requiredMineral == undefined) {
             let components = utils.getComponentsToProduceMineral(targetMineral);
-            // console.log("Room " + room.name + " now produce " + targetMineral + " from " + components[0] + " and " + components[1]);
             room.memory.lab1_resource = components[0];
             room.memory.lab2_resource = components[1];
             return true;
         } else {
             let neededMineral = requiredMineral[0];
             let neededMineralAmount = requiredMineral[1];
-            // console.log("Func from " + room.name + " " + targetMineral + " " + targetMineralAmount + " is needed for " + neededMineral + " " + neededMineralAmount);
             for (let roomName in Game.rooms) {
                 let anotherRoom = Game.rooms[roomName];
                 if (anotherRoom.name != room.name && !terminalsIsBusy.get(anotherRoom.name)) {
@@ -322,7 +305,6 @@ let calcRequiredMineralsMap = function (targetMineral, targetAmount, freeAmount,
     } else {
         let neededAmount = targetAmount - currentRoomAmount;
         if (neededAmount >= 0) {
-            // console.log(targetMineral + " " + neededAmount);
             requiredAmount.set(targetMineral, neededAmount + get(requiredAmount, targetMineral, 0));
             let offset = currentRoomAmount - targetAmount;
             if (offset < 0) {

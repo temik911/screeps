@@ -3,9 +3,6 @@ require('RoomInfo');
 
 module.exports = {
     run(room) {
-        if (room.memory.claimerNumb == undefined) {
-            room.memory.claimerNumb = 0;
-        }
         if (room.memory.harvesterNumb == undefined) {
             room.memory.harvesterNumb = 0;
         }
@@ -45,9 +42,6 @@ module.exports = {
         if (room.memory.guardNumb == undefined) {
             room.memory.guardNumb = 0;
         }
-        if (room.memory.labsSupportNumb == undefined) {
-            room.memory.labsSupportNumb = 0;
-        }
         if (room.memory.terminalCargoNumb == undefined) {
             room.memory.terminalCargoNumb = 0;
         }
@@ -58,7 +52,6 @@ module.exports = {
         let roomExtractors = roomStats.extractors;
         let spawns = roomStats.spawns;
         let mineral = roomStats.mineral;
-        let labs = roomStats.labs;
         let roomName = room.name;
 
         if (spawns.length == 0) {
@@ -73,7 +66,7 @@ module.exports = {
         let baseEnergySupportCount = 0;
         let cargoCount = 0;
         let terminalCargoCount = 0;
-        let linkCargoCount = 0;
+        let fastLinkCargoCount = 0;
         let soldierCount = 0;
         let repairCount = 0;
         let mineralHarvesterCount = 0;
@@ -109,8 +102,8 @@ module.exports = {
                         baseEnergySupportCount++;
                     } else if (currentSpawnRole == constants.CARGO) {
                         cargoCount++;
-                    } else if (currentSpawnRole == constants.LINK_CARGO) {
-                        linkCargoCount++;
+                    } else if (currentSpawnRole == constants.FAST_LINK_CARGO) {
+                        fastLinkCargoCount++;
                     } else if (currentSpawnRole == constants.TERMINAL_CARGO) {
                         terminalCargoCount++;
                     } else if (currentSpawnRole == constants.SOLDIER) {
@@ -166,8 +159,8 @@ module.exports = {
                 baseEnergySupportCount++;
             } else if (creepRole == constants.CARGO) {
                 cargoCount++;
-            } else if (creepRole == constants.LINK_CARGO) {
-                linkCargoCount++;
+            } else if (creepRole == constants.FAST_LINK_CARGO) {
+                fastLinkCargoCount++;
             } else if (creepRole == constants.TERMINAL_CARGO) {
                 terminalCargoCount++;
             } else if (creepRole == constants.SOLDIER) {
@@ -209,7 +202,7 @@ module.exports = {
         // -------------------------------------------------------------
         let maxUpgraderCount = 0;
         let maxLinkUpgraderCount = 0;
-        if (room.stats().links.length >=4) {
+        if (room.stats().links.length >= 2) {
             // link upgraders
             if (room.controller.level == 8) {
                 maxLinkUpgraderCount = 1;
@@ -326,12 +319,6 @@ module.exports = {
         }
 
         // --------------------------------------------------------------
-        let maxLabsSupportCount = 0;
-        if (labs.length >= 3) {
-            maxLabsSupportCount = 1
-        }
-
-        // --------------------------------------------------------------
         let maxTerminalCargoCount = 0;
         if (room.terminal != undefined) {
             if (room.controller.level != 8) {
@@ -360,7 +347,7 @@ module.exports = {
                 baseEnergySupportCount++;
             } else if (harvesterCount + harvesterWithLinkCount < roomSources.length) {
                 let harvesterNumb = room.memory.harvesterNumb;
-                if (room.stats().links.length < 3) {
+                if (room.stats().links.length < 4) {
                     bodies = createHarvesterBodies(room);
                     name = roomName + "-harv-" + harvesterNumb;
                     if (spawn.canCreateCreep(bodies, name) == OK) {
@@ -386,22 +373,22 @@ module.exports = {
                         harvesterWithLinkCount++;
                     }
                 }
-            } else if (room.storage && cargoCount < 2 && room.stats().links.length < 3) {
+            } else if (room.storage && cargoCount < 2 && room.stats().links.length < 4) {
                 bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-                          CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
+                    CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
                 role = constants.CARGO;
                 spawn.createCreep(bodies, null, {
                     role: role,
                     isCargo: false
                 });
                 cargoCount++;
-            } else if (room.storage && linkCargoCount < 1 && room.stats().links.length >= 3) {
+            } else if (room.storage && fastLinkCargoCount < 1 && room.stats().links.length >= 2) {
                 bodies = [MOVE, CARRY, CARRY, CARRY, CARRY];
-                role = constants.LINK_CARGO;
-                spawn.createCreep(bodies, roomName + "-linkCargo", {
+                role = constants.FAST_LINK_CARGO;
+                spawn.createCreep(bodies, roomName + "-fastLinkCargo", {
                     role: role,
                 });
-                linkCargoCount++;
+                fastLinkCargoCount++;
             } else if (terminalCargoCount < maxTerminalCargoCount) {
                 let terminalCargoNumb = room.memory.terminalCargoNumb;
                 bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
@@ -476,14 +463,9 @@ module.exports = {
                 }
             } else if (linkUpgraderCount < maxLinkUpgraderCount) {
                 let linkUpgraderNumb = room.memory.linkUpgraderNumb;
-                bodies = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
-                    MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-                    CARRY, CARRY, CARRY, CARRY, CARRY];
+                bodies = createLinkUpgraderBodies(room);
                 name = roomName + "-linkUpg-" + linkUpgraderNumb;
-                let isReadyToUpgrade = true;
-                if (room.controller.level < 8) {
-                    isReadyToUpgrade = room.terminal == undefined ? true : room.storage.store[RESOURCE_ENERGY] < 10000 * maxLinkUpgraderCount;
-                }
+                let isReadyToUpgrade = room.terminal == undefined ? true : room.storage.store[RESOURCE_ENERGY] < 10000 * maxLinkUpgraderCount;
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.LINK_UPGRADER;
                     spawn.createCreep(bodies, name, {
@@ -506,25 +488,6 @@ module.exports = {
                     });
                     room.memory.builderNumb++;
                     builderCount++;
-                }
-            } else if (labsSupportCount < maxLabsSupportCount) {
-                let labsSupportNumb = room.memory.labsSupportNumb;
-                if (labs.length == 10) {
-                    bodies = [MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY];
-                } else {
-                    bodies = [MOVE, CARRY, MOVE, CARRY];
-                }
-                name = roomName + "-labsSupport-" + labsSupportNumb;
-                if (spawn.canCreateCreep(bodies, name) == OK) {
-                    role = constants.LABS_SUPPORT;
-                    spawn.createCreep(bodies, name, {
-                        role: role,
-                        numb: labsSupportNumb,
-                        roomName: roomName,
-                        isBuild: false
-                    });
-                    room.memory.labsSupportNumb++;
-                    labsSupportCount++;
                 }
             } else if (room.controller.level >= 4 && repairCount < 1) {
                 let repairNumb = room.memory.repairNumb;
@@ -682,6 +645,21 @@ let createUpgraderBodies = function(room) {
         bodies.push(CARRY);
         bodies.push(WORK);
         currentCost += 200;
+        currentBodiesPart += 3;
+    }
+    return bodies;
+};
+
+let createLinkUpgraderBodies = function(room) {
+    let bodies = [CARRY, CARRY, CARRY, CARRY];
+    let currentCost = 200;
+    let currentBodiesPart = 4;
+    let maxCost = room.energyCapacityAvailable;
+    while ((currentCost + 250 < maxCost) && (currentBodiesPart + 3 < 35)) {
+        bodies.push(WORK);
+        bodies.push(WORK);
+        bodies.push(MOVE);
+        currentCost += 250;
         currentBodiesPart += 3;
     }
     return bodies;

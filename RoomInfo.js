@@ -20,6 +20,9 @@ Room.prototype.stats = function() {
         nuker: this.find(FIND_STRUCTURES, {
             filter: (structure) => structure.structureType == STRUCTURE_NUKER
         }),
-        hostilesCreeps: this.find(FIND_HOSTILE_CREEPS)
+        hostilesCreeps: this.find(FIND_HOSTILE_CREEPS),
+        attackHostileCreeps: this.find(FIND_HOSTILE_CREEPS, {
+            filter: (creep) => creep.getActiveBodyparts(ATTACK) != 0 || creep.getActiveBodyparts(RANGED_ATTACK) != 0
+        })
     };
 };

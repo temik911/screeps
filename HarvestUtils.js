@@ -46,7 +46,7 @@ module.exports = {
             let withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
 
             if(withdrawalResult == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {maxRooms: 1});
+                creep.moveTo(source);
             } else if (creep.carry.energy == creep.carryCapacity) {
                 creep.memory.sourceId = false;
             }
@@ -70,9 +70,7 @@ module.exports = {
     withdrawFromRoomStorage(creep) {
         let source = creep.room.storage;
 
-        let withdrawResult = creep.withdraw(source, RESOURCE_ENERGY);
-
-        if(withdrawResult == ERR_NOT_IN_RANGE) {
+        if(creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
             creep.moveTo(source);
         }
     },
@@ -124,9 +122,9 @@ module.exports = {
             creep.memory.linkId = link.id;
         }
 
-        if (creep.carry.energy >= 200) {
+        if (creep.carry.energy >= creep.carryCapacity * 0.75) {
             let link = Game.getObjectById(creep.memory.linkId);
-            if (creep.transfer(link, RESOURCE_ENERGY, 200) == ERR_NOT_IN_RANGE) {
+            if (creep.transfer(link, RESOURCE_ENERGY, creep.carry.energy) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(link);
             }
         } else {
@@ -149,6 +147,32 @@ module.exports = {
 
         if(harvestResult == ERR_NOT_IN_RANGE) {
             creep.moveTo(mineralSource[0]);
+        }
+    },
+
+    harvestFromPredefineExtractorWithOutCarry(creep) {
+        if (!creep.memory.mineralId || !creep.memory.containerId) {
+            let mineral = creep.room.stats().mineral;
+            creep.memory.mineralId = mineral.id;
+            let container = mineral.pos.findInRange(FIND_STRUCTURES, 1, {
+                filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
+            })[0];
+            creep.memory.containerId = container.id;
+        }
+
+        if (!creep.memory.onPosition) {
+            let pos = Game.getObjectById(creep.memory.containerId).pos;
+            if (creep.pos.inRangeTo(pos, 0)) {
+                creep.memory.onPosition = true;
+            } else {
+                creep.moveTo(pos);
+            }
+        } else {
+            let mineral = Game.getObjectById(creep.memory.mineralId);
+            let container = Game.getObjectById(creep.memory.containerId);
+            if (_.sum(container.store) + creep.getActiveBodyparts(CARRY) < container.storeCapacity) {
+                creep.harvest(mineral);
+            }
         }
     },
 

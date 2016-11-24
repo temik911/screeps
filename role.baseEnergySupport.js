@@ -3,6 +3,10 @@ require('RoomInfo');
 
 module.exports = {
     run(creep) {
+        if (creep.memory.waitForTime == undefined) {
+            creep.memory.waitForTime = 0;
+        }
+
         let isSupport = creep.memory.isSupport;
         
         if (Game.time % 20 == 0) {
@@ -31,13 +35,15 @@ module.exports = {
                 }
             }
 
-            if (target == null) {
-                target = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-                    filter: (structure) => {
-                        return structure.structureType == STRUCTURE_TOWER &&
-                            structure.energy < 150;
-                    }
-                });
+            if (target == null && creep.memory.waitForTime <= Game.time) {
+                if (creep.room.energyAvailable > creep.room.energyCapacityAvailable / 2) {
+                    target = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                        filter: (structure) => {
+                            return structure.structureType == STRUCTURE_TOWER &&
+                                structure.energy < 150;
+                        }
+                    });
+                }
 
                 if (target == null) {
                     target = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
@@ -84,10 +90,12 @@ module.exports = {
                                     }
 
                                     if (target == null) {
-                                        let nuker = creep.room.stats().nuker;
-                                        if (nuker.length != 0) {
-                                            if (nuker[0].energy < nuker[0].energyCapacity) {
-                                                target = nuker[0];
+                                        if (creep.room.storage.store.energy > 35000) {
+                                            let nuker = creep.room.stats().nuker;
+                                            if (nuker.length != 0) {
+                                                if (nuker[0].energy < nuker[0].energyCapacity) {
+                                                    target = nuker[0];
+                                                }
                                             }
                                         }
                                     }
@@ -99,6 +107,8 @@ module.exports = {
 
                 if (target != null) {
                     creep.memory.targetId = target.id;
+                } else {
+                    creep.memory.waitForTime = Game.time + 10;
                 }
             }
 

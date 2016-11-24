@@ -14,16 +14,18 @@ module.exports = {
             }).id;
         }
 
-        if (links.length == 3) {
+        if (links.length == 2) {
             if (creep.carry.energy > 0) {
-                if (creep.transfer(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(storage);
-                }
-            } else {
                 let storageLink = Game.getObjectById(creep.memory.storageLinkId);
 
-                if (creep.withdraw(storageLink, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                if (creep.transfer(storageLink, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(storageLink);
+                }
+            } else {
+                if (storage.store.energy >= 5000) {
+                    if (creep.withdraw(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(storage);
+                    }
                 }
             }
         } else if (links.length == 4) {

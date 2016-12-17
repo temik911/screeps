@@ -13,7 +13,6 @@ module.exports = {
             }).id;
         }
 
-
         if (isReadyToUpgrade) {
             if (creep.carry.energy > 0) {
                 if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
@@ -27,15 +26,18 @@ module.exports = {
                 }
             }
         } else {
+            let workBodyParts = creep.getActiveBodyparts(WORK);
+            let resourceNeeded = workBodyParts * 30;
+            let energyNeeded = workBodyParts * 20;
             if (creep.room.memory.cgaBoostLabId == undefined) {
-                if (creep.room.terminal.store[RESOURCE_CATALYZED_GHODIUM_ACID] < 450) {
+                if (creep.room.terminal.store[RESOURCE_CATALYZED_GHODIUM_ACID] < resourceNeeded) {
                     creep.memory.isReadyToUpgrade = true;
                 } else {
                     let labs = creep.room.stats().labs;
                     for (let index in labs) {
                         let lab = labs[index];
                         if (lab.id != creep.room.memory.lab1 && lab.id != creep.room.memory.lab2) {
-                            if (lab.energy >= 300) {
+                            if (lab.energy >= energyNeeded) {
                                 creep.room.memory.cgaBoostLabId = lab.id;
                                 break;
                             }
@@ -49,7 +51,7 @@ module.exports = {
                 let lab = Game.getObjectById(creep.room.memory.cgaBoostLabId);
                 let terminal = creep.room.terminal;
 
-                if (lab.energy < 300) {
+                if (lab.energy < energyNeeded) {
                     creep.memory.isReadyToUpgrade = true;
                     creep.room.memory.cgaBoostLabId = undefined;
                     return;
@@ -62,9 +64,9 @@ module.exports = {
                         }
                     }
                 } else if ((lab.mineralType == null && lab.mineralAmount == 0) || (lab.mineralType == RESOURCE_CATALYZED_GHODIUM_ACID)) {
-                    if (lab.mineralAmount < 450) {
+                    if (lab.mineralAmount < resourceNeeded) {
                         if (creep.carry[RESOURCE_CATALYZED_GHODIUM_ACID] == undefined) {
-                            let needed = 450 - lab.mineralAmount;
+                            let needed = resourceNeeded - lab.mineralAmount;
                             if (terminal.store[RESOURCE_CATALYZED_GHODIUM_ACID] >= needed) {
                                 let toWithdraw = needed <= creep.carryCapacity ? needed : creep.carryCapacity;
                                 if (creep.withdraw(terminal, RESOURCE_CATALYZED_GHODIUM_ACID, toWithdraw) == ERR_NOT_IN_RANGE) {
@@ -80,9 +82,10 @@ module.exports = {
                             }
                         }
                     } else {
-                        lab.boostCreep(creep, 15);
-                        creep.memory.isReadyToUpgrade = true;
-                        creep.room.memory.cgaBoostLabId = undefined
+                        if (lab.boostCreep(creep, workBodyParts) == OK) {
+                            creep.memory.isReadyToUpgrade = true;
+                            creep.room.memory.cgaBoostLabId = undefined
+                        }
                     }
                 } else {
                     if (creep.withdraw(lab, lab.mineralType) == ERR_NOT_IN_RANGE) {

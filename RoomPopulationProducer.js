@@ -191,14 +191,10 @@ module.exports = {
         for (creepName in Game.creeps) {
             creep = Game.creeps[creepName];
             if (creep.memory.from == roomName) {
-                if (creep.memory.role == constants.REMOTE_HARVEST) {
-                    remoteHarvestCount++;
-                } else if (creep.memory.role == constants.REMOTE_BUILDER) {
+                if (creep.memory.role == constants.REMOTE_BUILDER) {
                     remoteBuilderCount++;
                 } else if (creep.memory.role == constants.REMOTE_CONTAINER_BUILDER) {
                     remoteContainerBuilderCount++;
-                } else if (creep.memory.role == constants.GUARD) {
-                    guardCount++;
                 }
             }
         }
@@ -251,7 +247,7 @@ module.exports = {
         let totalProgress = 0;
         sites.forEach(site => totalProgress += site.progressTotal - site.progress);
         let carryCount = 0;
-        createBuilderBodies(room).forEach(body => {
+        createUpgraderOrBuilderBodies(room).forEach(body => {
             if (body == CARRY) {
                 carryCount++;
             }
@@ -265,7 +261,6 @@ module.exports = {
         }
 
         let builderFlagPrefix = roomName + "-build";
-        let flagPrefix = roomName + "-reserver";
         // -------------------------------------------------------------
         let maxRemoteContainerBuilderCount = 0;
         for (let flagName in Game.flags) {
@@ -280,33 +275,6 @@ module.exports = {
                 }
                 for (let i = 0; i < sourcesCount; i++) {
                     maxRemoteContainerBuilderCount++;
-                }
-            }
-        }
-
-        // -------------------------------------------------------------
-        let maxReserverForHarvestCount = 0;
-        for (let flagName in Game.flags) {
-            if (flagName.startsWith(flagPrefix)) {
-                maxReserverForHarvestCount++;
-            }
-        }
-
-        // -------------------------------------------------------------
-        let maxGuardCount = 0;
-        for (let flagName in Game.flags) {
-            if (flagName.startsWith(flagPrefix)) {
-                maxGuardCount++;
-            }
-        }
-
-        // -------------------------------------------------------------
-        let maxRemoteHarvestCount = 0;
-        for (let flagName in Game.flags) {
-            if (flagName.startsWith(flagPrefix)) {
-                let room2 = Game.flags[flagName].room;
-                if (room2 != undefined) {
-                    room2.stats().containers.forEach(container => maxRemoteHarvestCount++);
                 }
             }
         }
@@ -338,7 +306,17 @@ module.exports = {
                 if (room.terminal.store[RESOURCE_ENERGY] > 30000 + 1000) {
                     maxTerminalCargoCount = 1;
                 }
+            } else {
+                if (room.storage.store[RESOURCE_ENERGY] < 50000 || room.storage.store[RESOURCE_ENERGY] > 100000) {
+                    maxTerminalCargoCount = 1;
+                }
             }
+        }
+
+        // --------------------------------------------------------------
+        let remoteRoomsCount = 0;
+        for (let remoteRoomName in room.memory.remoteRooms) {
+            remoteRoomsCount++;
         }
 
         for (let spawnName in spawns) {
@@ -387,8 +365,7 @@ module.exports = {
                     }
                 }
             } else if (room.storage && cargoCount < 2 && room.stats().links.length < 3) {
-                bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-                          CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
+                bodies = createCargoBodies(room);
                 role = constants.CARGO;
                 spawn.createCreep(bodies, null, {
                     role: role,
@@ -404,9 +381,7 @@ module.exports = {
                 linkCargoCount++;
             } else if (terminalCargoCount < maxTerminalCargoCount) {
                 let terminalCargoNumb = room.memory.terminalCargoNumb;
-                bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-                    CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-                    CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
+                bodies = createTerminalCargoBodies(room);
                 name = roomName + "-terminalCrg-" + terminalCargoNumb;
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.TERMINAL_CARGO;
@@ -462,7 +437,7 @@ module.exports = {
                 }
             } else if (upgraderCount < maxUpgraderCount) {
                 let upgraderNumb = room.memory.upgraderNumb;
-                bodies = createUpgraderBodies(room);
+                bodies = createUpgraderOrBuilderBodies(room);
                 name = roomName + "-upg-" + upgraderNumb;
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.UPGRADER;
@@ -482,6 +457,7 @@ module.exports = {
                 name = roomName + "-linkUpg-" + linkUpgraderNumb;
                 let isReadyToUpgrade = true;
                 if (room.controller.level < 8) {
+                    bodies = createLinkUpgraderBodies(room);
                     isReadyToUpgrade = room.terminal == undefined ? true : room.storage.store[RESOURCE_ENERGY] < 10000 * maxLinkUpgraderCount;
                 }
                 if (spawn.canCreateCreep(bodies, name) == OK) {
@@ -496,7 +472,7 @@ module.exports = {
                 }
             } else if (builderCount < maxBuilderCount) {
                 let builderNumb = room.memory.builderNumb;
-                bodies = createBuilderBodies(room);
+                bodies = createUpgraderOrBuilderBodies(room);
                 name = roomName + "-builder-" + builderNumb;
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.BUILDER;
@@ -565,7 +541,7 @@ module.exports = {
                     room.memory.reserverForHarvestNumb++;
                     reserverForHarvestCount++;
                 }
-            } else if (remoteHarvestCount < maxRemoteHarvestCount) {
+            } else if (remoteHarvestCount < room.memory.neededRemoteHarvesters) {
                 let remoteHarvestNumb = room.memory.remoteHarvestNumb;
                 name = roomName + "-RmtHrv-" + remoteHarvestNumb;
                 bodies = [WORK, WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY];
@@ -597,12 +573,12 @@ module.exports = {
                     room.memory.remoteCargoNumb++;
                     remoteCargoCount++;
                 }
-            } else if (remoteBuilderCount < maxReserverForHarvestCount) {
+            } else if (remoteBuilderCount < (remoteRoomsCount == 0 ? 0 : 1)) {
                 let remoteBuilderNumb = room.memory.remoteBuilderNumb;
                 name = roomName + "-RmtBld-" + remoteBuilderNumb;
-                bodies = [WORK, WORK, WORK, WORK,
-                    MOVE, MOVE, MOVE, MOVE,
-                    CARRY, CARRY, CARRY, CARRY];
+                bodies = [WORK, WORK, WORK, WORK, WORK,
+                    MOVE, MOVE, MOVE, MOVE, MOVE,
+                    CARRY, CARRY, CARRY, CARRY, CARRY];
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.REMOTE_BUILDER;
                     spawn.createCreep(bodies, name, {
@@ -617,9 +593,9 @@ module.exports = {
             } else if (remoteContainerBuilderCount < maxRemoteContainerBuilderCount) {
                 let remoteContainerBuilderNumb = room.memory.remoteContainerBuilderNumb;
                 name = roomName + "-RmtCntBld-" + remoteContainerBuilderNumb;
-                bodies = [WORK, WORK, WORK, WORK,
-                    MOVE, MOVE, MOVE, MOVE,
-                    CARRY, CARRY, CARRY, CARRY];
+                bodies = [WORK, WORK, WORK, WORK, WORK,
+                    MOVE, MOVE, MOVE, MOVE, MOVE,
+                    CARRY, CARRY, CARRY, CARRY, CARRY];
                 if (spawn.canCreateCreep(bodies, name) == OK) {
                     role = constants.REMOTE_CONTAINER_BUILDER;
                     spawn.createCreep(bodies, name, {
@@ -631,7 +607,7 @@ module.exports = {
                     room.memory.remoteContainerBuilderNumb++;
                     remoteContainerBuilderCount++;
                 }
-            } else if (guardCount < maxGuardCount) {
+            } else if (guardCount < room.memory.neededGuards) {
                 let guardNumb = room.memory.guardNumb;
                 name = roomName + "-RmtGuard-" + guardNumb;
                 bodies = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
@@ -672,7 +648,24 @@ let createBaseEnergySupportBodies = function(room) {
     return bodies;
 };
 
-let createUpgraderBodies = function(room) {
+let createCargoBodies = function(room) {
+    let bodies = [MOVE, CARRY, CARRY, MOVE, CARRY, CARRY];
+    if (room.storage != undefined) {
+        let currentCost = 300;
+        let currentBodiesPart = 6;
+        let maxCost = room.energyCapacityAvailable;
+        while ((currentCost + 150 < maxCost) && (currentBodiesPart + 3 < 31)) {
+            bodies.push(MOVE);
+            bodies.push(CARRY);
+            bodies.push(CARRY);
+            currentCost += 150;
+            currentBodiesPart += 3;
+        }
+    }
+    return bodies;
+};
+
+let createUpgraderOrBuilderBodies = function(room) {
     let bodies = [];
     let currentCost = 0;
     let currentBodiesPart = 0;
@@ -687,16 +680,17 @@ let createUpgraderBodies = function(room) {
     return bodies;
 };
 
-let createBuilderBodies = function(room) {
-    let bodies = [MOVE, MOVE];
-    let currentCost = 100;
-    let currentBodiesPart = 2;
+let createLinkUpgraderBodies = function(room) {
+    let bodies = [CARRY, CARRY, CARRY, CARRY];
+    let currentCost = 200;
+    let currentBodiesPart = 4;
     let maxCost = room.energyCapacityAvailable;
-    while ((currentCost + 150 < maxCost) && (currentBodiesPart + 2 < 14)) {
-        bodies.push(CARRY);
+    while ((currentCost + 250 < maxCost) && (currentBodiesPart + 3 < 35)) {
         bodies.push(WORK);
-        currentCost += 150;
-        currentBodiesPart += 2;
+        bodies.push(WORK);
+        bodies.push(MOVE);
+        currentCost += 250;
+        currentBodiesPart += 3;
     }
     return bodies;
 };
@@ -733,6 +727,25 @@ let createMineralHarvesterWithOutCarryBodies = function(room) {
     if (currentBodiesPart == 48 && currentCost + 150 < maxCost) {
         bodies.push(WORK);
         bodies.push(MOVE);
+    }
+    return bodies;
+};
+
+let createTerminalCargoBodies = function(room) {
+    let bodies = [];
+    let currentCost = 0;
+    let currentBodiesPart = 0;
+    let maxCost = room.energyCapacityAvailable;
+    let maxBodiesPart = 16;
+    if (room.controller.level == 8 && room.storage.store[RESOURCE_ENERGY] > 150000) {
+        maxBodiesPart = 31;
+    }
+    while ((currentCost + 150 < maxCost) && (currentBodiesPart + 3 < maxBodiesPart)) {
+        bodies.push(MOVE);
+        bodies.push(CARRY);
+        bodies.push(CARRY);
+        currentCost += 150;
+        currentBodiesPart += 3;
     }
     return bodies;
 };

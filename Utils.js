@@ -68,23 +68,6 @@ module.exports = {
         }
     },
 
-    getProducedMineral(mineralsFromProduce) {
-        let mineral1 = mineralsFromProduce[0];
-        let mineral2 = mineralsFromProduce[1];
-
-        switch (mineral1) {
-            case 'O' :
-                switch (mineral2) {
-                    case 'H' :
-                        return 'OH';
-                    default :
-                        return undefined;
-                }
-            default :
-                return undefined;
-        }
-    },
-
     isBaseMineral(mineral) {
         switch (mineral) {
             case 'O' :

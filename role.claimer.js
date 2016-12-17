@@ -14,7 +14,7 @@ module.exports = {
             let currentStep = creep.memory.currentStep;
             let flag = Game.flags['Step' + currentStep];
             if (flag != undefined) {
-                if (creep.pos.findPathTo(flag.pos).length == 0) {
+                if (creep.pos.isNearTo(flag.pos)) {
                     creep.memory.currentStep++;
                 } else {
                     creep.moveTo(flag);
@@ -32,7 +32,7 @@ module.exports = {
                             containers.forEach(container => {
                                 sum += container.store.energy;
                             });
-                            if (sum > 0) {
+                            if (sum > 250) {
                                 harvestUtils.withdrawFromContainer(creep);
                             } else {
                                 harvestUtils.harvestFromPredefinedSource(creep);
@@ -49,6 +49,7 @@ module.exports = {
                 }
             }
             
+            console.log("ololo")
             
             let targets = creep.room.find(FIND_STRUCTURES, {
                 filter: structure => structure.structureType == STRUCTURE_ROAD &&
@@ -71,6 +72,21 @@ module.exports = {
                             if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                                 creep.moveTo(creep.room.storage);
                             }
+                        } else {
+                            let containers = creep.room.stats().containers;
+                            if (containers != undefined && containers.length > 0) {
+                                let sum = 0;
+                                containers.forEach(container => {
+                                    sum += container.store.energy;
+                                });
+                                if (sum > 250) {
+                                    harvestUtils.withdrawFromContainer(creep);
+                                } else {
+                                    harvestUtils.harvestFromPredefinedSource(creep);
+                                }
+                            } else {
+                                harvestUtils.harvestFromPredefinedSource(creep);
+                            }
                         }
                     } else {
                         let containers = creep.room.stats().containers;
@@ -79,7 +95,7 @@ module.exports = {
                             containers.forEach(container => {
                                 sum += container.store.energy;
                             });
-                            if (sum > 0) {
+                            if (sum > 250) {
                                 harvestUtils.withdrawFromContainer(creep);
                             } else {
                                 harvestUtils.harvestFromPredefinedSource(creep);
@@ -121,6 +137,21 @@ module.exports = {
                             if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                                 creep.moveTo(creep.room.storage);
                             }
+                        } else {
+                            let containers = creep.room.stats().containers;
+                            if (containers != undefined && containers.length > 0) {
+                                let sum = 0;
+                                containers.forEach(container => {
+                                    sum += container.store.energy;
+                                });
+                                if (sum > 250) {
+                                    harvestUtils.withdrawFromContainer(creep);
+                                } else {
+                                    harvestUtils.harvestFromPredefinedSource(creep);
+                                }
+                            } else {
+                                harvestUtils.harvestFromPredefinedSource(creep);
+                            }
                         }
                     } else {
                         let containers = creep.room.stats().containers;
@@ -129,7 +160,7 @@ module.exports = {
                             containers.forEach(container => {
                                 sum += container.store.energy;
                             });
-                            if (sum > 0) {
+                            if (sum > 250) {
                                 harvestUtils.withdrawFromContainer(creep);
                             } else {
                                 harvestUtils.harvestFromPredefinedSource(creep);

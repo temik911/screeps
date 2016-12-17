@@ -2,14 +2,6 @@ let constants = require('Constants');
 
 module.exports = {
     run() {
-        for (let roomName in Game.rooms) {
-            let room = Game.rooms[roomName];
-            let controller = room.controller;
-            if (controller != undefined && controller.my) {
-
-            }
-        }
-
         let remoteContainers = new Map();
         let remoteControllers = new Map();
         for (let roomName in Game.rooms) {
@@ -26,11 +18,13 @@ module.exports = {
                         } else {
                             room.memory.remoteRooms[remoteRoomName].isDirty = false;
                             room.memory.remoteRooms[remoteRoomName].dirtyTime = 0;
+                            room.memory.remoteRooms[remoteRoomName].guardSended = false;
                         }
                     } else {
                         if (room.memory.remoteRooms[remoteRoomName].dirtyTime <= 0) {
                             room.memory.remoteRooms[remoteRoomName].isDirty = false;
                             room.memory.remoteRooms[remoteRoomName].dirtyTime = 0;
+                            room.memory.remoteRooms[remoteRoomName].guardSended = false;
                         } else {
                             room.memory.remoteRooms[remoteRoomName].isDirty = true;
                             room.memory.remoteRooms[remoteRoomName].dirtyTime -= 1;
@@ -43,6 +37,7 @@ module.exports = {
                     let container = Game.getObjectById(containerId);
                     if (container != null) {
                         room.memory.remoteContainers[containerId].amount = container.store[RESOURCE_ENERGY];
+                        room.memory.remoteContainers[containerId].isHarvest = false;
                     } else {
                         let containerRoom = Game.rooms[remoteContainers[roomName][containerId].pos.roomName];
                         if (containerRoom != undefined && containerRoom.controller != undefined) {
@@ -55,7 +50,11 @@ module.exports = {
                 for (let controllerId in room.memory.remoteControllers) {
                     let controller = Game.getObjectById(controllerId);
                     if (controller != null) {
-                        room.memory.remoteControllers[controllerId].ticksToEnd = controller.reservation.ticksToEnd;
+                        if (controller.reservation != null) {
+                            room.memory.remoteControllers[controllerId].ticksToEnd = controller.reservation.ticksToEnd;
+                        } else {
+                            room.memory.remoteControllers[controllerId].ticksToEnd = 0;
+                        }
                     } else {
                         room.memory.remoteControllers[controllerId].ticksToEnd -= 1;
                     }
@@ -87,13 +86,23 @@ module.exports = {
                 if (creep.memory.controllerToReserv != undefined) {
                     Game.rooms[from].memory.remoteControllers[creep.memory.controllerToReserv].busy = true;
                 }
+            } else if (creep.memory.role == constants.REMOTE_HARVEST) {
+                let from = creep.memory.from;
+                if (creep.memory.containerId != undefined) {
+                    Game.rooms[from].memory.remoteContainers[creep.memory.containerId].isHarvest = true;
+                }
+            } else if (creep.memory.role == constants.GUARD) {
+                let from = creep.memory.from;
+                Game.rooms[from].memory.remoteRooms[creep.memory.guardRoomName].guardSended = true;
             }
         }
 
         for (let roomName in remoteContainers) {
             let room = Game.rooms[roomName];
             room.memory.neededCargo = 0;
+            room.memory.neededRemoteHarvesters = 0;
             for (let containerId in remoteContainers[roomName]) {
+                // remote cargo
                 let realValue = 0;
                 if (cargoTasks[roomName] != undefined && cargoTasks[roomName][containerId] != undefined) {
                     realValue = cargoTasks[roomName][containerId];
@@ -102,6 +111,12 @@ module.exports = {
                 if (remoteContainers[roomName][containerId].amount - remoteContainers[roomName][containerId].withdraw > 500
                     && !room.memory.remoteRooms[remoteContainers[roomName][containerId].pos.roomName].isDirty) {
                     room.memory.neededCargo++;
+                }
+
+                // remote harvesters
+                if (!remoteContainers[roomName][containerId].isHarvest &&
+                    !room.memory.remoteRooms[remoteContainers[roomName][containerId].pos.roomName].isDirty) {
+                    room.memory.neededRemoteHarvesters++;
                 }
             }
         }
@@ -118,13 +133,24 @@ module.exports = {
             }
         }
 
+        for (let roomName in Game.rooms) {
+            let room = Game.rooms[roomName];
+            let controller = room.controller;
+            if (controller != undefined && controller.my) {
+                room.memory.neededGuards = 0;
+                for (let remoteRoomName in room.memory.remoteRooms) {
+                    if (room.memory.remoteRooms[remoteRoomName].isDirty && !room.memory.remoteRooms[remoteRoomName].guardSended) {
+                        room.memory.neededGuards++;
+                    }
+                }
+            }
+        }
+
         // for (let roomName in Game.rooms) {
         //     let room = Game.rooms[roomName];
         //     let controller = room.controller;
         //     if (controller != undefined && controller.my) {
-        //         console.log(roomName);
-        //         console.log("   " + room.memory.neededCargo);
-        //         console.log("   " + room.memory.neededReserver);
+        //         console.log(roomName + " " + room.memory.neededGuards);
         //     }
         // }
     }

@@ -2,6 +2,15 @@ let utils = require('Utils');
 
 module.exports = {
     run(creep) {
+        if (Game.cpu.bucket < 2500) {
+            return;
+        }
+        
+        if (creep.memory.task == undefined) {
+            creep.memory.task = new Map();
+            creep.memory.task.isDone = true;
+        }
+
         if (creep.ticksToLive < 25 && _.sum(creep.carry) == 0) {
             creep.suicide();
             return;
@@ -15,116 +24,94 @@ module.exports = {
         let terminal = creep.room.terminal;
 
         if (creep.room.memory.clearLabs) {
-            let fromLab = undefined;
-            for (let labName in labs) {
-                let lab = labs[labName];
-                if (lab.id != creep.room.memory.cgaBoostLabId && lab.mineralAmount != 0) {
-                    fromLab = lab;
-                }
-            }
-
-            if (fromLab == undefined && _.sum(creep.carry) == 0) {
-                creep.room.memory.clearLabs = false;
-            } else {
-                if (_.sum(creep.carry) != 0) {
-                    for (let resourceType in creep.carry) {
-                        let transfer = creep.transfer(terminal, resourceType);
-                        if (transfer == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(terminal);
-                        }
+            if (_.sum(creep.carry) == 0) {
+                let fromLab = undefined;
+                for (let labName in labs) {
+                    let lab = labs[labName];
+                    if (lab.id != creep.room.memory.cgaBoostLabId && lab.mineralAmount != 0) {
+                        fromLab = lab;
                     }
+                }
+
+                if (fromLab == undefined) {
+                    creep.room.memory.clearLabs = false;
+                    creep.memory.task = new Map();
+                    creep.memory.task.isDone = true;
                 } else {
-                    if (creep.withdraw(fromLab, fromLab.mineralType) == ERR_NOT_IN_RANGE) {
+                    if (!creep.pos.isNearTo(fromLab.pos)) {
                         creep.moveTo(fromLab);
-                    }
-                }
-            }
-
-            return;
-        }
-
-        let lab1 = Game.getObjectById(creep.room.memory.lab1);
-        let lab2 = Game.getObjectById(creep.room.memory.lab2);
-
-        if (!creep.memory.needWithdraw) {
-            for (let labName in labs) {
-                let lab = labs[labName];
-                if (lab.id != lab1.id && lab.id != lab2.id && lab.id != creep.room.memory.cgaBoostLabId) {
-                    if (lab.mineralAmount > creep.carryCapacity) {
-                        creep.memory.needWithdraw = true;
-                        creep.memory.fromLabId = lab.id;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (creep.memory.needWithdraw) {
-            if (_.sum(creep.carry) != 0) {
-                for (let resourceType in creep.carry) {
-                    let transfer = creep.transfer(terminal, resourceType);
-                    if (transfer == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(terminal);
-                    } else if (transfer == OK) {
-                        creep.memory.needWithdraw = false;
-                        creep.memory.fromLabId = undefined;
+                    } else {
+                        creep.withdraw(fromLab, fromLab.mineralType)
                     }
                 }
             } else {
-                let fromLab = Game.getObjectById(creep.memory.fromLabId);
-                let withdraw = creep.withdraw(fromLab, fromLab.mineralType);
-                if (withdraw == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(fromLab);
-                } else if (withdraw == ERR_INVALID_ARGS) {
-                    creep.memory.needWithdraw = false;
-                    creep.memory.fromLabId = undefined;
+                if (!creep.pos.isNearTo(terminal.pos)) {
+                    creep.moveTo(terminal);
+                } else {
+                    for (let resourceType in creep.carry) {
+                        creep.transfer(terminal, resourceType);
+                    }
                 }
             }
         } else {
-            let withResource = creep.memory.withResource;
+            let lab1 = Game.getObjectById(creep.room.memory.lab1);
+            let lab2 = Game.getObjectById(creep.room.memory.lab2);
 
-            let amount1 = lab1.mineralAmount;
-            let amount2 = lab2.mineralAmount;
+            if (creep.memory.task.isDone == true) {
+                for (let labName in labs) {
+                    let lab = labs[labName];
+                    if (lab.id != lab1.id && lab.id != lab2.id && lab.id != creep.room.memory.cgaBoostLabId) {
+                        if (lab.mineralAmount > creep.carryCapacity) {
+                            creep.memory.task.from = lab.id;
+                            creep.memory.task.to = terminal.id;
+                            creep.memory.task.mineralType = lab.mineralType;
+                            creep.memory.task.isDone = false;
+                            return;
+                        }
+                    }
+                }
 
-            if (amount1 == undefined || isNaN(amount1)) {
-                amount1 = 0;
-            }
-            if (amount2 == undefined || isNaN(amount2)) {
-                amount2 = 0;
-            }
+                let amount1 = lab1.mineralAmount;
+                let amount2 = lab2.mineralAmount;
 
-            if (amount1 > 1500 && amount2 > 1500) {
-                return;
-            }
+                if (amount1 > 1500 && amount2 > 1500) {
+                    return;
+                }
 
-            let currentLab;
-            let currentMineral;
-            if (amount1 <= amount2) {
-                currentLab = lab1;
-                currentMineral = creep.room.memory['lab1_resource'];
+                let currentLabId = undefined;
+                let currentMineralType = undefined;
+                if (amount1 <= amount2) {
+                    currentLabId = lab1.id;
+                    currentMineralType = creep.room.memory['lab1_resource'];
+                } else {
+                    currentLabId = lab2.id;
+                    currentMineralType = creep.room.memory['lab2_resource'];
+                }
+
+                if (currentLabId != undefined && currentMineralType != undefined && terminal.store[currentMineralType] != undefined) {
+                    creep.memory.task.from = terminal.id;
+                    creep.memory.task.to = currentLabId;
+                    creep.memory.task.mineralType = currentMineralType;
+                    creep.memory.task.isDone = false;
+                }
             } else {
-                currentLab = lab2;
-                currentMineral = creep.room.memory['lab2_resource'];
-            }
-
-            if (!withResource) {
-                if (creep.carry[currentMineral] == undefined || creep.carry[currentMineral] < 100) {
-                    let withdraw = creep.withdraw(terminal, currentMineral);
-                    if (withdraw == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(terminal);
-                    } else if (withdraw == ERR_NOT_ENOUGH_RESOURCES) {
-                        creep.memory.withResource = true;
+                if (creep.carry[creep.memory.task.mineralType] == undefined) {
+                    let from = Game.getObjectById(creep.memory.task.from);
+                    if (!creep.pos.isNearTo(from.pos)) {
+                        creep.moveTo(from);
+                    } else {
+                        creep.withdraw(from, creep.memory.task.mineralType);
                     }
                 } else {
-                    creep.memory.withResource = true;
-                }
-            } else {
-                if (creep.transfer(currentLab, currentMineral) != 0) {
-                    creep.moveTo(currentLab);
-                }
-
-                if (creep.carry[currentMineral] == undefined || creep.carry[currentMineral] == 0) {
-                    creep.memory.withResource = false;
+                    let to = Game.getObjectById(creep.memory.task.to);
+                    if (!creep.pos.isNearTo(to.pos)) {
+                        creep.moveTo(to);
+                    } else {
+                        if (creep.transfer(to, creep.memory.task.mineralType) == OK) {
+                            creep.memory.task = new Map();
+                            creep.memory.task.isDone = true;
+                        }
+                    }
                 }
             }
         }

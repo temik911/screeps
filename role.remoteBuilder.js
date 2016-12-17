@@ -6,117 +6,117 @@ module.exports = {
         if (creep.memory.targetId == undefined) {
             creep.memory.targetId = false;
         }
-
-        let numb = creep.memory.numb;
-        let flagPrefix = creep.memory.flagPrefix;
-        let flags = [];
-        for (let flagName in Game.flags) {
-            if (flagName.startsWith(flagPrefix)) {
-                flags.push(Game.flags[flagName])
-            }
+        if (Memory.rooms[creep.memory.from].currentContainerNumb == undefined) {
+            Memory.rooms[creep.memory.from].currentContainerNumb = 0;
         }
-        let flag = flags[numb % flags.length];
+        if (creep.memory.goToStorage == undefined) {
+            creep.memory.goToStorage = true;
+        }
 
-        if (creep.room == flag.room) {
-            if (creep.memory.needEnergy == true) {
-                if (!creep.memory.sourceId) {
-                    let sources = creep.room.find(FIND_STRUCTURES, {
-                        filter: (structure) => {
-                            return structure.structureType == STRUCTURE_CONTAINER &&
-                                structure.store.energy > 0;
+        if (creep.memory.containerId == undefined) {
+            let remoteContainers = Memory.rooms[creep.memory.from].remoteContainers;
+            let containerIds = [];
+            for (let containerId in remoteContainers) {
+                containerIds.push(containerId);
+            }
+
+            creep.memory.containerId = containerIds[Memory.rooms[creep.memory.from].currentContainerNumb % containerIds.length];
+            if (creep.memory.containerId != undefined) {
+                if (Memory.rooms[creep.memory.from].remoteRooms[Memory.rooms[creep.memory.from].remoteContainers[creep.memory.containerId].pos.roomName].isDirty) {
+                    creep.memory.containerId = undefined;
+                }
+            }
+            Memory.rooms[creep.memory.from].currentContainerNumb += 1;
+        } else if (!creep.memory.goToStorage) {
+            if (creep.room.name != creep.memory.from) {
+                if (creep.memory.needEnergy == true) {
+                    if (!creep.memory.sourceId) {
+                        let sources = creep.room.find(FIND_STRUCTURES, {
+                            filter: (structure) => {
+                                return structure.structureType == STRUCTURE_CONTAINER &&
+                                    structure.store.energy > 0;
+                            }
+                        });
+
+                        sources.sort((a, b) => b.store.energy - a.store.energy);
+
+                        if (sources.length > 0) {
+                            creep.memory.sourceId = sources[0].id;
                         }
-                    });
-
-                    sources.sort((a, b) => b.store.energy - a.store.energy);
-
-                    if (sources.length > 0) {
-                        creep.memory.sourceId = sources[0].id;
-                    }
-                }
-
-                if (creep.memory.sourceId) {
-                    let source = Game.getObjectById(creep.memory.sourceId);
-
-                    if (source.store[RESOURCE_ENERGY] > 0) {
-                        let withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
-
-                        if (withdrawalResult == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(source, {maxRooms: 1});
-                        }
-                    } else {
-                        creep.moveTo(25, 25);
-                    }
-                }
-
-                if (creep.carry.energy == creep.carryCapacity) {
-                    creep.memory.needEnergy = false;
-                    creep.memory.sourceId = false;
-                }
-            } else {
-                if (creep.memory.targetId == false) {
-                    let targets = creep.room.find(FIND_STRUCTURES, {
-                        filter: structure => structure.structureType == STRUCTURE_ROAD &&
-                        structure.hits < structure.hitsMax / 2
-                    });
-
-                    targets.sort((a, b) => a.hits - b.hits);
-
-                    if (targets.length > 0) {
-                        creep.memory.targetId = targets[0].id;
-                    }
-                }
-
-                let target;
-                if (creep.memory.targetId != false) {
-                    target = Game.getObjectById(creep.memory.targetId);
-                    if (creep.repair(target) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target);
                     }
 
-                    if (target.hits > target.hitsMax * 0.75) {
-                        creep.memory.targetId = false;
-                    }
-                } else {
-                    target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
-                    if (target) {
-                        if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(target);
-                        }
-                    } else {
-                        let work = false;
-                        for (let flagName in Game.flags) {
-                            if (flagName.startsWith("dismantle") && !work) {
-                                let flag = Game.flags[flagName];
-                                if (flag.pos.roomName == creep.pos.roomName) {
-                                    let look = creep.room.lookAt(flag.pos.x, flag.pos.y);
-                                    let structureLook = undefined;
-                                    for (let i = 0; i < look.length; i++) {
-                                        if (look[i].type == "structure") {
-                                            structureLook = look[i].structure;
-                                        }
-                                    }
-                                    if (structureLook != undefined) {
-                                        let dismantle = creep.dismantle(structureLook);
-                                        work = true;
-                                        if (dismantle == ERR_NOT_IN_RANGE) {
-                                            creep.moveTo(structureLook);
-                                        }
-                                    }
-                                }
+                    if (creep.memory.sourceId) {
+                        let source = Game.getObjectById(creep.memory.sourceId);
+
+                        if (source.store[RESOURCE_ENERGY] > 0) {
+                            if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(source, {maxRooms: 1});
                             }
                         }
-                        if (!work) {
-                            creep.moveTo(25, 25);
+                    }
+
+                    if (creep.carry.energy == creep.carryCapacity) {
+                        creep.memory.needEnergy = false;
+                        creep.memory.sourceId = false;
+                    }
+                } else {
+                    if (creep.memory.roadId == undefined) {
+                        let structures = creep.room.lookForAt(LOOK_STRUCTURES, creep.pos);
+                        let road = null;
+                        for (let i in structures) {
+                            if (structures[i].structureType == STRUCTURE_ROAD) {
+                                road = structures[i];
+                                break;
+                            }
+                        }
+
+                        if (road != null && road.hits < road.hitsMax * 0.75) {
+                            creep.memory.roadId = road.id;
                         }
                     }
-                }
 
-                if (creep.carry.energy == 0) {
-                    creep.memory.needEnergy = true;
+                    if (creep.memory.roadId != undefined) {
+                        let road = Game.getObjectById(creep.memory.roadId);
+                        if (!creep.pos.isEqualTo(road.pos)) {
+                            creep.moveTo(road.pos);
+                        } else {
+                            let constructionSites = creep.pos.findInRange(FIND_MY_CONSTRUCTION_SITES, 1);
+                            if (constructionSites.length != 0) {
+                                let constructionSite = constructionSites[0];
+                                creep.build(constructionSite);
+                            } else if (road.hits > road.hitsMax * 0.9) {
+                                creep.memory.roadId = undefined;
+                            } else {
+                                creep.repair(road);
+                            }
+                        }
+                    } else {
+                        let container = Game.getObjectById(creep.memory.containerId);
+                        if (container.pos.isNearTo(creep.pos)) {
+                            creep.memory.goToStorage = true;
+                        } else {
+                            creep.moveTo(container);
+                        }
+                    }
+
+                    if (creep.carry.energy == 0) {
+                        creep.memory.needEnergy = true;
+                    }
                 }
+            } else {
+                let container = Game.getObjectById(creep.memory.containerId);
+                creep.moveTo(container);
             }
         } else {
-            creep.moveTo(flag);
+            let storage = Game.rooms[creep.memory.from].storage;
+            let withdraw = creep.withdraw(storage, RESOURCE_ENERGY);
+            if (withdraw == ERR_NOT_IN_RANGE) {
+                creep.moveTo(storage);
+            } else if (withdraw == OK || withdraw == ERR_FULL) {
+                creep.memory.containerId = undefined;
+                creep.memory.goToStorage = false;
+                creep.memory.needEnergy = false;
+            }
         }
     }
 };

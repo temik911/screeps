@@ -6,7 +6,7 @@ let labsHandler = require('LabsHandler');
 module.exports = {
     run(room) {
         try {
-            console.log(room.name);
+            // console.log(room.name);
             let beforeLabsHandler = Game.cpu.getUsed();
             labsHandler.run(room);
             let afterLabsHandler = Game.cpu.getUsed();
@@ -23,10 +23,10 @@ module.exports = {
             towersHandler.run(room);
             let afterTowersHandler = Game.cpu.getUsed();
 
-            console.log("   LabsHandler used: " + (afterLabsHandler - beforeLabsHandler));
-            console.log("   RoomPopulationProducer used: " + (afterRoomPopulationProducer - beforeRoomPopulationProducer));
-            console.log("   LinksHandler used: " + (afterLinksHandler - beforeLinksHandler));
-            console.log("   TowersHandler used: " + (afterTowersHandler - beforeTowersHandler));
+            // console.log("   LabsHandler used: " + (afterLabsHandler - beforeLabsHandler));
+            // console.log("   RoomPopulationProducer used: " + (afterRoomPopulationProducer - beforeRoomPopulationProducer));
+            // console.log("   LinksHandler used: " + (afterLinksHandler - beforeLinksHandler));
+            // console.log("   TowersHandler used: " + (afterTowersHandler - beforeTowersHandler));
         } catch (e) {
             console.log(room.name + ": " + e.stack);
         }

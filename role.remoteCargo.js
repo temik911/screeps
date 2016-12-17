@@ -2,7 +2,7 @@ require('RoomInfo');
 
 module.exports = {
     run(creep) {
-        if (creep.ticksToLive < 50 || creep.hits < creep.hitsMax) {
+        if (creep.hits < creep.hitsMax) {
             if (creep.memory.containerToGoId) {
                 if (creep.carry.energy != creep.carryCapacity) {
                     Memory.rooms[creep.memory.from].remoteContainers[creep.memory.containerToGoId].withdraw -= creep.carryCapacity;
@@ -11,33 +11,46 @@ module.exports = {
                 creep.memory.containerToGoId = undefined;
             }
 
-            if (creep.carry.energy == 0 && creep.hits == creep.hitsMax) {
-                creep.suicide();
-            } else {
-                let target = Game.flags[creep.memory.from].room.storage;
-                let transfer = creep.transfer(target, RESOURCE_ENERGY);
-                if (transfer == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target);
-                } else if (transfer == OK) {
-                    creep.suicide();
-                }
+            let target = Game.rooms[creep.memory.from].storage;
+            if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target);
             }
+
             return;
+        }
+
+        if (creep.memory.containerToGoId != undefined) {
+            if (Memory.rooms[creep.memory.from].remoteRooms[creep.memory.posToGo.roomName].isDirty) {
+                creep.memory.containerToGoId = undefined;
+                creep.memory.posToGo = undefined;
+                Memory.rooms[creep.memory.from].remoteContainers[creep.memory.containerToGoId].withdraw -= creep.carryCapacity;
+            }
         }
 
         if (!creep.memory.containerToGoId) {
             let remoteContainers = Memory.rooms[creep.memory.from].remoteContainers;
+            let minNeededTicks = 1500;
             let maxAmount = 0;
             let id = undefined;
             let pos = undefined;
             for (let containerId in remoteContainers) {
                 let containerInfo = remoteContainers[containerId];
+                let neededTicks = (containerInfo.timeToGo / containerInfo.times) * 2 * 1.2;
+
+                minNeededTicks = neededTicks < minNeededTicks ? neededTicks : minNeededTicks;
+
                 if (containerInfo.amount - containerInfo.withdraw > maxAmount
-                    && !Memory.rooms[creep.memory.from].remoteRooms[containerInfo.pos.roomName].isDirty) {
+                    && !Memory.rooms[creep.memory.from].remoteRooms[containerInfo.pos.roomName].isDirty
+                    && creep.ticksToLive > neededTicks) {
                     maxAmount = containerInfo.amount - containerInfo.withdraw;
                     id = containerId;
                     pos = containerInfo.pos;
                 }
+            }
+
+            if (minNeededTicks > creep.ticksToLive) {
+                creep.suicide();
+                return;
             }
 
             if (id != undefined) {
@@ -72,7 +85,7 @@ module.exports = {
                     creep.moveTo(new RoomPosition(creep.memory.posToGo.x, creep.memory.posToGo.y, creep.memory.posToGo.roomName));
                 }
             } else {
-                let target = Game.flags[creep.memory.from].room.storage;
+                let target = Game.rooms[creep.memory.from].storage;
                 if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target);
                 }

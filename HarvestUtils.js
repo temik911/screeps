@@ -31,37 +31,43 @@ module.exports = {
     },
 
     withdrawFromContainer(creep) {
-        let sources = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return structure.structureType == STRUCTURE_CONTAINER &&
-                    structure.store.energy > 0;
-            }
-        });
+        if (creep.memory.shouldWait > Game.time) {
+            creep.moveTo(25, 25);
+        } else {
+            let sources = creep.room.find(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return structure.structureType == STRUCTURE_CONTAINER &&
+                        structure.store.energy > 0;
+                }
+            });
 
-        sources.sort((a, b) => b.store.energy - a.store.energy);
+            sources.sort((a, b) => b.store.energy - a.store.energy);
 
-        if (sources.length > 0) {
-            let source = sources[0];
+            if (sources.length > 0) {
+                let source = sources[0];
 
-            let withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
+                let withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
 
-            if(withdrawalResult == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source);
-            } else if (creep.carry.energy == creep.carryCapacity) {
-                creep.memory.sourceId = false;
+                if (withdrawalResult == ERR_NOT_IN_RANGE) {
+                    let moveTo = creep.moveTo(source);
+                    if (moveTo == ERR_NO_PATH) {
+                        creep.memory.shouldWait = Game.time + 5;
+                    }
+                } else if (creep.carry.energy == creep.carryCapacity) {
+                    creep.memory.sourceId = false;
+                }
             }
         }
     },
 
-    withdrawFromTerminal(creep) {
-        let terminal = creep.room.terminal;
-        if (terminal != undefined) {
-            let amount = terminal.store[RESOURCE_ENERGY] - 30000;
+    withdrawFromWithMinAmount(creep, from, minAmount) {
+        if (from != undefined) {
+            let amount = from.store[RESOURCE_ENERGY] - minAmount;
 
             if (amount > 0) {
                 let amountToWithdraw = amount >= creep.carryCapacity ? creep.carryCapacity : amount;
-                if (creep.withdraw(terminal, RESOURCE_ENERGY, amountToWithdraw) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(terminal);
+                if (creep.withdraw(from, RESOURCE_ENERGY, amountToWithdraw) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(from);
                 }
             }
         }
@@ -100,7 +106,7 @@ module.exports = {
 
         if (!creep.memory.onPosition) {
             let pos = creep.memory.containerPos;
-            if (creep.pos.findPathTo(pos.x, pos.y).length == 0) {
+            if (creep.pos.isEqualTo(new RoomPosition(pos.x, pos.y, pos.roomName))) {
                 creep.memory.onPosition = true;
             } else {
                 creep.moveTo(pos.x, pos.y);

@@ -23,7 +23,11 @@ module.exports = {
                 }
 
                 if (_.includes(fastStrategyRooms, room)) {
-                    fastRoomStrategy.run(room);
+                    if (room.controller.level == 8) {
+                        // for (let .)
+                    } else {
+                        fastRoomStrategy.run(room);
+                    }
                 } else {
                     defaultRoomStrategy.run(room);
                 }

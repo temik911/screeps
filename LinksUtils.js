@@ -84,10 +84,10 @@ module.exports = {
                     } else {
                         // storage link
                         if (room.storage.store.energy >= 5000) {
-                            if (link.energy >= 400) {
-                                if (controllerLinkEnergy <= 400) {
-                                    link.transferEnergy(controllerLink, 400);
-                                    controllerLinkEnergy += 400;
+                            if (link.energy > 0) {
+                                if (controllerLinkEnergy < controllerLink.energyCapacity) {
+                                    let needed = controllerLink.energyCapacity - controllerLinkEnergy;
+                                    link.transferEnergy(controllerLink, needed >= link.energy ? link.energy : needed);
                                 }
                             }
                         }

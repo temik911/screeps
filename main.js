@@ -3,6 +3,8 @@ let globalPopulationProducer = require('GlobalPopulationProducer');
 let terminalsHandler = require('TerminalsHandler');
 let roomStrategyHandler = require('RoomStrategyHandler');
 let remoteRoomsWatcher = require('RemoteRoomsWatcher');
+let xgh2oTransfer = require('XGH2OTransfer');
+let baseMineralTransfer = require('BaseMineralTransfer');
 
 module.exports.loop = function () {
     console.log("************************* " + Game.time + " *************************")
@@ -39,6 +41,13 @@ module.exports.loop = function () {
     let beforeRemoteRoomsWatcher = Game.cpu.getUsed();
     remoteRoomsWatcher.run();
     let afterRemoteRoomsWatcher = Game.cpu.getUsed();
+
+    try {
+        xgh2oTransfer.run();
+        baseMineralTransfer.run();
+    } catch (e) {
+        console.log("GlobalPopulationProducer: " + e.stack);
+    }
 
     let progress = Game.gcl.progress;
     let progressTotal = Game.gcl.progressTotal;

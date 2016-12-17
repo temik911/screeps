@@ -82,9 +82,7 @@ module.exports = {
                                     }
 
                                     if (target == null) {
-                                        let terminalMaxCapacity = creep.room.controller.level == 8
-                                        && creep.room.storage.store.energy > 50000 ? 60000 : 30000;
-                                        if (creep.room.terminal != undefined && creep.room.terminal.store.energy <= terminalMaxCapacity) {
+                                        if (creep.room.terminal != undefined && creep.room.terminal.store.energy <= 30000) {
                                             target = creep.room.terminal;
                                         }
                                     }
@@ -126,6 +124,13 @@ module.exports = {
                     if (creep.transfer(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(storage);
                     }
+                } else {
+                    let spawn = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+                        filter: (structure) => {
+                            return structure.structureType == STRUCTURE_SPAWN;
+                        }
+                    });
+                    creep.moveTo(spawn);
                 }
             }
         }

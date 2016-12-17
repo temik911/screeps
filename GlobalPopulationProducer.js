@@ -41,8 +41,13 @@ module.exports = {
 
         let bodies;
         let name;
+        
+        let maxReserverCount = 1;
+        if (Game.rooms.E39S58 != undefined && Game.rooms.E39S58.controller != undefined && Game.rooms.E39S58.controller.my) {
+            maxReserverCount = 0;
+        }
 
-        if (reserverCount < 0) {
+        if (reserverCount < maxReserverCount) {
             let reserverNumb = spawn.memory.reserverNumb;
             bodies = [CLAIM, MOVE];
             name = "reserver-" + reserverNumb;
@@ -67,7 +72,7 @@ module.exports = {
                 });
                 spawn.memory.invaderNumb++;
             }
-        } else if (claimerCount < 6) {
+        } else if (claimerCount < 4) {
             let claimerNumb = spawn.memory.claimerNumb;
             bodies = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
                       MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,

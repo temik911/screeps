@@ -73,7 +73,7 @@ module.exports = {
         let baseEnergySupportCount = 0;
         let cargoCount = 0;
         let terminalCargoCount = 0;
-        let linkCargoCount = 0;
+        let fastLinkCargoCount = 0;
         let soldierCount = 0;
         let repairCount = 0;
         let mineralHarvesterCount = 0;
@@ -109,8 +109,8 @@ module.exports = {
                         baseEnergySupportCount++;
                     } else if (currentSpawnRole == constants.CARGO) {
                         cargoCount++;
-                    } else if (currentSpawnRole == constants.LINK_CARGO) {
-                        linkCargoCount++;
+                    } else if (currentSpawnRole == constants.FAST_LINK_CARGO) {
+                        fastLinkCargoCount++;
                     } else if (currentSpawnRole == constants.TERMINAL_CARGO) {
                         terminalCargoCount++;
                     } else if (currentSpawnRole == constants.SOLDIER) {
@@ -166,8 +166,8 @@ module.exports = {
                 baseEnergySupportCount++;
             } else if (creepRole == constants.CARGO) {
                 cargoCount++;
-            } else if (creepRole == constants.LINK_CARGO) {
-                linkCargoCount++;
+            } else if (creepRole == constants.FAST_LINK_CARGO) {
+                fastLinkCargoCount++;
             } else if (creepRole == constants.TERMINAL_CARGO) {
                 terminalCargoCount++;
             } else if (creepRole == constants.SOLDIER) {
@@ -205,7 +205,7 @@ module.exports = {
         // -------------------------------------------------------------
         let maxUpgraderCount = 0;
         let maxLinkUpgraderCount = 0;
-        if (room.stats().links.length >=4) {
+        if (room.stats().links.length >= 2) {
             // link upgraders
             if (room.controller.level == 8) {
                 maxLinkUpgraderCount = 1;
@@ -259,6 +259,9 @@ module.exports = {
         if (maxBuilderCount > 4) {
             maxBuilderCount = 4;
         }
+        if (maxBuilderCount > 1 && room.storage.store[RESOURCE_ENERGY] < 10000) {
+            maxBuilderCount = 1;
+        }
 
         let builderFlagPrefix = roomName + "-build";
         // -------------------------------------------------------------
@@ -295,7 +298,7 @@ module.exports = {
 
         // --------------------------------------------------------------
         let maxLabsSupportCount = 0;
-        if (labs.length >= 3) {
+        if (labs.length >= 3 && room.memory.lab1 != undefined && room.memory.lab2 != undefined) {
             maxLabsSupportCount = 1
         }
 
@@ -338,7 +341,7 @@ module.exports = {
                 baseEnergySupportCount++;
             } else if (harvesterCount + harvesterWithLinkCount < roomSources.length) {
                 let harvesterNumb = room.memory.harvesterNumb;
-                if (room.stats().links.length < 3) {
+                if (room.stats().links.length < 4) {
                     bodies = createHarvesterBodies(room);
                     name = roomName + "-harv-" + harvesterNumb;
                     if (spawn.canCreateCreep(bodies, name) == OK) {
@@ -364,7 +367,7 @@ module.exports = {
                         harvesterWithLinkCount++;
                     }
                 }
-            } else if (room.storage && cargoCount < 2 && room.stats().links.length < 3) {
+            } else if (room.storage && cargoCount < 2 && room.stats().links.length < 4) {
                 bodies = createCargoBodies(room);
                 role = constants.CARGO;
                 spawn.createCreep(bodies, null, {
@@ -372,13 +375,13 @@ module.exports = {
                     isCargo: false
                 });
                 cargoCount++;
-            } else if (room.storage && linkCargoCount < 1 && room.stats().links.length >= 3) {
+            } else if (room.storage && fastLinkCargoCount < 1 && room.stats().links.length >= 2) {
                 bodies = [MOVE, CARRY, CARRY, CARRY, CARRY];
-                role = constants.LINK_CARGO;
-                spawn.createCreep(bodies, roomName + "-linkCargo", {
+                role = constants.FAST_LINK_CARGO;
+                spawn.createCreep(bodies, roomName + "-fastLinkCargo", {
                     role: role,
                 });
-                linkCargoCount++;
+                fastLinkCargoCount++;
             } else if (terminalCargoCount < maxTerminalCargoCount) {
                 let terminalCargoNumb = room.memory.terminalCargoNumb;
                 bodies = createTerminalCargoBodies(room);
@@ -737,7 +740,8 @@ let createTerminalCargoBodies = function(room) {
     let currentBodiesPart = 0;
     let maxCost = room.energyCapacityAvailable;
     let maxBodiesPart = 16;
-    if (room.controller.level == 8 && room.storage.store[RESOURCE_ENERGY] > 150000) {
+    if (room.controller.level == 8 && room.storage.store[RESOURCE_ENERGY] > 150000
+            || room.controller.level != 8 && room.terminal.store[RESOURCE_ENERGY] > 75000) {
         maxBodiesPart = 31;
     }
     while ((currentCost + 150 < maxCost) && (currentBodiesPart + 3 < maxBodiesPart)) {

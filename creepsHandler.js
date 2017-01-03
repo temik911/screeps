@@ -24,6 +24,7 @@ let remoteContainerBuilderRole = require('role.remoteContainerBuilder');
 let guardRole = require('role.guard');
 let labsSupportRole = require('role.labsSupport');
 let healerRole = require('role.healer');
+let removerRole = require('role.remover');
 let squadMain = require('SquadMain');
 let constants = require('Constants');
 
@@ -84,6 +85,8 @@ module.exports = {
                     labsSupportRole.run(creep);
                 } else if (creep.memory.role == constants.HEALER) {
                     healerRole.run(creep);
+                } else if (creep.memory.role == constants.REMOVER) {
+                    removerRole.run(creep);
                 } else if (creep.memory.squad_role == constants.SQUAD_ROLE_MAIN) {
                     squadMain.run(creep);
                 }

@@ -3,10 +3,6 @@ require('RoomInfo');
 
 module.exports = {
     run(creep) {
-        if (creep.memory.targetId == undefined) {
-            creep.memory.targetId = false;
-        }
-
         if (creep.memory.flagName == undefined) {
             let numb = creep.memory.numb;
             let flagPrefix = creep.memory.flagPrefix;
@@ -79,24 +75,56 @@ module.exports = {
                     creep.memory.needEnergy = false;
                 }
             } else {
-                let target = creep.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
-                if (target) {
-                    if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target, {maxRooms: 1});
-                    }
-                } else {
-                    for (let container of creep.room.stats().containers) {
-                        if (Memory.rooms[creep.memory.from].remoteContainers[container.id] == undefined) {
-                            let containerInfo = new Map();
-                            containerInfo.amount = container.store[RESOURCE_ENERGY];
-                            containerInfo.pos = container.pos;
-                            containerInfo.withdraw = 0;
-                            containerInfo.isHarvest = false;
-                            Memory.rooms[creep.memory.from].remoteContainers[container.id] = containerInfo;
+                if (creep.memory.targetId != undefined) {
+                    let target = Game.getObjectById(creep.memory.targetId);
+                    if (creep.memory.action == 'build') {
+                        if (target != null) {
+                            if (creep.build(target) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(target);
+                            }
+                        } else {
+                            creep.memory.targetId = undefined;
+                            creep.memory.action = undefined;
+                        }
+                    } else if (creep.memory.action == 'repair') {
+                        if (target.hits < target.hitsMax * 0.9) {
+                            if (creep.repair(target) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(target);
+                            }
+                        } else {
+                            creep.memory.targetId = undefined;
+                            creep.memory.action = undefined;
                         }
                     }
-                    flag.remove();
-                    creep.suicide();
+                } else {
+                    let toRepair = creep.room.find(FIND_STRUCTURES, {
+                        filter: structure => structure.structureType == STRUCTURE_CONTAINER &&
+                        structure.hits < structure.hitsMax / 2
+                    });
+
+                    if (toRepair.length != 0) {
+                        creep.memory.targetId = toRepair[0].id;
+                        creep.memory.action = 'repair';
+                    } else {
+                        let target = creep.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
+                        if (target) {
+                            creep.memory.targetId = target.id;
+                            creep.memory.action = 'build';
+                        } else {
+                            for (let container of creep.room.stats().containers) {
+                                if (Memory.rooms[creep.memory.from].remoteContainers[container.id] == undefined) {
+                                    let containerInfo = new Map();
+                                    containerInfo.amount = container.store[RESOURCE_ENERGY];
+                                    containerInfo.pos = container.pos;
+                                    containerInfo.withdraw = 0;
+                                    containerInfo.isHarvest = false;
+                                    Memory.rooms[creep.memory.from].remoteContainers[container.id] = containerInfo;
+                                }
+                            }
+                            flag.remove();
+                            creep.suicide();
+                        }
+                    }
                 }
 
                 if (creep.carry.energy == 0) {

@@ -23,93 +23,79 @@ module.exports = {
                 creep.memory.inClaimedRoom = true;
             }
         } else {
-            if (creep.room.storage) {
-                if (creep.room.storage.store[RESOURCE_ENERGY] < 1000) {
-                    if (creep.carry[RESOURCE_ENERGY] < creep.carryCapacity) {
-                        let containers = creep.room.stats().containers;
-                        if (containers != undefined && containers.length > 0) {
-                            let sum = 0;
-                            containers.forEach(container => {
-                                sum += container.store.energy;
-                            });
-                            if (sum > 250) {
-                                harvestUtils.withdrawFromContainer(creep);
-                            } else {
-                                harvestUtils.harvestFromPredefinedSource(creep);
-                            }
+            // if (!creep.memory.noHostileStructure) {
+            //     let hostileStructures = creep.room.find(FIND_HOSTILE_STRUCTURES);
+            //     if (hostileStructures.length > 0) {
+            //         if (creep.dismantle(hostileStructures[0]) == ERR_NOT_IN_RANGE) {
+            //             creep.moveTo(hostileStructures[0]);
+            //         }
+            //     } else {
+            //         creep.memory.noHostileStructure = true;
+            //     }
+            //     return;
+            // }
+
+            if (!creep.memory.isWork) {
+                if (creep.room.storage != undefined && !creep.room.storage.my && creep.room.storage.store[RESOURCE_ENERGY] != 0) {
+                    if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(creep.room.storage);
+                    }
+                } else if (creep.room.terminal != undefined && !creep.room.terminal.my && creep.room.terminal.store[RESOURCE_ENERGY] != 0) {
+                    if (creep.withdraw(creep.room.terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(creep.room.terminal);
+                    }
+                } else if (creep.room.storage != undefined && creep.room.storage.my && creep.room.storage.store[RESOURCE_ENERGY] > 5000) {
+                    if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(creep.room.storage);
+                    }
+                } else {
+                    let containers = creep.room.stats().containers;
+                    if (containers != undefined && containers.length > 0) {
+                        let sum = 0;
+                        containers.forEach(container => {
+                            sum += container.store.energy;
+                        });
+                        if (sum > 250) {
+                            harvestUtils.withdrawFromContainer(creep);
                         } else {
                             harvestUtils.harvestFromPredefinedSource(creep);
                         }
                     } else {
-                        if(creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        harvestUtils.harvestFromPredefinedSource(creep);
+                    }
+                }
+
+                if (creep.carry.energy == creep.carryCapacity) {
+                    creep.memory.isWork = true;
+                }
+            } else {
+                if (creep.room.storage && creep.room.storage.my) {
+                    if (creep.room.storage.store[RESOURCE_ENERGY] < 4000) {
+                        if (creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                             creep.moveTo(creep.room.storage);
                         }
+                        
+                        if (creep.carry.energy == 0) {
+                            creep.memory.isWork = false;
+                        }
+                        
+                        return;
                     }
-                    return;
                 }
-            }
-            
-            console.log("ololo")
-            
-            let targets = creep.room.find(FIND_STRUCTURES, {
-                filter: structure => structure.structureType == STRUCTURE_ROAD &&
-                structure.hits < structure.hitsMax / 10
-            });
 
-            if (targets.length == 0) {
-                targets = creep.room.find(FIND_STRUCTURES, {
-                    filter: structure => structure.structureType == STRUCTURE_CONTAINER &&
-                    structure.hits < structure.hitsMax / 2
+                let targets = creep.room.find(FIND_STRUCTURES, {
+                    filter: structure => structure.structureType == STRUCTURE_ROAD &&
+                    structure.hits < structure.hitsMax / 10
                 });
-            }
 
-            if (creep.room.find(FIND_CONSTRUCTION_SITES).length > 0 || targets.length > 0) {
-                let isBuild = creep.memory.isBuild;
-
-                if (!isBuild) {
-                    if (creep.room.storage) {
-                        if (creep.room.storage.store[RESOURCE_ENERGY] > 5000) {
-                            if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(creep.room.storage);
-                            }
-                        } else {
-                            let containers = creep.room.stats().containers;
-                            if (containers != undefined && containers.length > 0) {
-                                let sum = 0;
-                                containers.forEach(container => {
-                                    sum += container.store.energy;
-                                });
-                                if (sum > 250) {
-                                    harvestUtils.withdrawFromContainer(creep);
-                                } else {
-                                    harvestUtils.harvestFromPredefinedSource(creep);
-                                }
-                            } else {
-                                harvestUtils.harvestFromPredefinedSource(creep);
-                            }
-                        }
-                    } else {
-                        let containers = creep.room.stats().containers;
-                        if (containers != undefined && containers.length > 0) {
-                            let sum = 0;
-                            containers.forEach(container => {
-                                sum += container.store.energy;
-                            });
-                            if (sum > 250) {
-                                harvestUtils.withdrawFromContainer(creep);
-                            } else {
-                                harvestUtils.harvestFromPredefinedSource(creep);
-                            }
-                        } else {
-                            harvestUtils.harvestFromPredefinedSource(creep);
-                        }
-                    }
-
-                    if (creep.carry.energy == creep.carryCapacity) {
-                        creep.memory.isBuild = true;
-                    }
+                if (targets.length == 0) {
+                    targets = creep.room.find(FIND_STRUCTURES, {
+                        filter: structure => structure.structureType == STRUCTURE_CONTAINER &&
+                        structure.hits < structure.hitsMax / 2
+                    });
                 }
-                else {
+
+                if (creep.room.find(FIND_CONSTRUCTION_SITES).length > 0 || targets.length > 0) {
                     targets.sort((a, b) => a.hits - b.hits);
 
                     if (targets.length > 0) {
@@ -124,64 +110,14 @@ module.exports = {
                             }
                         }
                     }
-                    if (creep.carry.energy == 0) {
-                        creep.memory.isBuild = false;
-                    }
-                }
-            } else {
-                let isUpgrade = creep.memory.isUpgrade;
-
-                if (!isUpgrade) {
-                    if (creep.room.storage) {
-                        if (creep.room.storage.store[RESOURCE_ENERGY] > 5000) {
-                            if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(creep.room.storage);
-                            }
-                        } else {
-                            let containers = creep.room.stats().containers;
-                            if (containers != undefined && containers.length > 0) {
-                                let sum = 0;
-                                containers.forEach(container => {
-                                    sum += container.store.energy;
-                                });
-                                if (sum > 250) {
-                                    harvestUtils.withdrawFromContainer(creep);
-                                } else {
-                                    harvestUtils.harvestFromPredefinedSource(creep);
-                                }
-                            } else {
-                                harvestUtils.harvestFromPredefinedSource(creep);
-                            }
-                        }
-                    } else {
-                        let containers = creep.room.stats().containers;
-                        if (containers != undefined && containers.length > 0) {
-                            let sum = 0;
-                            containers.forEach(container => {
-                                sum += container.store.energy;
-                            });
-                            if (sum > 250) {
-                                harvestUtils.withdrawFromContainer(creep);
-                            } else {
-                                harvestUtils.harvestFromPredefinedSource(creep);
-                            }
-                        } else {
-                            harvestUtils.harvestFromPredefinedSource(creep);
-                        }
-                    }
-
-                    if (creep.carry.energy == creep.carryCapacity) {
-                        creep.memory.isUpgrade = true;
-                    }
-                }
-                else {
+                } else {
                     if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(creep.room.controller);
                     }
+                }
 
-                    if (creep.carry.energy == 0) {
-                        creep.memory.isUpgrade = false;
-                    }
+                if (creep.carry.energy == 0) {
+                    creep.memory.isWork = false;
                 }
             }
         }

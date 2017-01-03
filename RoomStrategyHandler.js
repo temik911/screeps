@@ -4,7 +4,7 @@ let constants = require('Constants');
 
 module.exports = {
     run() {
-        let fastStrategyRooms = _.map(_.filter(Game.flags, function(flag) {return flag.name.startsWith('FastRoomStrategy')}), 'room');
+        // let fastStrategyRooms = _.map(_.filter(Game.flags, function(flag) {return flag.name.startsWith('FastRoomStrategy')}), 'room');
 
         let rooms = Game.rooms;
         for (let roomName in rooms) {
@@ -22,15 +22,15 @@ module.exports = {
                     room.memory.remoteRooms = new Map();
                 }
 
-                if (_.includes(fastStrategyRooms, room)) {
-                    if (room.controller.level == 8) {
-                        // for (let .)
-                    } else {
-                        fastRoomStrategy.run(room);
-                    }
-                } else {
+                // if (_.includes(fastStrategyRooms, room)) {
+                //     if (room.controller.level == 8) {
+                //         // for (let .)
+                //     } else {
+                //         fastRoomStrategy.run(room);
+                //     }
+                // } else {
                     defaultRoomStrategy.run(room);
-                }
+                // }
             }
         }
     }

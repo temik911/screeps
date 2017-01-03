@@ -10,7 +10,7 @@ module.exports = {
                     squadMain.run(creep);
                 }
 
-                Game.getObjectById('580541916402874c619e0182').createCreep([MOVE, MOVE, MOVE, MOVE, MOVE,
+                Game.getObjectById('582f53678242f5ba3658ad4a').createCreep([MOVE, MOVE, MOVE, MOVE, MOVE,
                     MOVE, MOVE, MOVE, MOVE, MOVE,
                     MOVE, MOVE, MOVE, MOVE, MOVE,
                     MOVE, MOVE, MOVE, MOVE, MOVE,
@@ -19,7 +19,7 @@ module.exports = {
                     ATTACK, ATTACK, ATTACK, ATTACK, ATTACK,
                     ATTACK, ATTACK, ATTACK, ATTACK, ATTACK,
                     ATTACK, ATTACK, ATTACK, ATTACK, ATTACK,
-                    ATTACK, ATTACK, ATTACK, ATTACK, ATTACK], "Squad-3-attack", {squad_role:'squadRoleMain', roomName: 'E39S52', squad_numb: 3, squad_alg: 'x1', role: 'squadAttack'});
+                    ATTACK, ATTACK, ATTACK, ATTACK, ATTACK], "Squad-1-attack", {squad_role:'squadRoleMain', roomName: 'E33S52', squad_numb: 1, squad_alg: 'x1', role: 'squadAttack'});
 
                 Game.getObjectById('580541916402874c619e0182').createCreep([MOVE, MOVE, MOVE, MOVE, MOVE,
                     MOVE, MOVE, MOVE, MOVE, MOVE,

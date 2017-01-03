@@ -70,7 +70,7 @@ module.exports = {
                 if (target == null) {
                     target = attack.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
                         filter: structure => structure.structureType != STRUCTURE_WALL &&
-                        structure.structureType != STRUCTURE_RAMPART
+                        structure.structureType != STRUCTURE_RAMPART && structure.structureType != STRUCTURE_CONTROLLER
                     });
                 }
 
@@ -81,9 +81,17 @@ module.exports = {
 
                 if (target == null) {
                     target = attack.pos.findClosestByPath(FIND_STRUCTURES, {
+                        filter: structure => structure.structureType == STRUCTURE_CONTAINER
+                    });
+                }
+
+                if (target == null) {
+                    target = attack.pos.findClosestByPath(FIND_STRUCTURES, {
                         filter: structure => structure.structureType == STRUCTURE_ROAD
                     });
                 }
+
+                console.log(target);
 
                 if (target != null) {
                     if (attack.attack(target) == ERR_NOT_IN_RANGE) {

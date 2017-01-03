@@ -9,7 +9,7 @@ module.exports = {
         if (Memory.nextBaseMineralTransfer <= Game.time && Game.cpu.bucket > 2500) {
             let stateChanged = false;
 
-            let eachRoomMineralAmountCap = 5000;
+            let eachRoomMineralAmountCap = 10000;
             let maxRoomMineralAmount = 125000;
             let maxEnergyAvailable = 25000;
             let maxTransactionPerRoom = 1;
@@ -24,8 +24,8 @@ module.exports = {
             maxPrice[RESOURCE_LEMERGIUM] = 0.20;
             maxPrice[RESOURCE_KEANIUM] = 0.30;
             maxPrice[RESOURCE_ZYNTHIUM] = 0.20;
-            maxPrice[RESOURCE_CATALYST] = 0.60;
-            // total price = 3.65
+            maxPrice[RESOURCE_CATALYST] = 0.70;
+            // total price = 3.75
 
             let roomWithExceededAmount = new Map();
             let transferAmount = new Map();
@@ -65,7 +65,10 @@ module.exports = {
                             if (roomInfo.availableEnergy > 0 && roomInfo.availableTransaction > 0) {
                                 let mineralType = roomInfo.mineralType;
                                 let neededAmount = eachRoomMineralAmountCap - get(terminal.store, mineralType, 0) - get(transferAmount[room.name], mineralType, 0);
-                                if (neededAmount > 100) {
+                                if (neededAmount > 0 && neededAmount < 100) {
+                                    neededAmount = 100;
+                                }
+                                if (neededAmount >= 100) {
                                     let calcTransactionCost = Game.market.calcTransactionCost(neededAmount, room.name, roomNameWithExceededAmount);
                                     if (calcTransactionCost < roomInfo.availableEnergy) {
                                         rooms[roomNameWithExceededAmount].terminal.send(mineralType, neededAmount, room.name);
@@ -99,29 +102,34 @@ module.exports = {
                 }
 
                 let neededAmount = order.neededAmount - order.filledPart;
+                if (neededAmount < 100) {
+                    neededAmount = 100;
+                }
                 for (let roomName in rooms) {
                     let room = rooms[roomName];
                     if (room.controller != undefined && room.controller.my && !terminalIsBusy[roomName] && !order.isDone) {
-                        let terminal = room.terminal;
-                        if (terminal.store[order.mineralType] != undefined && terminal.store[order.mineralType] >= eachRoomMineralAmountCap + neededAmount) {
-                            let transactionCost = Game.market.calcTransactionCost(neededAmount, roomName, order.roomName);
-                            if (terminal.store[RESOURCE_ENERGY] >= transactionCost) {
-                                if (terminal.send(order.mineralType, neededAmount, order.roomName) == OK) {
-                                    order.isDone = true;
-                                    console.log("Send from " + roomName + " to " + order.roomName + " mineral " + order.mineralType + " " + neededAmount + " with cost " + transactionCost);
+                        if (room.terminal != undefined) {
+                            let terminal = room.terminal;
+                            if (terminal.store[order.mineralType] != undefined && terminal.store[order.mineralType] >= eachRoomMineralAmountCap + neededAmount) {
+                                let transactionCost = Game.market.calcTransactionCost(neededAmount, roomName, order.roomName);
+                                if (terminal.store[RESOURCE_ENERGY] >= transactionCost) {
+                                    if (terminal.send(order.mineralType, neededAmount, order.roomName) == OK) {
+                                        order.isDone = true;
+                                        console.log("Send from " + roomName + " to " + order.roomName + " mineral " + order.mineralType + " " + neededAmount + " with cost " + transactionCost);
 
-                                    Memory.marketSystem.processedOrders[i] = new Map();
-                                    Memory.marketSystem.processedOrders[i].roomName = order.roomName;
-                                    Memory.marketSystem.processedOrders[i].mineralType = order.mineralType;
-                                    Memory.marketSystem.processedOrders[i].neededAmount = order.neededAmount;
-                                    Memory.marketSystem.processedOrders[i].filledPart = order.filledPart + neededAmount;
-                                    Memory.marketSystem.processedOrders[i].transactionCost = order.transactionCost + transactionCost;
-                                    Memory.marketSystem.processedOrders[i].cost = order.cost;
-                                    Memory.marketSystem.processedOrders[i].isDone = order.isDone;
-                                    delete(Memory.marketSystem.orders[i]);
+                                        Memory.marketSystem.processedOrders[i] = new Map();
+                                        Memory.marketSystem.processedOrders[i].roomName = order.roomName;
+                                        Memory.marketSystem.processedOrders[i].mineralType = order.mineralType;
+                                        Memory.marketSystem.processedOrders[i].neededAmount = order.neededAmount;
+                                        Memory.marketSystem.processedOrders[i].filledPart = order.filledPart + neededAmount;
+                                        Memory.marketSystem.processedOrders[i].transactionCost = order.transactionCost + transactionCost;
+                                        Memory.marketSystem.processedOrders[i].cost = order.cost;
+                                        Memory.marketSystem.processedOrders[i].isDone = order.isDone;
+                                        delete(Memory.marketSystem.orders[i]);
 
-                                    terminalIsBusy[roomName] = true;
-                                    stateChanged = true;
+                                        terminalIsBusy[roomName] = true;
+                                        stateChanged = true;
+                                    }
                                 }
                             }
                         }
@@ -131,53 +139,55 @@ module.exports = {
                 if (Game.market.credits > 100000) {
                     if (!order.isDone) {
                         let room = Game.rooms[order.roomName];
-                        if (room.terminal.store[RESOURCE_ENERGY] >= energyPerOrder) {
-                            if (marketOrders[order.mineralType] == undefined) {
-                                let sellOrders = Game.market.getAllOrders({
-                                    type: ORDER_SELL,
-                                    resourceType: order.mineralType
-                                });
-                                marketOrders[order.mineralType] = sellOrders;
-                                let orderId = null;
-                                let minPrice = 999999;
-                                let minCostForMinPrice = 999999;
-                                for (let i in sellOrders) {
-                                    let sellOrder = sellOrders[i];
-                                    if (sellOrder.amount >= orderAmount) {
-                                        let transactionCost = Game.market.calcTransactionCost(orderAmount, order.roomName, sellOrder.roomName);
-                                        if (transactionCost <= energyPerOrder && sellOrder.price <= maxPrice[order.mineralType]) {
-                                            if (sellOrder.price < minPrice || (sellOrder.price == minPrice && transactionCost < minCostForMinPrice)) {
-                                                orderId = sellOrder.id;
-                                                minPrice = sellOrder.price;
-                                                minCostForMinPrice = transactionCost;
+                        if (room.terminal != undefined) {
+                            if (room.terminal.store[RESOURCE_ENERGY] >= energyPerOrder) {
+                                if (marketOrders[order.mineralType] == undefined) {
+                                    let sellOrders = Game.market.getAllOrders({
+                                        type: ORDER_SELL,
+                                        resourceType: order.mineralType
+                                    });
+                                    marketOrders[order.mineralType] = sellOrders;
+                                    let orderId = null;
+                                    let minPrice = 999999;
+                                    let minCostForMinPrice = 999999;
+                                    for (let i in sellOrders) {
+                                        let sellOrder = sellOrders[i];
+                                        if (sellOrder.amount >= orderAmount) {
+                                            let transactionCost = Game.market.calcTransactionCost(orderAmount, order.roomName, sellOrder.roomName);
+                                            if (transactionCost <= energyPerOrder && sellOrder.price <= maxPrice[order.mineralType]) {
+                                                if (sellOrder.price < minPrice || (sellOrder.price == minPrice && transactionCost < minCostForMinPrice)) {
+                                                    orderId = sellOrder.id;
+                                                    minPrice = sellOrder.price;
+                                                    minCostForMinPrice = transactionCost;
+                                                }
                                             }
                                         }
                                     }
-                                }
-                                if (orderId != null) {
-                                    if (Game.market.deal(orderId, orderAmount, order.roomName) == OK) {
-                                        order.cost += minPrice * orderAmount;
-                                        order.transactionCost += minCostForMinPrice;
-                                        order.filledPart += orderAmount;
+                                    if (orderId != null) {
+                                        if (Game.market.deal(orderId, orderAmount, order.roomName) == OK) {
+                                            order.cost += minPrice * orderAmount;
+                                            order.transactionCost += minCostForMinPrice;
+                                            order.filledPart += orderAmount;
 
-                                        console.log("Buy " + orderAmount + " " + order.mineralType + " to " +
-                                            order.roomName + " was needed " + neededAmount + " with cost " + (minPrice * orderAmount) +
-                                            " with transactionCost " + minCostForMinPrice);
+                                            console.log("Buy " + orderAmount + " " + order.mineralType + " to " +
+                                                order.roomName + " was needed " + neededAmount + " with cost " + (minPrice * orderAmount) +
+                                                " with transactionCost " + minCostForMinPrice);
 
-                                        stateChanged = true;
+                                            stateChanged = true;
 
-                                        if (order.filledPart >= order.neededAmount) {
-                                            order.isDone = true;
+                                            if (order.filledPart >= order.neededAmount) {
+                                                order.isDone = true;
 
-                                            Memory.marketSystem.processedOrders[i] = new Map();
-                                            Memory.marketSystem.processedOrders[i].roomName = order.roomName;
-                                            Memory.marketSystem.processedOrders[i].mineralType = order.mineralType;
-                                            Memory.marketSystem.processedOrders[i].neededAmount = order.neededAmount;
-                                            Memory.marketSystem.processedOrders[i].filledPart = order.filledPart;
-                                            Memory.marketSystem.processedOrders[i].transactionCost = order.transactionCost;
-                                            Memory.marketSystem.processedOrders[i].cost = order.cost;
-                                            Memory.marketSystem.processedOrders[i].isDone = order.isDone;
-                                            delete(Memory.marketSystem.orders[i]);
+                                                Memory.marketSystem.processedOrders[i] = new Map();
+                                                Memory.marketSystem.processedOrders[i].roomName = order.roomName;
+                                                Memory.marketSystem.processedOrders[i].mineralType = order.mineralType;
+                                                Memory.marketSystem.processedOrders[i].neededAmount = order.neededAmount;
+                                                Memory.marketSystem.processedOrders[i].filledPart = order.filledPart;
+                                                Memory.marketSystem.processedOrders[i].transactionCost = order.transactionCost;
+                                                Memory.marketSystem.processedOrders[i].cost = order.cost;
+                                                Memory.marketSystem.processedOrders[i].isDone = order.isDone;
+                                                delete(Memory.marketSystem.orders[i]);
+                                            }
                                         }
                                     }
                                 }

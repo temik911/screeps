@@ -25,6 +25,7 @@ module.exports.REMOTE_CONTAINER_BUILDER = 'remoteContainerBuilder';
 module.exports.GUARD = 'guard';
 module.exports.LABS_SUPPORT = 'labsSupport';
 module.exports.HEALER = 'healer';
+module.exports.REMOVER = 'remover';
 module.exports.SQUAD_HEALER = 'squadHealer';
 module.exports.SQUAD_HEALER_SECOND = 'squadHealerSecond';
 module.exports.SQUAD_ATTACK = 'squadAttack';

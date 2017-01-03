@@ -23,7 +23,7 @@ module.exports.loop = function () {
     let afterTerminalsHandler = Game.cpu.getUsed();
 
     try {
-        // globalPopulationProducer.run(Game.spawns['Base']);
+        // globalPopulationProducer.run(Game.spawns['E39S58-Spawn-1']);
         // globalPopulationProducer.run(Game.spawns['E36S51-Spawn-2']);
         // globalPopulationProducer.run(Game.spawns['Base2']);
     } catch (e) {
@@ -70,4 +70,12 @@ module.exports.loop = function () {
     }
 
     console.log();
+
+    // let orders = Game.market.orders;
+    // for (let orderId in orders) {
+    //     let order = orders[orderId];
+    //     if (order.active == false) {
+    //         Game.market.cancelOrder(order.id);
+    //     }
+    // }
 };

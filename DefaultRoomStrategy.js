@@ -1,5 +1,5 @@
 let roomPopulationProducer = require('RoomPopulationProducer');
-let linksHandler = require('LinksHandler');
+let fastLinksHandler = require('FastLinksHandler');
 let towersHandler = require('TowersHandler');
 let labsHandler = require('LabsHandler');
 
@@ -16,7 +16,7 @@ module.exports = {
             let afterRoomPopulationProducer = Game.cpu.getUsed();
 
             let beforeLinksHandler = Game.cpu.getUsed();
-            linksHandler.run(room);
+            fastLinksHandler.run(room);
             let afterLinksHandler = Game.cpu.getUsed();
 
             let beforeTowersHandler = Game.cpu.getUsed();

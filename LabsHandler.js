@@ -22,6 +22,10 @@ module.exports = {
             room.memory.clearLabs = false;
         }
 
+        if (room.memory.nextTaskAssign == undefined) {
+            room.memory.nextTaskAssign = 0;
+        }
+
         if (room.memory.lab1 == undefined) {
             let lab = getLab(room, 1);
             if (lab != undefined) {
@@ -40,30 +44,36 @@ module.exports = {
         }
 
         if (room.memory.labsTask.isDone) {
-            let needed = getProducedMineralAndAmount(room);
+            if (room.memory.nextTaskAssign <= Game.time) {
+                let needed = getProducedMineralAndAmount(room);
 
-            if (utils.isBaseMineral(needed[0])) {
-                room.memory.labsTask.type = 'WAIT_FOR_BASE';
-                room.memory.labsTask.nextCheck = Game.time + 100;
-                room.memory.labsTask.orderId = Memory.marketSystem.currentOrderId;
+                if (needed == undefined) {
+                    room.memory.nextTaskAssign = Game.time + 250;
+                    return;
+                }
 
-                Memory.marketSystem.orders[Memory.marketSystem.currentOrderId] = new Map();
-                Memory.marketSystem.orders[Memory.marketSystem.currentOrderId].roomName = room.name;
-                Memory.marketSystem.orders[Memory.marketSystem.currentOrderId].mineralType = needed[0];
-                Memory.marketSystem.orders[Memory.marketSystem.currentOrderId].neededAmount = needed[2];
-                Memory.marketSystem.currentOrderId += 1;
-            } else {
-                room.memory.labsTask.type = 'PRODUCE';
-                room.memory.labsTask.nextCheck = Game.time + 500;
+                if (utils.isBaseMineral(needed[0])) {
+                    room.memory.labsTask.type = 'WAIT_FOR_BASE';
+                    room.memory.labsTask.nextCheck = Game.time + 100;
+                    room.memory.labsTask.orderId = Memory.marketSystem.currentOrderId;
 
-                room.memory.lab1_resource = utils.getComponentsToProduceMineral(needed[0])[0];
-                room.memory.lab2_resource = utils.getComponentsToProduceMineral(needed[0])[1];
+                    Memory.marketSystem.orders[Memory.marketSystem.currentOrderId] = new Map();
+                    Memory.marketSystem.orders[Memory.marketSystem.currentOrderId].roomName = room.name;
+                    Memory.marketSystem.orders[Memory.marketSystem.currentOrderId].mineralType = needed[0];
+                    Memory.marketSystem.orders[Memory.marketSystem.currentOrderId].neededAmount = needed[2];
+                    Memory.marketSystem.currentOrderId += 1;
+                } else {
+                    room.memory.labsTask.type = 'PRODUCE';
+                    room.memory.labsTask.nextCheck = Game.time + 500;
+
+                    room.memory.lab1_resource = utils.getComponentsToProduceMineral(needed[0])[0];
+                    room.memory.lab2_resource = utils.getComponentsToProduceMineral(needed[0])[1];
+                }
+
+                room.memory.labsTask.mineralType = needed[0];
+                room.memory.labsTask.mineralAmount = needed[1];
+                room.memory.labsTask.isDone = false;
             }
-
-            room.memory.labsTask.mineralType = needed[0];
-            room.memory.labsTask.mineralAmount = needed[1];
-            room.memory.labsTask.isDone = false;
-
             room.memory.clearLabs = true;
         } else {
             if (room.memory.labsTask.type == 'WAIT_FOR_BASE') {
@@ -78,6 +88,12 @@ module.exports = {
 
                 if (room.memory.labsTask.nextCheck <= Game.time) {
                     let needed = getProducedMineralAndAmount(room);
+
+                    if (needed == undefined) {
+                        room.memory.labsTask = new Map();
+                        room.memory.labsTask.isDone = true;
+                        return;
+                    }
 
                     if (room.memory.labsTask.mineralType != needed[0] || room.memory.labsTask.mineralAmount != needed[1]) {
                         room.memory.labsTask = new Map();
@@ -131,25 +147,22 @@ let getLab = function(room, numb) {
 
 let getProducedMineralAndAmount = function(room) {
     let currentAmount = calcRoomAmount(room);
+    let neededToProduce = 10000;
+    let neededMineral = aaa(currentAmount, 'XGH2O', neededToProduce, true);
 
-    let current = currentAmount.get('XGH2O');
-    if (isNaN(current) || current == 0) {
-        current = 5000;
+    if (neededMineral == undefined) {
+        return undefined;
     } else {
-        current = 5000 - current % 5000;
-    }
-
-    let neededMineral = aaa(currentAmount, 'XGH2O', current, true);
-
-    if (utils.isBaseMineral(neededMineral[0])) {
-        let current = currentAmount.get(neededMineral[0]);
-        if (isNaN(current)) {
-            return [neededMineral[0], neededMineral[1], neededMineral[1]];
+        if (utils.isBaseMineral(neededMineral[0])) {
+            let current = currentAmount.get(neededMineral[0]);
+            if (isNaN(current)) {
+                return [neededMineral[0], neededMineral[1], neededMineral[1]];
+            } else {
+                return [neededMineral[0], current + neededMineral[1], neededMineral[1]];
+            }
         } else {
-            return [neededMineral[0], current + neededMineral[1], neededMineral[1]];
+            return neededMineral;
         }
-    } else {
-        return neededMineral;
     }
 };
 
@@ -178,11 +191,11 @@ let calcRoomAmount = function (room) {
         if (creep.memory.role == constants.LABS_SUPPORT) {
             if (_.sum(creep.carry) != 0) {
                 for (let type in creep.carry) {
-                    let currentAmount = currentAmount.get(type);
-                    if (isNaN(currentAmount)) {
+                    let current = currentAmount.get(type);
+                    if (isNaN(current)) {
                         currentAmount.set(type, creep.carry[type]);
                     } else {
-                        currentAmount.set(type, currentAmount + creep.carry[type]);
+                        currentAmount.set(type, current + creep.carry[type]);
                     }
                 }
             }
@@ -212,17 +225,14 @@ let calcRoomAmount = function (room) {
 };
 
 let aaa = function (currentAmount, resourceType, amount, target) {
-    let roomAmount = 0;
-    if (!target) {
-        roomAmount = currentAmount.get(resourceType);
+    let roomAmount = currentAmount.get(resourceType);
 
-        if (isNaN(roomAmount)) {
-            roomAmount = 0;
-        }
+    if (isNaN(roomAmount)) {
+        roomAmount = 0;
+    }
 
-        if (roomAmount >= amount) {
-            return undefined;
-        }
+    if (roomAmount >= amount) {
+        return undefined;
     }
 
     if (utils.isBaseMineral(resourceType)) {

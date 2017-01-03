@@ -59,7 +59,9 @@ module.exports = {
             if (container.hits < container.hitsMax * 0.8 && creep.carry.energy > 0) {
                 creep.repair(container);
             } else {
-                creep.harvest(source);
+                if (_.sum(container.store) + creep.getActiveBodyparts(CARRY) * 2 < container.storeCapacity || creep.carry.energy < creep.carryCapacity) {
+                    creep.harvest(source);
+                }
             }
         }
     }

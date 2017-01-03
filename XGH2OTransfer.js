@@ -1,5 +1,9 @@
 module.exports = {
     run() {
+        if (Game.time % 5000 != 0) {
+            return;
+        }
+
         let transferRooms = new Map();
         let neededRooms = new Map();
 
@@ -11,7 +15,7 @@ module.exports = {
                 if (terminal != undefined) {
                     let amount = get(terminal.store, RESOURCE_CATALYZED_GHODIUM_ACID, 0);
 
-                    if (room.controller.level == 7) {
+                    if (room.controller.level != 8 && amount < 15000) {
                         neededRooms[roomName] = amount;
                     } else if (room.controller.level == 8) {
                         transferRooms[roomName] = amount;
@@ -36,9 +40,12 @@ module.exports = {
                 let minAmount = 999999;
 
                 for (let roomName in neededRooms) {
-                    if (neededRooms[roomName] < minAmount) {
-                        neededRoomName = roomName;
-                        minAmount = neededRooms[roomName];
+                    console.log(roomName)
+                    if (neededRooms[roomName] < 15000) {
+                        if (neededRooms[roomName] < minAmount) {
+                            neededRoomName = roomName;
+                            minAmount = neededRooms[roomName];
+                        }
                     }
                 }
 

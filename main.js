@@ -1,29 +1,20 @@
 let creepsHandler = require('creepsHandler');
 let globalPopulationProducer = require('GlobalPopulationProducer');
-let terminalsHandler = require('TerminalsHandler');
 let roomStrategyHandler = require('RoomStrategyHandler');
-let remoteRoomsWatcher = require('RemoteRoomsWatcher');
 let xgh2oTransfer = require('XGH2OTransfer');
-let baseMineralTransfer = require('BaseMineralTransfer');
+let missionExecutor = require('MissionExecutor');
 
 module.exports.loop = function () {
     console.log("************************* " + Game.time + " *************************")
+    console.log("Starts with used cpu: " + Game.cpu.getUsed());
     for (let name in Memory.creeps) {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];
         }
     }
 
-    let beforeTerminalsHandler = Game.cpu.getUsed();
     try {
-        terminalsHandler.run();
-    } catch (e) {
-        console.log("TerminalHandler: " + e.stack);
-    }
-    let afterTerminalsHandler = Game.cpu.getUsed();
-
-    try {
-        // globalPopulationProducer.run(Game.spawns['E39S58-Spawn-1']);
+        // globalPopulationProducer.run(Game.spawns['E42S58-Spawn-1']);
         // globalPopulationProducer.run(Game.spawns['E36S51-Spawn-2']);
         // globalPopulationProducer.run(Game.spawns['Base2']);
     } catch (e) {
@@ -38,13 +29,12 @@ module.exports.loop = function () {
     creepsHandler.run();
     let afterCreepsHandler = Game.cpu.getUsed();
 
-    let beforeRemoteRoomsWatcher = Game.cpu.getUsed();
-    remoteRoomsWatcher.run();
-    let afterRemoteRoomsWatcher = Game.cpu.getUsed();
+    let beforeMissionExecutor = Game.cpu.getUsed();
+    missionExecutor.run();
+    let afterMissionExecutor = Game.cpu.getUsed();
 
     try {
         xgh2oTransfer.run();
-        baseMineralTransfer.run();
     } catch (e) {
         console.log("GlobalPopulationProducer: " + e.stack);
     }
@@ -58,10 +48,9 @@ module.exports.loop = function () {
     Memory.ticks += 1;
     console.log("Used: " + total + "; bucket: " + Game.cpu.bucket);
     console.log("Average: " + (Memory.total / Memory.ticks) + " for " + Memory.ticks + " ticks");
-    console.log("TerminalsHandler used: " + (afterTerminalsHandler - beforeTerminalsHandler));
     console.log("RoomsHandler used: " + (afterRoomsHandler - beforeRoomsHandler));
     console.log("CreepsHandler used: " + (afterCreepsHandler - beforeCreepsHandler));
-    console.log("RemoteRoomsWatcher used: " + (afterRemoteRoomsWatcher - beforeRemoteRoomsWatcher));
+    console.log("MissionExecutor used: " + (afterMissionExecutor - beforeMissionExecutor));
 
     if (Memory.ticks == 5000) {
         Game.notify("Average: " + (Memory.total / Memory.ticks) + " for " + Memory.ticks + " ticks");
@@ -70,12 +59,4 @@ module.exports.loop = function () {
     }
 
     console.log();
-
-    // let orders = Game.market.orders;
-    // for (let orderId in orders) {
-    //     let order = orders[orderId];
-    //     if (order.active == false) {
-    //         Game.market.cancelOrder(order.id);
-    //     }
-    // }
 };

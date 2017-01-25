@@ -44,7 +44,7 @@ module.exports = {
                     if (creep.withdraw(creep.room.terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(creep.room.terminal);
                     }
-                } else if (creep.room.storage != undefined && creep.room.storage.my && creep.room.storage.store[RESOURCE_ENERGY] > 5000) {
+                } else if (creep.room.storage != undefined && creep.room.storage.my && creep.room.storage.store[RESOURCE_ENERGY] > 25000) {
                     if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(creep.room.storage);
                     }
@@ -70,7 +70,7 @@ module.exports = {
                 }
             } else {
                 if (creep.room.storage && creep.room.storage.my) {
-                    if (creep.room.storage.store[RESOURCE_ENERGY] < 4000) {
+                    if (creep.room.storage.store[RESOURCE_ENERGY] < 20000) {
                         if (creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                             creep.moveTo(creep.room.storage);
                         }
@@ -89,7 +89,7 @@ module.exports = {
                 });
 
                 if (targets.length == 0) {
-                    targets = creep.room.find(FIND_STRUCTURES, {
+                    targets = creep.pos.findInRange(FIND_STRUCTURES, 3, {
                         filter: structure => structure.structureType == STRUCTURE_CONTAINER &&
                         structure.hits < structure.hitsMax / 2
                     });

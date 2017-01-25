@@ -31,7 +31,7 @@ module.exports = {
         let name;
         
         let maxReserverCount = 1;
-        if (Game.rooms.E42S58 != undefined && Game.rooms.E42S58.controller != undefined && Game.rooms.E42S58.controller.my) {
+        if (Game.rooms.E42S62 != undefined && Game.rooms.E42S62.controller != undefined && Game.rooms.E42S62.controller.my) {
             maxReserverCount = 0;
         }
 

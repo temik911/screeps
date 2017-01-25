@@ -444,7 +444,7 @@ Game =
          *
          * @return {number|OK|ERR_NOT_ENOUGH_RESOURCES|ERR_INVALID_ARGS}
          */
-        deal: function(orderId, targetRoomName, amount) { },
+        deal: function(orderId, amount, targetRoomName) { },
 
         /**
          * This method is still under development.

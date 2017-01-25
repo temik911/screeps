@@ -49,7 +49,7 @@ module.exports = {
                 let withdrawalResult = creep.withdraw(source, RESOURCE_ENERGY);
 
                 if (withdrawalResult == ERR_NOT_IN_RANGE) {
-                    let moveTo = creep.moveTo(source);
+                    let moveTo = creep.moveTo(source, {maxRooms: 1});
                     if (moveTo == ERR_NO_PATH) {
                         creep.memory.shouldWait = Game.time + 5;
                     }
@@ -180,19 +180,5 @@ module.exports = {
                 creep.harvest(mineral);
             }
         }
-    },
-
-    findNearest(pos, array) {
-        let pathLength = 9999;
-        let toReturn;
-        for (let i = 0; i < array.length; i++) {
-            let current = array[i];
-            let length = pos.findPathTo(current.pos).length;
-            if (pathLength > length) {
-                toReturn = current;
-                pathLength = length;
-            }
-        }
-        return toReturn;
     }
 };

@@ -3,20 +3,8 @@ require('RoomInfo');
 
 module.exports = {
     run(room) {
-        if (room.memory.claimerNumb == undefined) {
-            room.memory.claimerNumb = 0;
-        }
-        if (room.memory.harvesterNumb == undefined) {
-            room.memory.harvesterNumb = 0;
-        }
         if (room.memory.repairNumb == undefined) {
             room.memory.repairNumb = 0;
-        }
-        if (room.memory.upgraderNumb == undefined) {
-            room.memory.upgraderNumb = 0;
-        }
-        if (room.memory.linkUpgraderNumb == undefined) {
-            room.memory.linkUpgraderNumb = 0;
         }
         if (room.memory.mineralHarvesterNumb == undefined) {
             room.memory.mineralHarvesterNumb = 0;
@@ -27,65 +15,29 @@ module.exports = {
         if (room.memory.builderNumb == undefined) {
             room.memory.builderNumb = 0;
         }
-        if (room.memory.reserverForHarvestNumb == undefined) {
-            room.memory.reserverForHarvestNumb = 0;
-        }
-        if (room.memory.remoteHarvestNumb == undefined) {
-            room.memory.remoteHarvestNumb = 0;
-        }
-        if (room.memory.remoteCargoNumb == undefined) {
-            room.memory.remoteCargoNumb = 0;
-        }
-        if (room.memory.remoteBuilderNumb == undefined) {
-            room.memory.remoteBuilderNumb = 0;
-        }
-        if (room.memory.remoteContainerBuilderNumb == undefined) {
-            room.memory.remoteContainerBuilderNumb = 0;
-        }
-        if (room.memory.guardNumb == undefined) {
-            room.memory.guardNumb = 0;
-        }
-        if (room.memory.labsSupportNumb == undefined) {
-            room.memory.labsSupportNumb = 0;
-        }
-        if (room.memory.terminalCargoNumb == undefined) {
-            room.memory.terminalCargoNumb = 0;
+        if (room.memory.missionCreepsRequests == undefined) {
+            room.memory.missionCreepsRequests = new Map();
         }
 
         let roomStats = room.stats();
         let roomCreeps = roomStats.creeps;
-        let roomSources = roomStats.sources;
         let roomExtractors = roomStats.extractors;
         let spawns = roomStats.spawns;
         let mineral = roomStats.mineral;
-        let labs = roomStats.labs;
         let roomName = room.name;
 
         if (spawns.length == 0) {
             return;
         }
 
-        let harvesterCount = 0;
-        let harvesterWithLinkCount = 0;
-        let upgraderCount = 0;
-        let linkUpgraderCount = 0;
         let builderCount = 0;
         let baseEnergySupportCount = 0;
-        let cargoCount = 0;
-        let terminalCargoCount = 0;
         let fastLinkCargoCount = 0;
         let soldierCount = 0;
         let repairCount = 0;
         let mineralHarvesterCount = 0;
         let mineralHarvesterWithOutCarryCount = 0;
         let mineralCargoCount = 0;
-        let reserverForHarvestCount = 0;
-        let remoteHarvestCount = 0;
-        let remoteCargoCount = 0;
-        let remoteBuilderCount = 0;
-        let remoteContainerBuilderCount = 0;
-        let guardCount = 0;
-        let labsSupportCount = 0;
 
         let creepName;
         let creep;
@@ -97,22 +49,12 @@ module.exports = {
             if (spawn.spawning != null) {
                 let currentSpawnRole = spawn.memory.currentSpawnRole;
                 if (currentSpawnRole != undefined) {
-                    if (currentSpawnRole == constants.HARVESTER) {
-                        harvesterCount++;
-                    } else if (currentSpawnRole == constants.HARVESTER_WITH_LINK) {
-                        harvesterWithLinkCount++;
-                    } else if (currentSpawnRole == constants.UPGRADER) {
-                        upgraderCount++;
-                    } else if (currentSpawnRole == constants.BUILDER) {
+                    if (currentSpawnRole == constants.BUILDER) {
                         builderCount++;
                     } else if (currentSpawnRole == constants.BASE_ENERGY_SUPPORT) {
                         baseEnergySupportCount++;
-                    } else if (currentSpawnRole == constants.CARGO) {
-                        cargoCount++;
                     } else if (currentSpawnRole == constants.FAST_LINK_CARGO) {
                         fastLinkCargoCount++;
-                    } else if (currentSpawnRole == constants.TERMINAL_CARGO) {
-                        terminalCargoCount++;
                     } else if (currentSpawnRole == constants.SOLDIER) {
                         soldierCount++;
                     } else if (currentSpawnRole == constants.REPAIR) {
@@ -123,22 +65,6 @@ module.exports = {
                         mineralHarvesterWithOutCarryCount++;
                     } else if (currentSpawnRole == constants.MINERAL_CARGO) {
                         mineralCargoCount++;
-                    } else if (currentSpawnRole == constants.RESERVER_FOR_HARVEST) {
-                        reserverForHarvestCount++;
-                    } else if (currentSpawnRole == constants.REMOTE_HARVEST) {
-                        remoteHarvestCount++;
-                    } else if (currentSpawnRole == constants.REMOTE_CARGO) {
-                        remoteCargoCount++;
-                    } else if (currentSpawnRole == constants.REMOTE_BUILDER) {
-                        remoteBuilderCount++;
-                    } else if (currentSpawnRole == constants.REMOTE_CONTAINER_BUILDER) {
-                        remoteContainerBuilderCount++;
-                    } else if (currentSpawnRole == constants.GUARD) {
-                        guardCount++;
-                    } else if (currentSpawnRole == constants.LINK_UPGRADER) {
-                        linkUpgraderCount++;
-                    } else if (currentSpawnRole == constants.LABS_SUPPORT) {
-                        labsSupportCount++;
                     }
                 }
             } else {
@@ -154,22 +80,12 @@ module.exports = {
         for (creepName in roomCreeps) {
             let creepRole = roomCreeps[creepName].memory.role;
 
-            if (creepRole == constants.HARVESTER) {
-                harvesterCount++;
-            } else if (creepRole == constants.HARVESTER_WITH_LINK) {
-                harvesterWithLinkCount++;
-            } else if (creepRole == constants.UPGRADER) {
-                upgraderCount++;
-            } else if (creepRole == constants.BUILDER) {
+            if (creepRole == constants.BUILDER) {
                 builderCount++;
             } else if (creepRole == constants.BASE_ENERGY_SUPPORT) {
                 baseEnergySupportCount++;
-            } else if (creepRole == constants.CARGO) {
-                cargoCount++;
             } else if (creepRole == constants.FAST_LINK_CARGO) {
                 fastLinkCargoCount++;
-            } else if (creepRole == constants.TERMINAL_CARGO) {
-                terminalCargoCount++;
             } else if (creepRole == constants.SOLDIER) {
                 soldierCount++;
             } else if (creepRole == constants.REPAIR) {
@@ -180,61 +96,11 @@ module.exports = {
                 mineralHarvesterWithOutCarryCount++;
             } else if (creepRole == constants.MINERAL_CARGO) {
                 mineralCargoCount++;
-            } else if (creepRole == constants.LINK_UPGRADER) {
-                linkUpgraderCount++;
-            } else if (creepRole == constants.LABS_SUPPORT) {
-                labsSupportCount++;
-            }
-        }
-
-        // remote creeps from this room
-        for (creepName in Game.creeps) {
-            creep = Game.creeps[creepName];
-            if (creep.memory.from == roomName) {
-                if (creep.memory.role == constants.REMOTE_BUILDER) {
-                    remoteBuilderCount++;
-                } else if (creep.memory.role == constants.REMOTE_CONTAINER_BUILDER) {
-                    remoteContainerBuilderCount++;
-                }
             }
         }
 
         let bodies;
         let name;
-
-        // -------------------------------------------------------------
-        let maxUpgraderCount = 0;
-        let maxLinkUpgraderCount = 0;
-        if (room.stats().links.length >= 2) {
-            // link upgraders
-            if (room.controller.level == 8) {
-                maxLinkUpgraderCount = 1;
-            } else {
-                if (room.storage.store.energy < 10000) {
-                    maxLinkUpgraderCount = 1;
-                } else if (room.storage.store.energy < 75000) {
-                    maxLinkUpgraderCount = 2;
-                } else {
-                    maxLinkUpgraderCount = 4;
-                }
-            }
-        } else {
-            // default upgraders
-            if (room.storage != undefined) {
-                if (room.storage.store.energy < 10000) {
-                    maxUpgraderCount = 1;
-                } else if (room.storage.store.energy < 25000) {
-                    maxUpgraderCount = 2;
-                } else if (room.storage.store.energy < 45000) {
-                    maxUpgraderCount = 4;
-                } else {
-                    maxUpgraderCount = 8;
-                }
-            } else {
-                maxUpgraderCount = 4;
-            }
-        }
-
 
         // -------------------------------------------------------------
         let maxBaseEnergySupportCount = 2;
@@ -263,25 +129,6 @@ module.exports = {
             maxBuilderCount = 1;
         }
 
-        let builderFlagPrefix = roomName + "-build";
-        // -------------------------------------------------------------
-        let maxRemoteContainerBuilderCount = 0;
-        for (let flagName in Game.flags) {
-            if (flagName.startsWith(builderFlagPrefix)) {
-                let flagInfo = flagName.split('-');
-                let sourcesCount = 0;
-                for (let q in flagInfo) {
-                    let info = flagInfo[q];
-                    if (info.startsWith('sources')) {
-                        sourcesCount = info.split(':')[1]
-                    }
-                }
-                for (let i = 0; i < sourcesCount; i++) {
-                    maxRemoteContainerBuilderCount++;
-                }
-            }
-        }
-
         // --------------------------------------------------------------
         let maxMineralHarvesterCount = 0;
         let maxMineralHarvesterWithOutCarry = 0;
@@ -294,32 +141,6 @@ module.exports = {
             } else {
                 maxMineralHarvesterCount = 1
             }
-        }
-
-        // --------------------------------------------------------------
-        let maxLabsSupportCount = 0;
-        if (labs.length >= 3 && room.memory.lab1 != undefined && room.memory.lab2 != undefined) {
-            maxLabsSupportCount = 1
-        }
-
-        // --------------------------------------------------------------
-        let maxTerminalCargoCount = 0;
-        if (room.terminal != undefined) {
-            if (room.controller.level != 8) {
-                if (room.terminal.store[RESOURCE_ENERGY] > 30000 + 1000) {
-                    maxTerminalCargoCount = 1;
-                }
-            } else {
-                if (room.storage.store[RESOURCE_ENERGY] < 50000 || room.storage.store[RESOURCE_ENERGY] > 100000) {
-                    maxTerminalCargoCount = 1;
-                }
-            }
-        }
-
-        // --------------------------------------------------------------
-        let remoteRoomsCount = 0;
-        for (let remoteRoomName in room.memory.remoteRooms) {
-            remoteRoomsCount++;
         }
 
         for (let spawnName in spawns) {
@@ -339,42 +160,6 @@ module.exports = {
                     isSupport: false
                 });
                 baseEnergySupportCount++;
-            } else if (harvesterCount + harvesterWithLinkCount < roomSources.length) {
-                let harvesterNumb = room.memory.harvesterNumb;
-                if (room.stats().links.length < 4) {
-                    bodies = createHarvesterBodies(room);
-                    name = roomName + "-harv-" + harvesterNumb;
-                    if (spawn.canCreateCreep(bodies, name) == OK) {
-                        role = constants.HARVESTER;
-                        spawn.createCreep(bodies, name, {
-                            role: role,
-                            numb: harvesterNumb,
-                            isHarvest: true
-                        });
-                        room.memory.harvesterNumb++;
-                        harvesterCount++;
-                    }
-                } else {
-                    bodies = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK, WORK, WORK];
-                    name = roomName + "-linkHarv-" + harvesterNumb;
-                    if (spawn.canCreateCreep(bodies, name) == OK) {
-                        role = constants.HARVESTER_WITH_LINK;
-                        spawn.createCreep(bodies, name, {
-                            role: role,
-                            numb: harvesterNumb,
-                        });
-                        room.memory.harvesterNumb++;
-                        harvesterWithLinkCount++;
-                    }
-                }
-            } else if (room.storage && cargoCount < 2 && room.stats().links.length < 4) {
-                bodies = createCargoBodies(room);
-                role = constants.CARGO;
-                spawn.createCreep(bodies, null, {
-                    role: role,
-                    isCargo: false
-                });
-                cargoCount++;
             } else if (room.storage && fastLinkCargoCount < 1 && room.stats().links.length >= 2) {
                 bodies = [MOVE, CARRY, CARRY, CARRY, CARRY];
                 role = constants.FAST_LINK_CARGO;
@@ -382,19 +167,6 @@ module.exports = {
                     role: role,
                 });
                 fastLinkCargoCount++;
-            } else if (terminalCargoCount < maxTerminalCargoCount) {
-                let terminalCargoNumb = room.memory.terminalCargoNumb;
-                bodies = createTerminalCargoBodies(room);
-                name = roomName + "-terminalCrg-" + terminalCargoNumb;
-                if (spawn.canCreateCreep(bodies, name) == OK) {
-                    role = constants.TERMINAL_CARGO;
-                    spawn.createCreep(bodies, name, {
-                        role: role,
-                        numb: terminalCargoNumb
-                    });
-                    room.memory.terminalCargoNumb++;
-                    terminalCargoCount++;
-                }
             } else if (mineralHarvesterCount < maxMineralHarvesterCount) {
                 let mineralHarvesterNumb = room.memory.mineralHarvesterNumb;
                 bodies = [WORK, WORK, WORK, WORK, WORK,
@@ -438,41 +210,6 @@ module.exports = {
                     room.memory.mineralCargoNumb++;
                     mineralCargoCount++;
                 }
-            } else if (upgraderCount < maxUpgraderCount) {
-                let upgraderNumb = room.memory.upgraderNumb;
-                bodies = createUpgraderOrBuilderBodies(room);
-                name = roomName + "-upg-" + upgraderNumb;
-                if (spawn.canCreateCreep(bodies, name) == OK) {
-                    role = constants.UPGRADER;
-                    spawn.createCreep(bodies, name, {
-                        role: role,
-                        numb: upgraderNumb,
-                        isUpgrade: false
-                    });
-                    room.memory.upgraderNumb++;
-                    upgraderCount++;
-                }
-            } else if (linkUpgraderCount < maxLinkUpgraderCount) {
-                let linkUpgraderNumb = room.memory.linkUpgraderNumb;
-                bodies = [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
-                    MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-                    CARRY, CARRY, CARRY, CARRY, CARRY];
-                name = roomName + "-linkUpg-" + linkUpgraderNumb;
-                let isReadyToUpgrade = true;
-                if (room.controller.level < 8) {
-                    bodies = createLinkUpgraderBodies(room);
-                    isReadyToUpgrade = room.terminal == undefined ? true : room.storage.store[RESOURCE_ENERGY] < 10000 * maxLinkUpgraderCount;
-                }
-                if (spawn.canCreateCreep(bodies, name) == OK) {
-                    role = constants.LINK_UPGRADER;
-                    spawn.createCreep(bodies, name, {
-                        role: role,
-                        numb: linkUpgraderNumb,
-                        isReadyToUpgrade: isReadyToUpgrade
-                    });
-                    room.memory.linkUpgraderNumb++;
-                    linkUpgraderCount++;
-                }
             } else if (builderCount < maxBuilderCount) {
                 let builderNumb = room.memory.builderNumb;
                 bodies = createUpgraderOrBuilderBodies(room);
@@ -486,26 +223,7 @@ module.exports = {
                     room.memory.builderNumb++;
                     builderCount++;
                 }
-            } else if (labsSupportCount < maxLabsSupportCount) {
-                let labsSupportNumb = room.memory.labsSupportNumb;
-                if (labs.length == 10) {
-                    bodies = [MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY];
-                } else {
-                    bodies = [MOVE, CARRY, MOVE, CARRY];
-                }
-                name = roomName + "-labsSupport-" + labsSupportNumb;
-                if (spawn.canCreateCreep(bodies, name) == OK) {
-                    role = constants.LABS_SUPPORT;
-                    spawn.createCreep(bodies, name, {
-                        role: role,
-                        numb: labsSupportNumb,
-                        roomName: roomName,
-                        isBuild: false
-                    });
-                    room.memory.labsSupportNumb++;
-                    labsSupportCount++;
-                }
-            } else if (room.controller.level >= 4 && repairCount < 1) {
+            } else if (room.controller.level == 8 && repairCount < 1) {
                 let repairNumb = room.memory.repairNumb;
                 name = roomName + "-repair-" + repairNumb;
                 bodies = [WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
@@ -529,103 +247,25 @@ module.exports = {
                     role: role
                 });
                 soldierCount++;
-            } else if (reserverForHarvestCount < room.memory.neededReserver) {
-                let reserverForHarvestNumb = room.memory.reserverForHarvestNumb;
-                name = roomName + "-RsrvFHrv-" + reserverForHarvestNumb;
-                bodies = [CLAIM, CLAIM, MOVE, MOVE];
-                if (spawn.canCreateCreep(bodies, name) == OK) {
-                    role = constants.RESERVER_FOR_HARVEST;
-                    spawn.createCreep(bodies, name, {
-                        role: role,
-                        numb: reserverForHarvestNumb,
-                        flagPrefix: roomName + "-reserver",
-                        from: roomName
-                    });
-                    room.memory.reserverForHarvestNumb++;
-                    reserverForHarvestCount++;
-                }
-            } else if (remoteHarvestCount < room.memory.neededRemoteHarvesters) {
-                let remoteHarvestNumb = room.memory.remoteHarvestNumb;
-                name = roomName + "-RmtHrv-" + remoteHarvestNumb;
-                bodies = [WORK, WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY];
-                if (spawn.canCreateCreep(bodies, name) == OK) {
-                    role = constants.REMOTE_HARVEST;
-                    spawn.createCreep(bodies, name, {
-                        role: role,
-                        numb: remoteHarvestNumb,
-                        flagPrefix: roomName + "-reserver",
-                        from: roomName
-                    });
-                    room.memory.remoteHarvestNumb++;
-                    remoteHarvestCount++;
-                }
-            } else if (remoteCargoCount < room.memory.neededCargo) {
-                let remoteCargoNumb = room.memory.remoteCargoNumb;
-                name = roomName + "-RmtCrg-" + remoteCargoNumb;
-                bodies = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-                    CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-                    CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
-                if (spawn.canCreateCreep(bodies, name) == OK) {
-                    role = constants.REMOTE_CARGO;
-                    spawn.createCreep(bodies, name, {
-                        role: role,
-                        numb: remoteCargoNumb,
-                        flagPrefix: roomName + "-reserver",
-                        from: roomName
-                    });
-                    room.memory.remoteCargoNumb++;
-                    remoteCargoCount++;
-                }
-            } else if (remoteBuilderCount < (remoteRoomsCount == 0 ? 0 : 1)) {
-                let remoteBuilderNumb = room.memory.remoteBuilderNumb;
-                name = roomName + "-RmtBld-" + remoteBuilderNumb;
-                bodies = [WORK, WORK, WORK, WORK, WORK,
-                    MOVE, MOVE, MOVE, MOVE, MOVE,
-                    CARRY, CARRY, CARRY, CARRY, CARRY];
-                if (spawn.canCreateCreep(bodies, name) == OK) {
-                    role = constants.REMOTE_BUILDER;
-                    spawn.createCreep(bodies, name, {
-                        role: role,
-                        numb: remoteBuilderNumb,
-                        flagPrefix: roomName + "-reserver",
-                        from: roomName
-                    });
-                    room.memory.remoteBuilderNumb++;
-                    remoteBuilderCount++;
-                }
-            } else if (remoteContainerBuilderCount < maxRemoteContainerBuilderCount) {
-                let remoteContainerBuilderNumb = room.memory.remoteContainerBuilderNumb;
-                name = roomName + "-RmtCntBld-" + remoteContainerBuilderNumb;
-                bodies = [WORK, WORK, WORK, WORK, WORK,
-                    MOVE, MOVE, MOVE, MOVE, MOVE,
-                    CARRY, CARRY, CARRY, CARRY, CARRY];
-                if (spawn.canCreateCreep(bodies, name) == OK) {
-                    role = constants.REMOTE_CONTAINER_BUILDER;
-                    spawn.createCreep(bodies, name, {
-                        role: role,
-                        numb: remoteContainerBuilderNumb,
-                        flagPrefix: roomName + "-build",
-                        from: roomName
-                    });
-                    room.memory.remoteContainerBuilderNumb++;
-                    remoteContainerBuilderCount++;
-                }
-            } else if (guardCount < room.memory.neededGuards) {
-                let guardNumb = room.memory.guardNumb;
-                name = roomName + "-RmtGuard-" + guardNumb;
-                bodies = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
-                    MOVE, MOVE, MOVE, MOVE, MOVE,
-                    ATTACK, ATTACK, ATTACK, ATTACK, ATTACK];
-                if (spawn.canCreateCreep(bodies, name) == OK) {
-                    role = constants.GUARD;
-                    spawn.createCreep(bodies, name, {
-                        role: role,
-                        numb: guardNumb,
-                        flagPrefix: roomName + "-reserver",
-                        from: roomName
-                    });
-                    room.memory.guardNumb++;
-                    guardCount++;
+            } else {
+                let creepCreates = false;
+                for (let i in room.memory.missionCreepsRequests) {
+                    if (Memory.missions[i] != undefined) {
+                        if (!creepCreates) {
+                            let request = room.memory.missionCreepsRequests[i];
+                            if (request.isProcessed != true) {
+                                if (spawn.canCreateCreep(request.body, request.name) == OK) {
+                                    let result = spawn.createCreep(request.body, request.name, request.memory);
+                                    request.isProcessed = true;
+                                    delete(room.memory.missionCreepsRequests[i]);
+                                    creepCreates = true;
+                                }
+                            }
+                        }
+                    } else {
+                        console.log(room.name + " request for undefined mission: " + i);
+                        delete(room.memory.missionCreepsRequests[i]);
+                    }
                 }
             }
 

@@ -45,24 +45,42 @@ module.exports = {
                 return ['L', 'O'];
             case 'ZK' :
                 return ['Z', 'K'];
+            case 'ZO' :
+                return ['Z', 'O'];
+            case 'KO' :
+                return ['K', 'O'];
             case 'UL' :
                 return ['U', 'L'];
             case 'G' :
                 return ['ZK', 'UL'];
             case 'GH' :
                 return ['G', 'H'];
+            case 'GO' :
+                return ['G', 'O'];
             case 'UH2O' :
                 return ['UH', 'OH'];
+            case 'ZHO2' :
+                return ['ZO', 'OH'];
+            case 'KHO2' :
+                return ['KO', 'OH'];
             case 'GH2O' :
                 return ['GH', 'OH'];
+            case 'GHO2' :
+                return ['GO', 'OH'];
             case 'LHO2' :
                 return ['LO', 'OH'];
             case 'XUH2O' :
                 return ['UH2O', 'X'];
+            case 'XZHO2' :
+                return ['ZHO2', 'X'];
+            case 'XKHO2' :
+                return ['KHO2', 'X'];
             case 'XLHO2' :
                 return ['LHO2', 'X'];
             case 'XGH2O' :
                 return ['GH2O', 'X'];
+            case 'XGHO2' :
+                return ['GHO2', 'X'];
             default :
                 return undefined;
         }

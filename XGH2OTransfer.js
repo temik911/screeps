@@ -25,6 +25,7 @@ module.exports = {
         }
 
         let orders = Game.market.orders;
+        let myOrders = [];
         for (let orderName in orders) {
             let order = orders[orderName];
             let mineral = order.resourceType;
@@ -32,6 +33,7 @@ module.exports = {
                 continue;
             }
             transferRooms[order.roomName] -= order.remainingAmount;
+            myOrders.push(order);
         }
 
         for (let transferRoomName in transferRooms) {
@@ -40,7 +42,6 @@ module.exports = {
                 let minAmount = 999999;
 
                 for (let roomName in neededRooms) {
-                    console.log(roomName)
                     if (neededRooms[roomName] < 15000) {
                         if (neededRooms[roomName] < minAmount) {
                             neededRoomName = roomName;
@@ -53,6 +54,14 @@ module.exports = {
                     Game.rooms[transferRoomName].terminal.send(RESOURCE_CATALYZED_GHODIUM_ACID, 10000, neededRoomName);
                     console.log(transferRoomName + " send to " + neededRoomName);
                     neededRooms[neededRoomName] += 10000;
+                } else {
+                    for (let i in myOrders) {
+                        let order = myOrders[i];
+                        if (order.roomName == transferRoomName && order.amount < 1000) {
+                            Game.market.extendOrder(order.id, 10000);
+                            break;
+                        }
+                    }
                 }
             }
         }

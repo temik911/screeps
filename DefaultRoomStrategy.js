@@ -1,15 +1,11 @@
 let roomPopulationProducer = require('RoomPopulationProducer');
 let fastLinksHandler = require('FastLinksHandler');
 let towersHandler = require('TowersHandler');
-let labsHandler = require('LabsHandler');
 
 module.exports = {
     run(room) {
         try {
             // console.log(room.name);
-            let beforeLabsHandler = Game.cpu.getUsed();
-            labsHandler.run(room);
-            let afterLabsHandler = Game.cpu.getUsed();
 
             let beforeRoomPopulationProducer = Game.cpu.getUsed();
             roomPopulationProducer.run(room);

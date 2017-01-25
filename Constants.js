@@ -1,12 +1,6 @@
 // roles
-module.exports.HARVESTER = 'harvester';
-module.exports.HARVESTER_WITH_LINK = 'harvesterWithLink';
 module.exports.BUILDER = 'builder';
-module.exports.UPGRADER = 'upgrader';
-module.exports.LINK_UPGRADER = 'linkUpg';
 module.exports.BASE_ENERGY_SUPPORT = 'baseEnergySupport';
-module.exports.CARGO = 'cargo';
-module.exports.TERMINAL_CARGO = 'terminalCargo';
 module.exports.LINK_CARGO = 'linkCargo';
 module.exports.FAST_LINK_CARGO = 'fastLinkCargo';
 module.exports.SOLDIER = 'soldier';
@@ -17,18 +11,39 @@ module.exports.MINERAL_HARVESTER_WITHOUT_CARRY = 'mineralHarvesterWithOutCarry';
 module.exports.MINERAL_CARGO = 'mineralCargo';
 module.exports.INVADER = 'invader';
 module.exports.RESERVER = 'reserver';
-module.exports.RESERVER_FOR_HARVEST = 'reserverForHarvest';
-module.exports.REMOTE_HARVEST = 'remoteHarvest';
-module.exports.REMOTE_CARGO = 'remoteCargo';
-module.exports.REMOTE_BUILDER = 'remoteBuilder';
-module.exports.REMOTE_CONTAINER_BUILDER = 'remoteContainerBuilder';
-module.exports.GUARD = 'guard';
-module.exports.LABS_SUPPORT = 'labsSupport';
 module.exports.HEALER = 'healer';
 module.exports.REMOVER = 'remover';
 module.exports.SQUAD_HEALER = 'squadHealer';
 module.exports.SQUAD_HEALER_SECOND = 'squadHealerSecond';
 module.exports.SQUAD_ATTACK = 'squadAttack';
+
+// missions
+module.exports.ROOM_MANAGER_MISSION = 'roomManagerMission';
+module.exports.ROOM_HARVEST_MANAGER_MISSION = 'roomHarvestManagerMission';
+module.exports.CONTROLLER_UPGRADE_MANAGER_MISSION = 'controllerUpgradeManagerMission';
+module.exports.REMOTE_ROOM_HARVEST_MISSION = 'remoteRoomHarvestMission';
+module.exports.SELF_ROOM_HARVEST_MISSION = 'selfRoomHarvestMission';
+module.exports.DISMANTLE_ROOM_MISSION = 'dismantleRoomMission';
+module.exports.PREPARE_REMOTE_HARVEST_MISSION = 'prepareRemoteHarvestMission';
+module.exports.CREATE_MINERAL_MISSION = 'createMineralMission';
+module.exports.LABS_MANAGER_MISSION = 'labsManagerMission';
+module.exports.TERMINAL_MANAGER_MISSION = 'terminalManagerMission';
+
+// sub missions
+module.exports.CREATE_STRUCTURES_FOR_REMOTE_HARVEST_MISSION = 'createStructuresForRemoteHarvestMission';
+module.exports.BUILD_STRUCTURES_FOR_REMOTE_HARVEST_MISSION = 'buildStructuresForRemoteHarvestMission';
+module.exports.HARVEST_MISSION = 'harvestMission';
+module.exports.LINK_HARVEST_MISSION = 'linkHarvestMission';
+module.exports.RESERVE_CONTROLLER_MISSION = 'reserveControllerMission';
+module.exports.CARGO_MISSION = 'cargoMission';
+module.exports.TERMINAL_CARGO_MISSION = 'terminalCargoMission';
+module.exports.REPAIR_ROADS_MISSION = 'repairRoadsMission';
+module.exports.DEFEND_REMOTE_ROOM_MISSION = 'defendRemoteRoomMission';
+module.exports.SIMPLE_LINK_CONTROLLER_UPGRADE_MISSION = 'simpleLinkControllerUpgradeMission';
+module.exports.BOOSTED_LINK_CONTROLLER_UPGRADE_MISSION = 'boostedLinkControllerUpgradeMission';
+module.exports.PRODUCE_MINERAL_MISSION = 'produceMineralMission';
+module.exports.WAIT_MINERAL_MISSION = 'waitMineralMission';
+module.exports.CLEAR_LABS_MISSION = 'clearLabMission';
 
 // squad
 module.exports.SQUAD_ROLE_MAIN = 'squadRoleMain';
